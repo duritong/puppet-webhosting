@@ -1,9 +1,13 @@
 # manifests/defines.pp
 
+# domainalias:
+#   - www: add as well a www.${name} entry
+#   - absent: do nothing
+#   - default: add the string
 define webhosting::static(
     $password = 'absent',
     $password_crypted = 'true',
-    $domainalias = 'absent',
+    $domainalias = 'www',
     $owner = root,
     $group = 'sftponly',
     $allow_override = 'None',
@@ -15,13 +19,18 @@ define webhosting::static(
     $nagios_check_url = '/',
     $nagios_check_code = 'OK'
 ){
+
+    case $domainalias {
+        'www': { $real_domainalias = "www.${name}" }
+        default: { $real_domainalias = $domainalias }
+    }
     user::sftp_only{"${name}":
         password => $password,
         password_crypted => $password_crypted,         
     }
 
     apache::vhost::static{"${name}":
-        domainalias => $domainalias,
+        domainalias => $real_domainalias,
         group => $group,
         user_owner => $name, 
         allow_override => $allow_override,
