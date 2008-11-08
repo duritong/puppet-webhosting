@@ -17,6 +17,7 @@ define webhosting::static(
     $vhost_mode = 'template',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
+    $htpasswd_file = 'false',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK'
 ){
@@ -41,6 +42,7 @@ define webhosting::static(
         vhost_mode => $vhost_mode,    
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
+        htpasswd_file => $htpasswd_file,
     }
 
     if $use_nagios {
