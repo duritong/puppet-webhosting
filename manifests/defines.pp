@@ -17,7 +17,7 @@ define webhosting::static(
     $vhost_mode = 'template',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
-    $htpasswd_file = 'false',
+    $htpasswd_file = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK'
 ){
