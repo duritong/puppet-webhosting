@@ -18,6 +18,7 @@ define webhosting::static(
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
     $htpasswd_file = 'absent',
+    $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK'
 ){
@@ -46,10 +47,21 @@ define webhosting::static(
     }
 
     if $use_nagios {
+        case $nagios_check_code {
+            'OK': { 
+                    $real_nagios_check_code = $htpasswd_file ? {
+                        'absent' => $nagios_check_code,
+                        default => 'Unauthorized'
+                    } 
+            }
+            default: { $real_nagios_check_code = $nagios_check_code }
+        }
+
         nagios::service::http{"${name}":
+            check_domain => $nagios_check_domain,
             ssl_mode => $ssl_mode,
             check_url => $nagios_check_url,
-            check_code => $nagios_check_code, 
+            check_code => $real_nagios_check_code, 
         }
     }
 }
