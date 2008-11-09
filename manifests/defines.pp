@@ -5,8 +5,8 @@
 #   - absent: do nothing
 #   - default: add the string
 define webhosting::static(
-    $uid => 'absent',
-    $gid => 'absent',
+    $uid = 'absent',
+    $gid = 'absent',
     $password = 'absent',
     $password_crypted = 'true',
     $domainalias = 'www',
