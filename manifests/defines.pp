@@ -5,6 +5,8 @@
 #   - absent: do nothing
 #   - default: add the string
 define webhosting::static(
+    $uid => 'absent',
+    $gid => 'absent',
     $password = 'absent',
     $password_crypted = 'true',
     $domainalias = 'www',
@@ -28,6 +30,8 @@ define webhosting::static(
         default: { $real_domainalias = $domainalias }
     }
     user::sftp_only{"${name}":
+        uid => $uid,
+        gid => $gid,
         password => $password,
         password_crypted => $password_crypted,         
     }
