@@ -51,7 +51,7 @@ define webhosting::static(
             'OK': { 
                     $real_nagios_check_code = $htpasswd_file ? {
                         'absent' => $nagios_check_code,
-                        default => 'Unauthorized'
+                        default => '401'
                     } 
             }
             default: { $real_nagios_check_code = $nagios_check_code }
