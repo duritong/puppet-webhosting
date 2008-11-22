@@ -6,7 +6,7 @@
 #   - default: add the string
 define webhosting::static(
     $uid = 'absent',
-    $gid = 'absent',
+    $gid = 'uid',
     $password = 'absent',
     $password_crypted = 'true',
     $domainalias = 'www',
@@ -68,4 +68,13 @@ define webhosting::static(
             check_code => $real_nagios_check_code, 
         }
     }
+}
+
+define webhosting::perl(
+    $nagios_check_domain = 'absent',
+    $nagios_check_url = '/',
+    $nagios_check_code = 'OK'
+){
+
+
 }
