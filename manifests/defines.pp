@@ -39,7 +39,7 @@ define webhosting::static(
     apache::vhost::static{"${name}":
         domainalias => $real_domainalias,
         group => $group,
-        user_owner => $name, 
+        documentroot_owner => $name, 
         allow_override => $allow_override,
         options => $options,
         additional_options => $additional_options,
@@ -71,6 +71,21 @@ define webhosting::static(
 }
 
 define webhosting::perl(
+    $uid = 'absent',
+    $gid = 'uid',
+    $password = 'absent',
+    $password_crypted = 'true',
+    $domainalias = 'www',
+    $owner = root,
+    $group = 'sftponly',
+    $allow_override = 'None',
+    $options = 'absent',
+    $additional_options = 'absent',
+    $ssl_mode = 'false',
+    $vhost_mode = 'template',
+    $vhost_source = 'absent',
+    $vhost_destination = 'absent',
+    $htpasswd_file = 'absent',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK'
