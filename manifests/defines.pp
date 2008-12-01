@@ -90,6 +90,28 @@ define webhosting::perl(
     $nagios_check_url = '/',
     $nagios_check_code = 'OK'
 ){
+    case $domainalias {
+        'www': { $real_domainalias = "www.${name}" }
+        default: { $real_domainalias = $domainalias }
+    }
+    user::sftp_only{"${name}":
+        uid => $uid,
+        gid => $gid,
+        password => $password,
+        password_crypted => $password_crypted,
+    }
 
-
+    apache::vhost::perl{"${name}":
+        domainalias => $real_domainalias,
+        group => $group,
+        documentroot_owner => $name,
+        allow_override => $allow_override,
+        options => $options,
+        additional_options => $additional_options,
+        ssl_mode => $ssl_mode,
+        vhost_mode => $vhost_mode,
+        vhost_source => $vhost_source,
+        vhost_destination => $vhost_destination,
+        htpasswd_file => $htpasswd_file,
+    }
 }
