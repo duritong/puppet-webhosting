@@ -40,6 +40,7 @@ define webhosting::static(
         domainalias => $real_domainalias,
         group => $group,
         documentroot_owner => $name, 
+        documentroot_group => $group, 
         allow_override => $allow_override,
         options => $options,
         additional_options => $additional_options,
@@ -133,13 +134,17 @@ define webhosting::modperl(
             User::Sftp_only["${name}"]{ 
                 homedir_mode => 0755 
             }
+            Apache::Vhost::Modperl[$name]{
+                documentroot_owner => $name,
+                documentroot_group => $name,
+                documentroot_mode => 0750,
+            }
         }
     } 
 
     apache::vhost::modperl{"${name}":
         domainalias => $real_domainalias,
         group => $group,
-        documentroot_owner => $name,
         allow_override => $allow_override,
         options => $options,
         additional_options => $additional_options,
