@@ -129,6 +129,9 @@ define webhosting::modperl(
                 gid => $real_run_gid,
                 manage_group => 'false',
             }
+            User::Sftp_only["${name}"]{ 
+                homedir_mode => 0755 
+            }
         }
     } 
 
@@ -140,8 +143,8 @@ define webhosting::modperl(
         options => $options,
         additional_options => $additional_options,
         run_mode => $run_mode,
-        run_uid => $run_uid,
-        run_gid => $real_run_gid,
+        run_uid => "${name}_run",
+        run_gid => "${name}",
         ssl_mode => $ssl_mode,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
