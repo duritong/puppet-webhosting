@@ -158,4 +158,13 @@ define webhosting::modperl(
         htpasswd_file => $htpasswd_file,
         require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
     }
+   case $run_mode {
+        'itk': {
+            Apache::Vhost::Modperl[$name]{
+                documentroot_owner => $name,
+                documentroot_group => $name,
+                documentroot_mode => 0750,
+            }
+        }
+    } 
 }
