@@ -127,6 +127,7 @@ define webhosting::modperl(
             user::managed{"${name}_run":
                 uid => $run_uid,
                 gid => $real_run_gid,
+                manage_group => 'false',
             }
         }
     } 
