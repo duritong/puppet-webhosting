@@ -2,4 +2,4 @@
 
 # Manages our webhosting
 
-import 'defines.pp'
+import 'defines/*.pp'

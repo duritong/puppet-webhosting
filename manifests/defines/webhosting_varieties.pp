@@ -26,18 +26,20 @@ define webhosting::static(
     $nagios_check_url = '/',
     $nagios_check_code = 'OK'
 ){
-
-    case $domainalias {
-        'www': { $real_domainalias = "www.${name}" }
-        default: { $real_domainalias = $domainalias }
-    }
-    user::sftp_only{"${name}":
+    webhosting::common{$name:
         uid => $uid,
         gid => $gid,
         password => $password,
-        password_crypted => $password_crypted,         
+        password_crypted => $password_crypted,
+        htpasswd_file => $htpasswd_file,
+        ssl_mode => $ssl_mode,
+        run_mode => $run_mode,
+        run_uid => $run_uid,
+        run_gid => $run_gid,
+        nagios_check_domain => $nagios_check_domain,
+        nagios_check_url => $nagios_check_url,
+        nagios_check_code => $nagios_check_code,
     }
-
     apache::vhost::static{"${name}":
         domainalias => $real_domainalias,
         group => $group,
@@ -53,25 +55,6 @@ define webhosting::static(
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
-    }
-
-    if $use_nagios {
-        case $nagios_check_code {
-            'OK': { 
-                    $real_nagios_check_code = $htpasswd_file ? {
-                        'absent' => $nagios_check_code,
-                        default => '401'
-                    } 
-            }
-            default: { $real_nagios_check_code = $nagios_check_code }
-        }
-
-        nagios::service::http{"${name}":
-            check_domain => $nagios_check_domain,
-            ssl_mode => $ssl_mode,
-            check_url => $nagios_check_url,
-            check_code => $real_nagios_check_code, 
-        }
     }
 }
 
@@ -106,43 +89,20 @@ define webhosting::modperl(
     $nagios_check_url = '/',
     $nagios_check_code = 'OK'
 ){
-    case $domainalias {
-        'www': { $real_domainalias = "www.${name}" }
-        default: { $real_domainalias = $domainalias }
-    }
-    user::sftp_only{"${name}":
+    webhosting::common{$name:
         uid => $uid,
         gid => $gid,
         password => $password,
         password_crypted => $password_crypted,
+        htpasswd_file => $htpasswd_file,
+        ssl_mode => $ssl_mode,
+        run_mode => $run_mode,
+        run_uid => $run_uid,
+        run_gid => $run_gid,
+        nagios_check_domain => $nagios_check_domain,
+        nagios_check_url => $nagios_check_url,
+        nagios_check_code => $nagios_check_code,
     }
-
-   case $run_mode {
-        'itk': {
-            case $run_uid {
-                'absent': { fail("you need to define run_uid for $name on $fqdn to use itk") }
-            }
-            case $run_gid {
-                'absent': {
-                    case $gid {
-                        'uid': { $real_run_gid = $uid }
-                        default: { $real_run_gid = $gid }
-                    }
-                }
-                default: { $real_run_gid = $run_gid }
-            }
-            user::managed{"${name}_run":
-                uid => $run_uid,
-                gid => $real_run_gid,
-                manage_group => false,
-                require => User::Sftp_only[$name],
-            }
-            User::Sftp_only["${name}"]{ 
-                homedir_mode => 0755 
-            }
-        }
-    } 
-
     apache::vhost::modperl{"${name}":
         domainalias => $real_domainalias,
         group => $group,
