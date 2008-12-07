@@ -58,6 +58,12 @@ define webhosting::common(
                 uid => $run_uid,
                 gid => $real_run_gid,
                 manage_group => false,
+                managehome => false,
+                shell => $operatingsystem ? {
+                    debian => '/usr/sbin/nologin',
+                    ubuntu => '/usr/sbin/nologin',
+                    default => '/sbin/nologin'
+                },
                 require => User::Sftp_only[$name],
             }
             User::Sftp_only["${name}"]{
