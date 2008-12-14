@@ -112,14 +112,12 @@ define webhosting::modperl(
         additional_options => $additional_options,
         default_charset => $default_charset,
         run_mode => $run_mode,
-        run_uid => "${name}_run",
-        run_gid => "${name}",
         ssl_mode => $ssl_mode,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
-        require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
+        require => User::Sftp_only["${name}"], 
     }
     case $run_mode {
         'itk': {
@@ -127,6 +125,9 @@ define webhosting::modperl(
                 documentroot_owner => $name,
                 documentroot_group => $name,
                 documentroot_mode => 0750,
+                run_uid => "${name}_run",
+                run_gid => "${name}",
+                require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
             }
         }
     } 
@@ -186,14 +187,12 @@ define webhosting::php(
         additional_options => $additional_options,
         default_charset => $default_charset,
         run_mode => $run_mode,
-        run_uid => "${name}_run",
-        run_gid => "${name}",
         ssl_mode => $ssl_mode,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
-        require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
+        require => User::Sftp_only["${name}"], 
     }
     case $run_mode {
         'itk': {
@@ -201,6 +200,9 @@ define webhosting::php(
                 documentroot_owner => $name,
                 documentroot_group => $name,
                 documentroot_mode => 0750,
+                run_uid => "${name}_run",
+                run_gid => "${name}",
+                require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
             }
         }
     } 
