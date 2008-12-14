@@ -117,7 +117,6 @@ define webhosting::modperl(
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
-        require => User::Sftp_only["${name}"], 
     }
     case $run_mode {
         'itk': {
@@ -128,6 +127,11 @@ define webhosting::modperl(
                 run_uid => "${name}_run",
                 run_gid => "${name}",
                 require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
+            }
+        }
+        default: {
+            Apache::Vhost::Modperl[$name]{
+                require => User::Sftp_only["${name}"], 
             }
         }
     } 
@@ -192,7 +196,6 @@ define webhosting::php(
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
-        require => User::Sftp_only["${name}"], 
     }
     case $run_mode {
         'itk': {
@@ -203,6 +206,11 @@ define webhosting::php(
                 run_uid => "${name}_run",
                 run_gid => "${name}",
                 require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
+            }
+        }
+        default: {
+            Apache::Vhost::Modperl[$name]{
+                require => User::Sftp_only["${name}"], 
             }
         }
     } 
