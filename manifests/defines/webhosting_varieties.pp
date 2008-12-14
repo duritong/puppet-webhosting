@@ -199,7 +199,7 @@ define webhosting::php(
     }
     case $run_mode {
         'itk': {
-            Apache::Vhost::Modperl[$name]{
+            Apache::Vhost::Php::Standard[$name]{
                 documentroot_owner => $name,
                 documentroot_group => $name,
                 documentroot_mode => 0750,
@@ -209,7 +209,7 @@ define webhosting::php(
             }
         }
         default: {
-            Apache::Vhost::Modperl[$name]{
+            Apache::Vhost::Php::Standard[$name]{
                 require => User::Sftp_only["${name}"], 
             }
         }
