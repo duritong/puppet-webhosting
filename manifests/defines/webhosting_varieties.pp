@@ -261,7 +261,7 @@ define webhosting::php::joomla(
         nagios_check_url => $nagios_check_url,
         nagios_check_code => $nagios_check_code,
     }
-	apache::vhost::php::joomla{"${name}":
+    apache::vhost::php::joomla{"${name}":
         domainalias => $domainalias,
         group => $group,
         allow_override => $allow_override,
