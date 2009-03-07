@@ -1,6 +1,7 @@
 # manifests/files/webhosting_standard.pp
 
 define webhosting::common(
+    $ensure = present,
     $uid = 'absent',
     $gid = 'uid',
     $password = 'absent',
@@ -15,6 +16,7 @@ define webhosting::common(
     $nagios_check_code = 'OK'
 ){
     user::sftp_only{"${name}":
+        ensure => $ensure,
         uid => $uid,
         gid => $gid,
         password => $password,
@@ -33,6 +35,7 @@ define webhosting::common(
         }
 
         nagios::service::http{"${name}":
+            ensure => $ensure,
             check_domain => $nagios_check_domain,
             ssl_mode => $ssl_mode,
             check_url => $nagios_check_url,
@@ -55,6 +58,7 @@ define webhosting::common(
                 default: { $real_run_gid = $run_gid }
             }
             user::managed{"${name}_run":
+                ensure => $ensure,
                 uid => $run_uid,
                 gid => $real_run_gid,
                 manage_group => false,

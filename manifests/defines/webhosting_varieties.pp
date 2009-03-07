@@ -5,6 +5,7 @@
 #   - absent: do nothing
 #   - default: add the string
 define webhosting::static(
+    ensure => present,
     $uid = 'absent',
     $gid = 'uid',
     $password = 'absent',
@@ -27,6 +28,7 @@ define webhosting::static(
     $nagios_check_code = 'OK'
 ){
     webhosting::common{$name:
+        ensure => $ensure,
         uid => $uid,
         gid => $gid,
         password => $password,
@@ -41,6 +43,7 @@ define webhosting::static(
         nagios_check_code => $nagios_check_code,
     }
     apache::vhost::static{"${name}":
+        ensure => $ensure,
         domainalias => $domainalias,
         group => $group,
         documentroot_owner => $name, 
@@ -65,6 +68,7 @@ define webhosting::static(
 # run_uid: the uid the vhost should run as with the itk module
 # run_gid: the gid the vhost should run as with the itk module
 define webhosting::modperl(
+    $ensure = ensure,
     $uid = 'absent',
     $gid = 'uid',
     $password = 'absent',
@@ -90,6 +94,7 @@ define webhosting::modperl(
     $nagios_check_code = 'OK'
 ){
     webhosting::common{$name:
+        ensure => $ensure,
         uid => $uid,
         gid => $gid,
         password => $password,
@@ -104,6 +109,7 @@ define webhosting::modperl(
         nagios_check_code => $nagios_check_code,
     }
     apache::vhost::modperl{"${name}":
+        ensure => $ensure,
         domainalias => $domainalias,
         group => $group,
         allow_override => $allow_override,
@@ -144,6 +150,7 @@ define webhosting::modperl(
 # run_uid: the uid the vhost should run as with the itk module
 # run_gid: the gid the vhost should run as with the itk module
 define webhosting::php(
+    $ensure = present,
     $uid = 'absent',
     $gid = 'uid',
     $password = 'absent',
@@ -169,6 +176,7 @@ define webhosting::php(
     $nagios_check_code = 'OK'
 ){
     webhosting::common{$name:
+        ensure => $ensure,
         uid => $uid,
         gid => $gid,
         password => $password,
@@ -183,6 +191,7 @@ define webhosting::php(
         nagios_check_code => $nagios_check_code,
     }
     apache::vhost::php::standard{"${name}":
+        ensure => $ensure,
         domainalias => $domainalias,
         group => $group,
         allow_override => $allow_override,
@@ -223,6 +232,7 @@ define webhosting::php(
 # run_uid: the uid the vhost should run as with the itk module
 # run_gid: the gid the vhost should run as with the itk module
 define webhosting::php::joomla(
+    $ensure = present,
     $uid = 'absent',
     $gid = 'uid',
     $password = 'absent',
@@ -248,6 +258,7 @@ define webhosting::php::joomla(
     $nagios_check_code = 'OK'
 ){
     webhosting::common{$name:
+        ensure => $ensure,
         uid => $uid,
         gid => $gid,
         password => $password,
@@ -262,6 +273,7 @@ define webhosting::php::joomla(
         nagios_check_code => $nagios_check_code,
     }
     apache::vhost::php::joomla{"${name}":
+        ensure => $ensure,
         domainalias => $domainalias,
         group => $group,
         allow_override => $allow_override,
