@@ -255,7 +255,8 @@ define webhosting::php::joomla(
     $htpasswd_file = 'absent',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
-    $nagios_check_code = 'OK'
+    $nagios_check_code = 'OK',
+    $git_repo = 'absent'
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -272,6 +273,16 @@ define webhosting::php::joomla(
         nagios_check_url => $nagios_check_url,
         nagios_check_code => $nagios_check_code,
     }
+
+    $real_path = $path ? {
+        'absent' => $operatingsystem ? {
+            openbsd => "/var/www/htdocs/${name}",
+            default => "/var/www/vhosts/${name}"
+        },
+        default => "${path}"
+    }
+    $documentroot = "${real_path}/www"
+
     apache::vhost::php::joomla{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
@@ -288,6 +299,18 @@ define webhosting::php::joomla(
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
     }
+    if $git_repo != 'absent' {
+        # create webdir
+        # for the cloning, $documentroot needs to be absent
+        git::clone{"git_clone_$name":
+            ensure => $ensure,
+            git_repo => $git_repo,
+            projectroot => $documentroot,
+            cloneddir_user => $documentroot_owner,
+            cloneddir_group => $documentroot_group,
+            before =>  Apache::Vhost::Php::Joomla[$name],
+        }
+    }
     case $run_mode {
         'itk': {
             Apache::Vhost::Php::Joomla[$name]{
@@ -298,10 +321,20 @@ define webhosting::php::joomla(
                 run_gid => "${name}",
                 require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
             }
+            if $git_repo != 'absent' {
+                Git::clone["git_clone_$name"]{
+                    require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
+                }
+            }
         }
         default: {
             Apache::Vhost::Php::Joomla[$name]{
                 require => User::Sftp_only["${name}"], 
+            }
+            if $git_repo != 'absent' {
+                Git::clone["git_clone_$name"]{
+                    require => User::Sftp_only["${name}"],
+                }
             }
         }
     } 
