@@ -5,7 +5,7 @@
 #   - absent: do nothing
 #   - default: add the string
 define webhosting::static(
-    ensure = present,
+    $ensure = present,
     $uid = 'absent',
     $gid = 'uid',
     $password = 'absent',
