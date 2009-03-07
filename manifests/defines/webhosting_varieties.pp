@@ -322,7 +322,7 @@ define webhosting::php::joomla(
                 require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
             }
             if $git_repo != 'absent' {
-                Git::clone["git_clone_$name"]{
+                Git::Clone["git_clone_$name"]{
                     require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
                 }
             }
@@ -332,7 +332,7 @@ define webhosting::php::joomla(
                 require => User::Sftp_only["${name}"], 
             }
             if $git_repo != 'absent' {
-                Git::clone["git_clone_$name"]{
+                Git::Clone["git_clone_$name"]{
                     require => User::Sftp_only["${name}"],
                 }
             }
