@@ -91,7 +91,8 @@ define webhosting::modperl(
     $htpasswd_file = 'absent',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
-    $nagios_check_code = 'OK'
+    $nagios_check_code = 'OK',
+    $mod_security = true
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -123,6 +124,7 @@ define webhosting::modperl(
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
+        mod_security => $mod_security,
     }
     case $run_mode {
         'itk': {
@@ -173,7 +175,8 @@ define webhosting::php(
     $htpasswd_file = 'absent',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
-    $nagios_check_code = 'OK'
+    $nagios_check_code = 'OK',
+    $mod_security = true
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -205,6 +208,7 @@ define webhosting::php(
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
+        mod_security => $mod_security,
     }
     case $run_mode {
         'itk': {
@@ -256,7 +260,8 @@ define webhosting::php::joomla(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
-    $git_repo = 'absent'
+    $git_repo = 'absent',
+    $mod_security = true
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -298,6 +303,7 @@ define webhosting::php::joomla(
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
+        mod_security => $mod_security,
     }
     if $git_repo != 'absent' {
         # create webdir
