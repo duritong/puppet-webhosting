@@ -68,7 +68,7 @@ define webhosting::static(
 # run_uid: the uid the vhost should run as with the itk module
 # run_gid: the gid the vhost should run as with the itk module
 define webhosting::modperl(
-    $ensure = ensure,
+    $ensure = present,
     $uid = 'absent',
     $gid = 'uid',
     $password = 'absent',
