@@ -11,6 +11,7 @@ define webhosting::common(
     $run_mode = 'normal',
     $run_uid = 'absent',
     $run_gid = 'absent',
+    $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK'
@@ -24,6 +25,10 @@ define webhosting::common(
     }
 
     if $use_nagios {
+        case $nagios_check {
+            'ensure': { $nagios_ensure = $ensure }
+            default: { $nagios_ensure = $nagios_check }
+        }
         case $nagios_check_code {
             'OK': {
                     $real_nagios_check_code = $htpasswd_file ? {
@@ -35,7 +40,7 @@ define webhosting::common(
         }
 
         nagios::service::http{"${name}":
-            ensure => $ensure,
+            ensure => $nagios_ensure,
             check_domain => $nagios_check_domain,
             ssl_mode => $ssl_mode,
             check_url => $nagios_check_url,
