@@ -268,7 +268,10 @@ define webhosting::php::joomla(
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
     $git_repo = 'absent',
-    $mod_security = true
+    $mod_security = true,
+    $manage_config = true,
+    $config_webwriteable = false,
+    $manage_directories = true
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -312,6 +315,9 @@ define webhosting::php::joomla(
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
         mod_security => $mod_security,
+        manage_config => $manage_config,
+        config_webwriteable => $config_webwriteable,
+        manage_directories => $manage_directories,
     }
     if $git_repo != 'absent' {
         # create webdir
