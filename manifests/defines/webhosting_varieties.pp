@@ -290,14 +290,11 @@ define webhosting::php::joomla(
         nagios_check_code => $nagios_check_code,
     }
 
-    $real_path = $path ? {
-        'absent' => $operatingsystem ? {
-            openbsd => "/var/www/htdocs/${name}",
-            default => "/var/www/vhosts/${name}"
-        },
-        default => "${path}"
-    }
-    $documentroot = "${real_path}/www"
+    $path = $operatingsystem ? {
+        openbsd => "/var/www/htdocs/${name}",
+        default => "/var/www/vhosts/${name}"
+    },
+    $documentroot = "${path}/www"
 
     apache::vhost::php::joomla{"${name}":
         ensure => $ensure,
@@ -326,15 +323,15 @@ define webhosting::php::joomla(
             ensure => $ensure,
             git_repo => $git_repo,
             projectroot => $documentroot,
-            cloneddir_user => $documentroot_owner,
-            cloneddir_group => $documentroot_group,
+            cloneddir_user => $name,
+            cloneddir_group => $name,
             before =>  Apache::Vhost::Php::Joomla[$name],
         }
         apache::vhost::file::documentrootdir{"joomlagitdir_${name}":
             documentroot => $documentroot,
             filename => '.git',
             thedomain => $name,
-            owner => $documentroot_owner,
+            owner => $name,
             group => 'root',
             mode => 400,
         }
