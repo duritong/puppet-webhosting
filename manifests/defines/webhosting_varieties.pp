@@ -293,7 +293,7 @@ define webhosting::php::joomla(
     $path = $operatingsystem ? {
         openbsd => "/var/www/htdocs/${name}",
         default => "/var/www/vhosts/${name}"
-    },
+    }
     $documentroot = "${path}/www"
 
     apache::vhost::php::joomla{"${name}":
