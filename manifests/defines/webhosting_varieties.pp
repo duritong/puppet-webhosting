@@ -330,6 +330,14 @@ define webhosting::php::joomla(
             cloneddir_group => $documentroot_group,
             before =>  Apache::Vhost::Php::Joomla[$name],
         }
+        apache::vhost::file::documentrootdir{"joomlagitdir_${name}":
+            documentroot => $documentroot,
+            filename => '.git',
+            thedomain => $name,
+            owner => $documentroot_owner,
+            group => 'root',
+            mode => 400,
+        }
     }
     case $run_mode {
         'itk': {
