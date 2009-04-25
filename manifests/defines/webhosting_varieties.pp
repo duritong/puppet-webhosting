@@ -386,6 +386,7 @@ define webhosting::php::wordpress(
     $password = 'absent',
     $password_crypted = true,
     $domainalias = 'www',
+    $server_admin = 'absent',
     $owner = root,
     $group = 'sftponly',
     $run_mode = 'normal',
@@ -437,6 +438,7 @@ define webhosting::php::wordpress(
     apache::vhost::php::wordpress{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
+        server_admin => $server_admin,
         group => $group,
         allow_override => $allow_override,
         do_includes => $do_includes,
@@ -516,6 +518,7 @@ define webhosting::php::simplemachine(
     $password = 'absent',
     $password_crypted = true,
     $domainalias = 'www',
+    $server_admin = 'absent',
     $owner = root,
     $group = 'sftponly',
     $run_mode = 'normal',
@@ -567,6 +570,7 @@ define webhosting::php::simplemachine(
     apache::vhost::php::simplemachine{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
+        server_admin => $server_admin,
         group => $group,
         allow_override => $allow_override,
         do_includes => $do_includes,
