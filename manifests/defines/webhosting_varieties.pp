@@ -11,6 +11,7 @@ define webhosting::static(
     $password = 'absent',
     $password_crypted = true,
     $domainalias = 'www',
+    $server_admin = 'absent',
     $owner = root,
     $group = 'sftponly',
     $allow_override = 'None',
@@ -47,6 +48,7 @@ define webhosting::static(
     apache::vhost::static{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
+        server_admin => 'absent',
         group => $group,
         documentroot_owner => $name,
         documentroot_group => $group,
@@ -76,6 +78,7 @@ define webhosting::modperl(
     $password = 'absent',
     $password_crypted = true,
     $domainalias = 'www',
+    $server_admin = 'absent',
     $owner = root,
     $group = 'sftponly',
     $run_mode = 'normal',
@@ -116,6 +119,7 @@ define webhosting::modperl(
     apache::vhost::modperl{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
+        server_admin => 'absent',
         group => $group,
         allow_override => $allow_override,
         do_includes => $do_includes,
