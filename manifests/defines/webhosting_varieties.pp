@@ -162,6 +162,7 @@ define webhosting::php(
     $password = 'absent',
     $password_crypted = true,
     $domainalias = 'www',
+    $server_admin = 'absent',
     $owner = root,
     $group = 'sftponly',
     $run_mode = 'normal',
@@ -202,6 +203,7 @@ define webhosting::php(
     apache::vhost::php::standard{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
+        server_admin => $server_admin,
         group => $group,
         allow_override => $allow_override,
         do_includes => $do_includes,
@@ -248,6 +250,7 @@ define webhosting::php::joomla(
     $password = 'absent',
     $password_crypted = true,
     $domainalias = 'www',
+    $server_admin = 'absent',
     $owner = root,
     $group = 'sftponly',
     $run_mode = 'normal',
@@ -299,6 +302,7 @@ define webhosting::php::joomla(
     apache::vhost::php::joomla{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
+        server_admin => $server_admin,
         group => $group,
         allow_override => $allow_override,
         do_includes => $do_includes,
