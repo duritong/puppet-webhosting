@@ -336,6 +336,7 @@ define webhosting::php::joomla(
             before =>  Apache::Vhost::Php::Joomla[$name],
         }
         apache::vhost::file::documentrootdir{"joomlagitdir_${name}":
+            ensure => $ensure,
             documentroot => $documentroot,
             filename => '.git',
             thedomain => $name,
@@ -468,6 +469,7 @@ define webhosting::php::wordpress(
             before =>  Apache::Vhost::Php::Wordpress[$name],
         }
         apache::vhost::file::documentrootdir{"wordpressgitdir_${name}":
+            ensure => $ensure,
             documentroot => $documentroot,
             filename => '.git',
             thedomain => $name,
@@ -597,9 +599,10 @@ define webhosting::php::simplemachine(
             projectroot => $documentroot,
             cloneddir_user => $name,
             cloneddir_group => $name,
-            before =>  Apache::Vhost::Php::Wordpress[$name],
+            before =>  Apache::Vhost::Php::Simplemachine[$name],
         }
         apache::vhost::file::documentrootdir{"simplemachinesgitdir_${name}":
+            ensure => $ensure,
             documentroot => $documentroot,
             filename => '.git',
             thedomain => $name,
