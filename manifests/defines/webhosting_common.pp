@@ -10,7 +10,9 @@ define webhosting::common(
     $ssl_mode = false,
     $run_mode = 'normal',
     $run_uid = 'absent',
+    $run_uid_name = 'absent',
     $run_gid = 'absent',
+    $run_gid_name = 'absent',
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
@@ -61,7 +63,12 @@ define webhosting::common(
       } else {
         $real_run_gid = $run_gid
       }
-      user::managed{"${name}_run":
+      if ($run_uid_name == 'absent'){
+        $real_run_uid_name = "${name}_run"
+      } else {
+        $real_run_uid_name = $run_uid_name
+      }
+      user::managed{$real_run_uid_name:
         ensure => $ensure,
         uid => $run_uid,
         gid => $real_run_gid,

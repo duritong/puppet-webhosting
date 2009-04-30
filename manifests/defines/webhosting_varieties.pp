@@ -83,7 +83,9 @@ define webhosting::modperl(
     $group = 'sftponly',
     $run_mode = 'normal',
     $run_uid = 'absent',
+    $run_uid_name = 'absent',
     $run_gid = 'absent',
+    $run_gid_name = 'absent',
     $allow_override = 'None',
     $do_includes = false,
     $options = 'absent',
@@ -110,7 +112,9 @@ define webhosting::modperl(
         ssl_mode => $ssl_mode,
         run_mode => $run_mode,
         run_uid => $run_uid,
+        run_uid_name => $run_uid_name,
         run_gid => $run_gid,
+        run_gid_name => $run_gid_name,
         nagios_check => $nagios_check,
         nagios_check_domain => $nagios_check_domain,
         nagios_check_url => $nagios_check_url,
@@ -136,19 +140,30 @@ define webhosting::modperl(
     }
     case $run_mode {
         'itk': {
-            Apache::Vhost::Modperl[$name]{
-                documentroot_owner => $name,
-                documentroot_group => $name,
-                documentroot_mode => 0750,
-                run_uid => "${name}_run",
-                run_gid => "${name}",
-                require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
-            }
+          if ($run_uid_name == 'absent'){
+            $real_run_uid_name = "${name}_run"
+          } else {
+            $real_run_uid_name = $run_uid_name
+          }
+          if ($run_gid_name == 'absent'){
+            $real_run_gid_name = $name
+          } else {
+            $real_run_gid_name = $run_gid_name
+          }
+
+          Apache::Vhost::Modperl[$name]{
+            documentroot_owner => $name,
+            documentroot_group => $name,
+            documentroot_mode => 0750,
+            run_uid => $real_run_uid_name,
+            run_gid => $real_run_gid_name,
+            require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+          }
         }
         default: {
-            Apache::Vhost::Modperl[$name]{
-                require => User::Sftp_only["${name}"],
-            }
+          Apache::Vhost::Modperl[$name]{
+            require => User::Sftp_only["${name}"],
+          }
         }
     }
 }
@@ -171,7 +186,9 @@ define webhosting::php(
     $group = 'sftponly',
     $run_mode = 'normal',
     $run_uid = 'absent',
+    $run_uid_name = 'absent',
     $run_gid = 'absent',
+    $run_gid_name = 'absent',
     $allow_override = 'None',
     $do_includes = false,
     $options = 'absent',
@@ -224,19 +241,29 @@ define webhosting::php(
     }
     case $run_mode {
         'itk': {
-            Apache::Vhost::Php::Standard[$name]{
-                documentroot_owner => $name,
-                documentroot_group => $name,
-                documentroot_mode => 0750,
-                run_uid => "${name}_run",
-                run_gid => "${name}",
-                require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
-            }
+          if ($run_uid_name == 'absent'){
+            $real_run_uid_name = "${name}_run"
+          } else {
+            $real_run_uid_name = $run_uid_name
+          }
+          if ($run_gid_name == 'absent'){
+            $real_run_gid_name = $name
+          } else {
+            $real_run_gid_name = $run_gid_name
+          }
+          Apache::Vhost::Php::Standard[$name]{
+            documentroot_owner => $name,
+            documentroot_group => $name,
+            documentroot_mode => 0750,
+            run_uid => $real_run_uid_name,
+            run_gid => $real_run_gid_name,
+            require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+          }
         }
         default: {
-            Apache::Vhost::Php::Standard[$name]{
-                require => User::Sftp_only["${name}"],
-            }
+          Apache::Vhost::Php::Standard[$name]{
+            require => User::Sftp_only["${name}"],
+          }
         }
     }
 }
@@ -259,7 +286,9 @@ define webhosting::php::joomla(
     $group = 'sftponly',
     $run_mode = 'normal',
     $run_uid = 'absent',
+    $run_uid_name = 'absent',
     $run_gid = 'absent',
+    $run_gid_name = 'absent',
     $allow_override = 'None',
     $do_includes = false,
     $options = 'absent',
@@ -347,19 +376,29 @@ define webhosting::php::joomla(
     }
     case $run_mode {
         'itk': {
-            Apache::Vhost::Php::Joomla[$name]{
-                documentroot_owner => $name,
-                documentroot_group => $name,
-                documentroot_mode => 0750,
-                run_uid => "${name}_run",
-                run_gid => "${name}",
-                require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
+          if ($run_uid_name == 'absent'){
+            $real_run_uid_name = "${name}_run"
+          } else {
+            $real_run_uid_name = $run_uid_name
+          }
+          if ($run_gid_name == 'absent'){
+            $real_run_gid_name = $name
+          } else {
+            $real_run_gid_name = $run_gid_name
+          }
+          Apache::Vhost::Php::Joomla[$name]{
+            documentroot_owner => $name,
+            documentroot_group => $name,
+            documentroot_mode => 0750,
+            run_uid => $real_run_uid_name,
+            run_gid => $real_run_gid_name,
+            require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+          }
+          if ($git_repo != 'absent') and ($ensure != 'absent') {
+            Git::Clone["git_clone_$name"]{
+              require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
             }
-            if ($git_repo != 'absent') and ($ensure != 'absent') {
-                Git::Clone["git_clone_$name"]{
-                    require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
-                }
-            }
+          }
         }
         default: {
             Apache::Vhost::Php::Joomla[$name]{
@@ -392,7 +431,11 @@ define webhosting::php::wordpress(
     $group = 'sftponly',
     $run_mode = 'normal',
     $run_uid = 'absent',
+    $run_uid_name = 'absent',
     $run_gid = 'absent',
+    $run_uid_name = 'absent',
+    $run_gid = 'absent',
+    $run_gid_name = 'absent',
     $allow_override = 'FileInfo',
     $do_includes = false,
     $options = 'absent',
@@ -478,32 +521,39 @@ define webhosting::php::wordpress(
             mode => 400,
         }
     }
-    case $run_mode {
-        'itk': {
-            Apache::Vhost::Php::Wordpress[$name]{
-                documentroot_owner => $name,
-                documentroot_group => $name,
-                documentroot_mode => 0750,
-                run_uid => "${name}_run",
-                run_gid => "${name}",
-                require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
+    if ($run_mode == 'itk') {
+          if ($run_uid_name == 'absent'){
+            $real_run_uid_name = "${name}_run"
+          } else {
+            $real_run_uid_name = $run_uid_name
+          }
+          if ($run_gid_name == 'absent'){
+            $real_run_gid_name = $name
+          } else {
+            $real_run_gid_name = $run_gid_name
+          }
+          Apache::Vhost::Php::Wordpress[$name]{
+            documentroot_owner => $name,
+            documentroot_group => $name,
+            documentroot_mode => 0750,
+            run_uid => $real_run_uid_name,
+            run_gid => $real_run_gid_name,
+            require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+          }
+          if ($git_repo != 'absent') and ($ensure != 'absent') {
+            Git::Clone["git_clone_$name"]{
+              require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
             }
-            if ($git_repo != 'absent') and ($ensure != 'absent') {
-                Git::Clone["git_clone_$name"]{
-                    require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
-                }
-            }
+          }
+    } else {
+      Apache::Vhost::Php::Wordpress[$name]{
+        require => User::Sftp_only["${name}"],
+      }
+      if ($git_repo != 'absent') and ($ensure != 'absent') {
+        Git::Clone["git_clone_$name"]{
+          require => User::Sftp_only["${name}"],
         }
-        default: {
-            Apache::Vhost::Php::Wordpress[$name]{
-                require => User::Sftp_only["${name}"],
-            }
-            if ($git_repo != 'absent') and ($ensure != 'absent') {
-                Git::Clone["git_clone_$name"]{
-                    require => User::Sftp_only["${name}"],
-                }
-            }
-        }
+      }
     }
 }
 
@@ -525,7 +575,9 @@ define webhosting::php::simplemachine(
     $group = 'sftponly',
     $run_mode = 'normal',
     $run_uid = 'absent',
+    $run_uid_name = 'absent',
     $run_gid = 'absent',
+    $run_gid_name = 'absent',
     $allow_override = 'FileInfo',
     $do_includes = false,
     $options = 'absent',
@@ -611,32 +663,39 @@ define webhosting::php::simplemachine(
             mode => 400,
         }
     }
-    case $run_mode {
-        'itk': {
-            Apache::Vhost::Php::Simplemachine[$name]{
-                documentroot_owner => $name,
-                documentroot_group => $name,
-                documentroot_mode => 0750,
-                run_uid => "${name}_run",
-                run_gid => "${name}",
-                require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
-            }
-            if ($git_repo != 'absent') and ($ensure != 'absent') {
-                Git::Clone["git_clone_$name"]{
-                    require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
-                }
-            }
+    if ($run_mode == 'itk') {
+      if ($run_uid_name == 'absent'){
+          $real_run_uid_name = "${name}_run"
+      } else {
+        $real_run_uid_name = $run_uid_name
+      }
+      if ($run_gid_name == 'absent'){
+        $real_run_gid_name = $name
+      } else {
+        $real_run_gid_name = $run_gid_name
+      }
+      Apache::Vhost::Php::Simplemachine[$name]{
+        documentroot_owner => $name,
+        documentroot_group => $name,
+        documentroot_mode => 0750,
+        run_uid => $real_run_uid_name,
+        run_gid => real_run_gid_name,
+        require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+      }
+      if ($git_repo != 'absent') and ($ensure != 'absent') {
+        Git::Clone["git_clone_$name"]{
+          require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
         }
-        default: {
-            Apache::Vhost::Php::Simplemachine[$name]{
-                require => User::Sftp_only["${name}"],
-            }
-            if ($git_repo != 'absent') and ($ensure != 'absent') {
-                Git::Clone["git_clone_$name"]{
-                    require => User::Sftp_only["${name}"],
-                }
-            }
+      }
+    } else {
+      Apache::Vhost::Php::Simplemachine[$name]{
+        require => User::Sftp_only["${name}"],
+      }
+      if ($git_repo != 'absent') and ($ensure != 'absent') {
+        Git::Clone["git_clone_$name"]{
+          require => User::Sftp_only["${name}"],
         }
+      }
     }
 }
 
