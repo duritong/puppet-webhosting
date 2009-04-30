@@ -324,7 +324,7 @@ define webhosting::php::joomla(
         config_webwriteable => $config_webwriteable,
         manage_directories => $manage_directories,
     }
-    if $git_repo != 'absent' {
+    if ($git_repo != 'absent') and ($ensure != 'absent') {
         # create webdir
         # for the cloning, $documentroot needs to be absent
         git::clone{"git_clone_$name":
@@ -355,7 +355,7 @@ define webhosting::php::joomla(
                 run_gid => "${name}",
                 require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
             }
-            if $git_repo != 'absent' {
+            if ($git_repo != 'absent') and ($ensure != 'absent') {
                 Git::Clone["git_clone_$name"]{
                     require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
                 }
@@ -365,7 +365,7 @@ define webhosting::php::joomla(
             Apache::Vhost::Php::Joomla[$name]{
                 require => User::Sftp_only["${name}"],
             }
-            if $git_repo != 'absent' {
+            if ($git_repo != 'absent') and ($ensure != 'absent') {
                 Git::Clone["git_clone_$name"]{
                     require => User::Sftp_only["${name}"],
                 }
@@ -457,7 +457,7 @@ define webhosting::php::wordpress(
         config_webwriteable => $config_webwriteable,
         manage_directories => $manage_directories,
     }
-    if $git_repo != 'absent' {
+    if ($git_repo != 'absent') and ($ensure != 'absent') {
         # create webdir
         # for the cloning, $documentroot needs to be absent
         git::clone{"git_clone_$name":
@@ -488,7 +488,7 @@ define webhosting::php::wordpress(
                 run_gid => "${name}",
                 require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
             }
-            if $git_repo != 'absent' {
+            if ($git_repo != 'absent') and ($ensure != 'absent') {
                 Git::Clone["git_clone_$name"]{
                     require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
                 }
@@ -498,7 +498,7 @@ define webhosting::php::wordpress(
             Apache::Vhost::Php::Wordpress[$name]{
                 require => User::Sftp_only["${name}"],
             }
-            if $git_repo != 'absent' {
+            if ($git_repo != 'absent') and ($ensure != 'absent') {
                 Git::Clone["git_clone_$name"]{
                     require => User::Sftp_only["${name}"],
                 }
@@ -590,7 +590,7 @@ define webhosting::php::simplemachine(
         config_webwriteable => $config_webwriteable,
         manage_directories => $manage_directories,
     }
-    if $git_repo != 'absent' {
+    if ($git_repo != 'absent') and ($ensure != 'absent') {
         # create webdir
         # for the cloning, $documentroot needs to be absent
         git::clone{"git_clone_$name":
@@ -621,7 +621,7 @@ define webhosting::php::simplemachine(
                 run_gid => "${name}",
                 require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
             }
-            if $git_repo != 'absent' {
+            if ($git_repo != 'absent') and ($ensure != 'absent') {
                 Git::Clone["git_clone_$name"]{
                     require => [ User::Sftp_only["${name}"], User::Managed["${name}_run"] ],
                 }
@@ -631,7 +631,7 @@ define webhosting::php::simplemachine(
             Apache::Vhost::Php::Simplemachine[$name]{
                 require => User::Sftp_only["${name}"],
             }
-            if $git_repo != 'absent' {
+            if ($git_repo != 'absent') and ($ensure != 'absent') {
                 Git::Clone["git_clone_$name"]{
                     require => User::Sftp_only["${name}"],
                 }
