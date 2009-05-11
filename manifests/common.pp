@@ -1,5 +1,4 @@
-# manifests/files/webhosting_standard.pp
-
+# Manages common things amongst webhostings
 define webhosting::common(
     $ensure = present,
     $uid = 'absent',
