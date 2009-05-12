@@ -7,6 +7,10 @@
 # user_access:
 #   - sftp: an sftp only user will be created (*default*)
 #   - webdav: a webdav vhost will be created which will point to the webhostings root
+# ldap_user: Used if you have set user_provider to `ldap`
+#   - absent: $name will be passed
+#   - any: any authenticated ldap user will work
+#   - everything else will be used as a required ldap username
 define webhosting::common(
     $ensure = present,
     $uid = 'absent',
@@ -28,7 +32,7 @@ define webhosting::common(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
-    $ldap_user = 'any'
+    $ldap_user = 'absent'
 ){
     if ($user_provider == 'local') and ($user_access == 'sftp') {
         user::sftp_only{"${name}":
@@ -94,9 +98,14 @@ define webhosting::common(
             ssl_mode => $webdav_ssl_mode,
         }
         if ($user_provider == 'ldap'){
+            if ($ldap_user == 'absent') {
+                $real_ldap_user = $name
+            } else {
+                $real_ldap_user = $ldap_user
+            }
             Apache::Vhost::Webdav["webdav.${name}"]{
                 ldap_auth => true,
-                ldap_user => $ldap_user,
+                ldap_user => $real_ldap_user,
             }
         }
     }
