@@ -33,7 +33,7 @@ define webhosting::php(
     $domainalias = 'www',
     $server_admin = 'absent',
     $owner = root,
-    $group = 'sftponly',
+    $group = 'absent',
     $run_mode = 'normal',
     $run_uid = 'absent',
     $run_uid_name = 'absent',
@@ -56,6 +56,17 @@ define webhosting::php(
     $mod_security = true,
     $ldap_user = 'absent'
 ){
+
+    if ($group == 'absent') and ($user_access == 'sftp') {
+        $real_group = 'sftponly'
+    } else {
+        if ($group == 'absent') {
+            $real_group = 'apache'
+        } else {
+            $real_group = $group
+        }
+    }
+
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
@@ -82,7 +93,7 @@ define webhosting::php(
         ensure => $ensure,
         domainalias => $domainalias,
         server_admin => $server_admin,
-        group => $group,
+        group => $real_group,
         allow_override => $allow_override,
         do_includes => $do_includes,
         options => $options,
