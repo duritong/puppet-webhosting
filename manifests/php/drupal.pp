@@ -45,7 +45,8 @@ define webhosting::php::drupal(
     $mod_security = true,
     $manage_config = true,
     $config_webwriteable = false,
-    $manage_directories = true
+    $manage_directories = true,
+    $manage_cron = true
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -93,6 +94,7 @@ define webhosting::php::drupal(
         manage_config => $manage_config,
         config_webwriteable => $config_webwriteable,
         manage_directories => $manage_directories,
+        manage_cron => $mange_cron,
     }
     if ($git_repo != 'absent') and ($ensure != 'absent') {
         # create webdir
