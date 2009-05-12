@@ -54,7 +54,7 @@ define webhosting::php(
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
     $mod_security = true,
-    $ldap_user = 'absent',
+    $ldap_user = 'absent'
 ){
     webhosting::common{$name:
         ensure => $ensure,
