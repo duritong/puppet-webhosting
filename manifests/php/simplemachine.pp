@@ -1,3 +1,10 @@
+# domainalias:
+#   - www: add as well a www.${name} entry
+#   - absent: do nothing
+#   - default: add the string
+# user_provider:
+#   - local: user will be crated locally (*default*)
+#   - everything else will currently do noting
 # run_mode:
 #   - normal: nothing special (*default*)
 #   - itk: apache is running with the itk module

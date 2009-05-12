@@ -2,6 +2,9 @@
 #   - www: add as well a www.${name} entry
 #   - absent: do nothing
 #   - default: add the string
+# user_provider:
+#   - local: user will be crated locally (*default*)
+#   - everything else will currently do noting
 define webhosting::static(
     $ensure = present,
     $uid = 'absent',

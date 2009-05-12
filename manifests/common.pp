@@ -1,6 +1,7 @@
 # Manages common things amongst webhostings
 # user_provider:
 #   - local: user will be crated locally (*default*)
+#   - everything else will currently do noting
 define webhosting::common(
     $ensure = present,
     $uid = 'absent',
