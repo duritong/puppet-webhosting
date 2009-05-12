@@ -99,12 +99,18 @@ define webhosting::modperl(
             documentroot_mode => 0750,
             run_uid => $real_run_uid_name,
             run_gid => $real_run_gid_name,
-            require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+          }
+          if ($user_provider == 'local') {
+              Apache::Vhost::Modperl[$name]{
+                require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+              }
           }
         }
         default: {
-          Apache::Vhost::Modperl[$name]{
-            require => User::Sftp_only["${name}"],
+          if ($user_provider == 'local') {
+            Apache::Vhost::Modperl[$name]{
+                require => User::Sftp_only["${name}"],
+            }
           }
         }
     }
