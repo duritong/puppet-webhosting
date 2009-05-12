@@ -4,6 +4,8 @@
 #   - default: add the string
 # user_provider:
 #   - local: user will be crated locally (*default*)
+#   - ldap: ldap settings will be passed and ldap authorization
+#           is mandatory using webdav as user_access
 #   - everything else will currently do noting
 # run_mode:
 #   - normal: nothing special (*default*)
@@ -11,11 +13,21 @@
 #          and run_uid and run_gid are used as vhost users
 # run_uid: the uid the vhost should run as with the itk module
 # run_gid: the gid the vhost should run as with the itk module
+# user_access:
+#   - sftp: an sftp only user will be created (*default*)
+#   - webdav: a webdav vhost will be created which will point to the webhostings root
+# ldap_user: Used if you have set user_provider to `ldap`
+#   - absent: $name will be passed
+#   - any: any authenticated ldap user will work
+#   - everything else will be used as a required ldap username
 define webhosting::php(
     $ensure = present,
     $uid = 'absent',
     $gid = 'uid',
     $user_provider = 'local',
+    $user_access = 'sftp',
+    $webdav_domain = 'absent',
+    $webdav_ssl_mode = false,
     $password = 'absent',
     $password_crypted = true,
     $domainalias = 'www',
@@ -41,13 +53,16 @@ define webhosting::php(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
-    $mod_security = true
+    $mod_security = true,
+    $ldap_user = 'absent',
 ){
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
         gid => $gid,
         user_provider => $user_provider,
+        user_access => $user_access,
+        webdav_ssl_mode => $webdav_ssl_mode,
         password => $password,
         password_crypted => $password_crypted,
         htpasswd_file => $htpasswd_file,
@@ -61,6 +76,7 @@ define webhosting::php(
         nagios_check_domain => $nagios_check_domain,
         nagios_check_url => $nagios_check_url,
         nagios_check_code => $nagios_check_code,
+        ldap_user => $ldap_user,
     }
     apache::vhost::php::standard{"${name}":
         ensure => $ensure,
@@ -82,28 +98,28 @@ define webhosting::php(
     }
     case $run_mode {
         'itk': {
-          if ($run_uid_name == 'absent'){
-            $real_run_uid_name = "${name}_run"
-          } else {
-            $real_run_uid_name = $run_uid_name
-          }
-          if ($run_gid_name == 'absent'){
-            $real_run_gid_name = $name
-          } else {
-            $real_run_gid_name = $run_gid_name
-          }
-          if ($user_provider == 'local') {
-              Apache::Vhost::Modperl[$name]{
-                require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
-              }
-          }
+            if ($run_uid_name == 'absent'){
+                $real_run_uid_name = "${name}_run"
+            } else {
+                $real_run_uid_name = $run_uid_name
+            }
+            if ($run_gid_name == 'absent'){
+                $real_run_gid_name = $name
+            } else {
+                $real_run_gid_name = $run_gid_name
+            }
+            if ($user_provider == 'local') {
+                Apache::Vhost::Modperl[$name]{
+                    require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+                }
+            }
         }
         default: {
-          if ($user_provider == 'local') {
-            Apache::Vhost::Modperl[$name]{
-                require => User::Sftp_only["${name}"],
+            if ($user_provider == 'local') {
+                Apache::Vhost::Modperl[$name]{
+                    require => User::Sftp_only["${name}"],
+                }
             }
-          }
         }
     }
 }
