@@ -1,8 +1,11 @@
 # Manages common things amongst webhostings
+# user_provider:
+#   - local: user will be crated locally (*default*)
 define webhosting::common(
     $ensure = present,
     $uid = 'absent',
     $gid = 'uid',
+    $user_provider = 'local',
     $password = 'absent',
     $password_crypted = true,
     $htpasswd_file = 'absent',
@@ -17,12 +20,52 @@ define webhosting::common(
     $nagios_check_url = '/',
     $nagios_check_code = 'OK'
 ){
-    user::sftp_only{"${name}":
-      ensure => $ensure,
-      uid => $uid,
-      gid => $gid,
-      password => $password,
-      password_crypted => $password_crypted,
+    if $user_provider == 'local' {
+        user::sftp_only{"${name}":
+          ensure => $ensure,
+          uid => $uid,
+          gid => $gid,
+          password => $password,
+          password_crypted => $password_crypted,
+        }
+    }
+
+    if ($run_mode == 'itk') {
+      if ($run_uid=='absent') and ($ensure != 'absent') {
+        fail("you need to define run_uid for $name on $fqdn to use itk")
+      }
+      if ($user_provider == 'local') {
+          if ($run_gid == 'absent') {
+            if ($gid == 'uid') {
+              $real_run_gid = $uid
+            } else {
+              $real_run_gid = $gid
+            }
+          } else {
+            $real_run_gid = $run_gid
+          }
+          if ($run_uid_name == 'absent'){
+            $real_run_uid_name = "${name}_run"
+          } else {
+            $real_run_uid_name = $run_uid_name
+          }
+          user::managed{$real_run_uid_name:
+            ensure => $ensure,
+            uid => $run_uid,
+            gid => $real_run_gid,
+            manage_group => false,
+            managehome => false,
+            shell => $operatingsystem ? {
+              debian => '/usr/sbin/nologin',
+              ubuntu => '/usr/sbin/nologin',
+              default => '/sbin/nologin'
+            },
+            require => User::Sftp_only[$name],
+          }
+          User::Sftp_only["${name}"]{
+            homedir_mode => 0755
+          }
+      }
     }
 
     if $use_nagios {
@@ -49,39 +92,4 @@ define webhosting::common(
       }
     }
 
-    if ($run_mode == 'itk') {
-      if ($run_uid=='absent') and ($ensure != 'absent') {
-        fail("you need to define run_uid for $name on $fqdn to use itk")
-      }
-      if ($run_gid == 'absent') {
-        if ($gid == 'uid') {
-          $real_run_gid = $uid
-        } else {
-          $real_run_gid = $gid
-        }
-      } else {
-        $real_run_gid = $run_gid
-      }
-      if ($run_uid_name == 'absent'){
-        $real_run_uid_name = "${name}_run"
-      } else {
-        $real_run_uid_name = $run_uid_name
-      }
-      user::managed{$real_run_uid_name:
-        ensure => $ensure,
-        uid => $run_uid,
-        gid => $real_run_gid,
-        manage_group => false,
-        managehome => false,
-        shell => $operatingsystem ? {
-          debian => '/usr/sbin/nologin',
-          ubuntu => '/usr/sbin/nologin',
-          default => '/sbin/nologin'
-        },
-        require => User::Sftp_only[$name],
-      }
-      User::Sftp_only["${name}"]{
-        homedir_mode => 0755
-      }
-   }
 }
