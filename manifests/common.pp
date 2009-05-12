@@ -87,12 +87,6 @@ define webhosting::common(
     }
 
     if ($user_access == 'webdav'){
-            'absent' => $operatingsystem ? {
-                        openbsd => "/var/www/htdocs/$name",
-                                    default => "/var/www/vhosts/$name"
-                                            },
-                                                    default => $path
-
         apache::vhost::webdav{"webdav.${name}":
             domain => $webdav_domain,
             run_mode => $run_mode,
