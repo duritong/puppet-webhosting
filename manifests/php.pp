@@ -119,20 +119,22 @@ define webhosting::php(
             } else {
                 $real_run_gid_name = $run_gid_name
             }
+            Apache::Vhost::Php::Standard[$name]{
+              documentroot_owner => $name,
+              documentroot_group => $name,
+              documentroot_mode => 0750,
+              run_uid => $real_run_uid_name,
+              run_gid => $real_run_gid_name,
+            }
             if ($user_provider == 'local') {
-                Apache::Vhost::Php[$name]{
-                    documentroot_owner => $name,
-                    documentroot_group => $name,
-                    documentroot_mode => 0750,
-                    run_uid => $real_run_uid_name,
-                    run_gid => $real_run_gid_name,
-                    require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+                Apache::Vhost::Php::Standard[$name]{
+                  require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
                 }
             }
         }
         default: {
             if ($user_provider == 'local') {
-                Apache::Vhost::Php[$name]{
+                Apache::Vhost::Php::Standard[$name]{
                     require => User::Sftp_only["${name}"],
                 }
             }
