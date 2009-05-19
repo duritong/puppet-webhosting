@@ -73,6 +73,7 @@ define webhosting::php(
         gid => $gid,
         user_provider => $user_provider,
         user_access => $user_access,
+        webdav_domain => $webdav_domain,
         webdav_ssl_mode => $webdav_ssl_mode,
         password => $password,
         password_crypted => $password_crypted,
