@@ -11,7 +11,7 @@
 #          and run_uid and run_gid are used as vhost users
 # run_uid: the uid the vhost should run as with the itk module
 # run_gid: the gid the vhost should run as with the itk module
-define webhosting::php::wordpress(
+define webhosting::php::mediawiki(
     $ensure = present,
     $uid = 'absent',
     $gid = 'uid',
