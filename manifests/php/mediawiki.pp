@@ -96,7 +96,6 @@ define webhosting::php::mediawiki(
     }
     mediawiki::instance{$name:
       ensure => $ensure,
-      path => $path,
       image => $image,
       config => $config,
       db_server => $db_server,
