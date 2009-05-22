@@ -30,7 +30,6 @@ define webhosting::php::mediawiki(
     $run_gid = 'absent',
     $run_gid_name = 'absent',
     $allow_override = 'FileInfo',
-    $do_includes = false,
     $options = 'absent',
     $additional_options = 'absent',
     $default_charset = 'absent',
@@ -84,7 +83,6 @@ define webhosting::php::mediawiki(
         group => $group,
         manage_docroot => false,
         allow_override => $allow_override,
-        do_includes => $do_includes,
         options => $options,
         additional_options => $additional_options,
         default_charset => $default_charset,
@@ -95,9 +93,6 @@ define webhosting::php::mediawiki(
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
         mod_security => $mod_security,
-        manage_config => $manage_config,
-        config_webwriteable => $config_webwriteable,
-        manage_directories => $manage_directories,
     }
     mediawiki::instance{$name:
       ensure => $ensure,
