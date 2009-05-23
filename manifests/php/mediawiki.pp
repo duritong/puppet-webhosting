@@ -40,7 +40,7 @@ define webhosting::php::mediawiki(
     $htpasswd_file = 'absent',
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
-    $nagios_check_url = '/',
+    $nagios_check_url = '/index.php/Hauptseite',
     $nagios_check_code = 'OK',
     $mod_security = true,
     $image = 'absent',
