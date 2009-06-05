@@ -30,6 +30,7 @@ define webhosting::passenger(
     $server_admin = 'absent',
     $owner = root,
     $group = 'absent',
+    $run_mode = 'normal'
     $run_uid = 'absent',
     $run_uid_name = 'absent',
     $run_gid = 'absent',
