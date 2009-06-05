@@ -89,6 +89,7 @@ define webhosting::common(
     if ($user_access == 'webdav'){
         apache::vhost::webdav{"webdav.${name}":
             domain => $webdav_domain,
+            run_mode => $run_mode,
             manage_webdir => false,
             path => $operatingsystem ? {
                 openbsd => "/var/www/htdocs/$name",
@@ -96,8 +97,8 @@ define webhosting::common(
             },
             path_is_webdir => true,
             run_mode => $run_mode,
-            run_uid => $run_uid,
-            run_gid => $run_gid,
+            run_uid => $name,
+            run_gid => $name,
             ssl_mode => $webdav_ssl_mode,
         }
         if ($user_provider == 'ldap'){
