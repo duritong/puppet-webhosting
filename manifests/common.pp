@@ -120,13 +120,9 @@ define webhosting::common(
         } else {
             $nagios_ensure = $nagios_check
         }
-        if $nagios_check_code == 'OK' {
-            $real_nagios_check_code = $htpasswd_file ? {
-                'absent' => $nagios_check_code,
-                default => '401'
-            }
-        } else {
-            $real_nagios_check_code = $nagios_check_code
+        $real_nagios_check_code = $htpasswd_file ? {
+          'absent' => $nagios_check_code,
+           default => '401'
         }
 
         nagios::service::http{"${name}":
