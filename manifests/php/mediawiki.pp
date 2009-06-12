@@ -104,7 +104,7 @@ define webhosting::php::mediawiki(
       db_pwd => $db_pwd,
       contact => $contact,
       sitename => $sitename,
-      secret_key => $secrect_key,
+      secret_key => $secret_key,
       extensions => $extensions,
       squid_servers => $squid_servers,
       language => $language,
