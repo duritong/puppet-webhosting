@@ -107,10 +107,10 @@ define webhosting::common(
             } else {
                 $real_ldap_user = $ldap_user
             }
-            #Apache::Vhost::Webdav["webdav.${name}"]{
-            #    ldap_auth => true,
-            #    ldap_user => $real_ldap_user,
-            #}
+            Apache::Vhost::Webdav["webdav.${name}"]{
+                ldap_auth => true,
+                ldap_user => $real_ldap_user,
+            }
         }
     }
 
