@@ -29,7 +29,8 @@ define webhosting::static(
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
-    $nagios_check_code = 'OK'
+    $nagios_check_code = 'OK',
+    $mod_security = false
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -67,6 +68,7 @@ define webhosting::static(
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
+        mod_security => $mod_security,
     }
 }
 
