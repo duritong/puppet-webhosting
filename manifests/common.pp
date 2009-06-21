@@ -97,8 +97,8 @@ define webhosting::common(
             },
             path_is_webdir => true,
             run_mode => $run_mode,
-            run_uid => $name,
-            run_gid => $name,
+            run_uid => $run_uid,
+            run_gid => $run_gid,
             ssl_mode => $webdav_ssl_mode,
         }
         if ($user_provider == 'ldap'){
