@@ -42,6 +42,7 @@ define webhosting::common(
             password => $password,
             password_crypted => $password_crypted,
         }
+        include apache::sftponly
     }
 
     if ($run_gid == 'absent') {
