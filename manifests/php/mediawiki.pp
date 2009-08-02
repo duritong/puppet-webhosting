@@ -54,7 +54,8 @@ define webhosting::php::mediawiki(
     $secret_key = 'unmanaged',
     $squid_servers = 'absent',
     $extensions = 'absent',
-    $language = 'de'
+    $language = 'de',
+    $hashed_upload_dir = true
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -108,6 +109,7 @@ define webhosting::php::mediawiki(
       extensions => $extensions,
       squid_servers => $squid_servers,
       language => $language,
+      hashed_upload_dir => $hashed_upload_dir,
       documentroot_write_mode => 0660,
     }
 
