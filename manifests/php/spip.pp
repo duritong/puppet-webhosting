@@ -27,7 +27,7 @@ define webhosting::php::spip(
     $run_uid_name = 'absent',
     $run_gid = 'absent',
     $run_gid_name = 'absent',
-    $allow_override = 'None',
+    $allow_override = 'FileInfo',
     $do_includes = false,
     $options = 'absent',
     $additional_options = 'absent',
