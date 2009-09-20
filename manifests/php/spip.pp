@@ -41,11 +41,7 @@ define webhosting::php::spip(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
-    $mod_security = true,
-    $manage_config = true,
-    $config_webwriteable = false,
-    $manage_directories = true,
-    $manage_cron = true
+    $mod_security = true
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -90,10 +86,6 @@ define webhosting::php::spip(
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
         mod_security => $mod_security,
-        manage_config => $manage_config,
-        config_webwriteable => $config_webwriteable,
-        manage_directories => $manage_directories,
-        manage_cron => $mange_cron,
     }
     case $run_mode {
         'itk': {
