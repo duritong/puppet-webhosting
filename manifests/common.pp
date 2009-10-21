@@ -77,12 +77,18 @@ define webhosting::common(
                 },
             }
             if ($user_access == 'sftp') {
+              if ($ensure == 'absent') {
                 User::Managed[$real_run_uid_name]{
-                    require => User::Sftp_only[$name],
+                  before => User::Sftp_only[$name],
+                }
+	      } else {
+                User::Managed[$real_run_uid_name]{
+                  require => User::Sftp_only[$name],
                 }
                 User::Sftp_only["${name}"]{
-                    homedir_mode => 0755,
+                  homedir_mode => 0755,
                 }
+              }
             }
         }
     }
