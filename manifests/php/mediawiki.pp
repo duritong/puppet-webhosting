@@ -26,8 +26,6 @@ define webhosting::php::mediawiki(
     $run_uid = 'absent',
     $run_uid_name = 'absent',
     $run_gid = 'absent',
-    $run_uid_name = 'absent',
-    $run_gid = 'absent',
     $run_gid_name = 'absent',
     $allow_override = 'FileInfo',
     $options = 'absent',
