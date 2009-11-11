@@ -58,7 +58,7 @@ define webhosting::php(
     $nagios_check_code = 'OK',
     $mod_security = true,
     $ldap_user = 'absent',
-    $php_safe_mode_exec_bins => 'absent'
+    $php_safe_mode_exec_bins = 'absent'
 ){
 
     if ($group == 'absent') and ($user_access == 'sftp') {
