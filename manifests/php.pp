@@ -57,8 +57,7 @@ define webhosting::php(
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
     $mod_security = true,
-    $ldap_user = 'absent',
-    $php_safe_mode_exec_bins = 'absent'
+    $ldap_user = 'absent'
 ){
 
     if ($group == 'absent') and ($user_access == 'sftp') {
@@ -70,21 +69,6 @@ define webhosting::php(
             $real_group = $group
         }
     }
-
-    if $php_safe_mode_exec_bins != 'absent' {
-      $path = "/var/www/htdocs/$vhost/bin"
-      file{$path:
-        ensure => directory,
-        source => "puppet://$server/modules/common/empty",
-        recurse => true,
-        purge => true,
-        owner => $owner, group => $group, mode => 0750;
-      }
-      $php_safe_mode_exec_bins_subst =  regsubst($php_safe_mode_exec_bins,"(.+)","${vhost}_\\1")
-      apache::vhost::php::safe_mode_bin{ $php_safe_mode_exec_bins_subst: 
-        path => $path
-      }
-    } 
 
     webhosting::common{$name:
         ensure => $ensure,

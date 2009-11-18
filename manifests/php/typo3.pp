@@ -45,7 +45,8 @@ define webhosting::php::typo3(
     $mod_security = true,
     $manage_config = true,
     $config_webwriteable = false,
-    $manage_directories = true
+    $manage_directories = true,
+    $php_safe_mode_exec_bins = 'absent'
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -93,6 +94,7 @@ define webhosting::php::typo3(
         manage_config => $manage_config,
         config_webwriteable => $config_webwriteable,
         manage_directories => $manage_directories,
+        php_safe_mode_exec_bins => $php_safe_mode_exec_bins,
     }
     if ($git_repo != 'absent') and ($ensure != 'absent') {
         # create webdir
