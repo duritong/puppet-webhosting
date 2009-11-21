@@ -20,6 +20,12 @@
 #   - absent: $name will be passed
 #   - any: any authenticated ldap user will work
 #   - everything else will be used as a required ldap username
+# php_safe_mode_exec_bins: An array of local binaries which should be linked in the
+#                          safe_mode_exec_bin for this hosting
+#                          *default*: None
+# php_default_charset: default charset header for php.
+#                      *default*: absent, which will set the same as default_charset
+#                                 of apache
 define webhosting::php(
     $ensure = present,
     $uid = 'absent',
@@ -47,6 +53,8 @@ define webhosting::php(
     $php_use_smarty = false,
     $php_use_pear = false,
     $php_safe_mode = true,
+    $php_safe_mode_exec_bins = 'absent',
+    $php_default_charset = 'absent',
     $ssl_mode = false,
     $vhost_mode = 'template',
     $vhost_source = 'absent',
@@ -106,6 +114,8 @@ define webhosting::php(
         php_use_smarty => $php_use_smarty,
         php_use_pear => $php_use_pear,
         php_safe_mode => $php_safe_mode,
+        php_safe_mode_exec_bins => $php_safe_mode_exec_bins,
+        php_default_charset => $php_default_charset,
         run_mode => $run_mode,
         ssl_mode => $ssl_mode,
         vhost_mode => $vhost_mode,

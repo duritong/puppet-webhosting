@@ -11,6 +11,12 @@
 #          and run_uid and run_gid are used as vhost users
 # run_uid: the uid the vhost should run as with the itk module
 # run_gid: the gid the vhost should run as with the itk module
+# php_safe_mode_exec_bins: An array of local binaries which should be linked in the
+#                          safe_mode_exec_bin for this hosting
+#                          *default*: None
+# php_default_charset: default charset header for php.
+#                      *default*: absent, which will set the same as default_charset
+#                                 of apache
 define webhosting::php::typo3(
     $ensure = present,
     $uid = 'absent',
@@ -33,6 +39,8 @@ define webhosting::php::typo3(
     $additional_options = 'absent',
     $default_charset = 'absent',
     $ssl_mode = false,
+    $php_safe_mode_exec_bins = 'absent',
+    $php_default_charset = 'absent',
     $vhost_mode = 'template',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
@@ -45,8 +53,7 @@ define webhosting::php::typo3(
     $mod_security = true,
     $manage_config = true,
     $config_webwriteable = false,
-    $manage_directories = true,
-    $php_safe_mode_exec_bins = 'absent'
+    $manage_directories = true
 ){
     webhosting::common{$name:
         ensure => $ensure,
@@ -86,6 +93,8 @@ define webhosting::php::typo3(
         default_charset => $default_charset,
         run_mode => $run_mode,
         ssl_mode => $ssl_mode,
+        php_default_charset => $php_default_charset,
+        php_safe_mode_exec_bins => $php_safe_mode_exec_bins,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
@@ -94,7 +103,6 @@ define webhosting::php::typo3(
         manage_config => $manage_config,
         config_webwriteable => $config_webwriteable,
         manage_directories => $manage_directories,
-        php_safe_mode_exec_bins => $php_safe_mode_exec_bins,
     }
     if ($git_repo != 'absent') and ($ensure != 'absent') {
         # create webdir
