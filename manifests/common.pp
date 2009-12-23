@@ -14,6 +14,7 @@
 define webhosting::common(
     $ensure = present,
     $uid = 'absent',
+    $uid_name = 'absent',
     $gid = 'uid',
     $user_provider = 'local',
     $user_access = 'sftp',
@@ -34,17 +35,6 @@ define webhosting::common(
     $nagios_check_code = 'OK',
     $ldap_user = 'absent'
 ){
-    if ($user_provider == 'local') and ($user_access == 'sftp') {
-        user::sftp_only{"${name}":
-            ensure => $ensure,
-            uid => $uid,
-            gid => $gid,
-            password => $password,
-            password_crypted => $password_crypted,
-        }
-        include apache::sftponly
-    }
-
     if ($run_gid == 'absent') {
         if ($gid == 'uid') {
             $real_run_gid = $uid
@@ -54,12 +44,28 @@ define webhosting::common(
     } else {
         $real_run_gid = $run_gid
     }
+    if ($uid_name == 'absent'){
+        $real_uid_name = $name
+    } else {
+        $real_uid_name = $uid_name
+    }
     if ($run_uid_name == 'absent'){
         $real_run_uid_name = "${name}_run"
     } else {
         $real_run_uid_name = $run_uid_name
     }
-    if ($run_mode == 'itk') {
+    if ($user_provider == 'local') and ($user_access == 'sftp') {
+        user::sftp_only{"${real_uid_name}":
+            ensure => $ensure,
+            uid => $uid,
+            gid => $gid,
+            password => $password,
+            password_crypted => $password_crypted,
+        }
+        include apache::sftponly
+    }
+
+   if ($run_mode == 'itk') {
         if ($run_uid=='absent') and ($ensure != 'absent') {
             fail("you need to define run_uid for $name on $fqdn to use itk")
         }
@@ -79,13 +85,13 @@ define webhosting::common(
             if ($user_access == 'sftp') {
               if ($ensure == 'absent') {
                 User::Managed[$real_run_uid_name]{
-                  before => User::Sftp_only[$name],
+                  before => User::Sftp_only[$real_uid_name],
                 }
 	      } else {
                 User::Managed[$real_run_uid_name]{
-                  require => User::Sftp_only[$name],
+                  require => User::Sftp_only[$real_uid_name],
                 }
-                User::Sftp_only["${name}"]{
+                User::Sftp_only["${real_uid_name}"]{
                   homedir_mode => 0755,
                 }
               }
