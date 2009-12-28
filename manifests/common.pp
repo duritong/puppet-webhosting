@@ -61,6 +61,10 @@ define webhosting::common(
             gid => $gid,
             password => $password,
             password_crypted => $password_crypted,
+            homedir => $operatingsystem ? {
+                  openbsd => "/var/www/htdocs/${name}",
+                  default => "/var/www/vhosts/${name}"
+            },
         }
         include apache::sftponly
     }
@@ -76,6 +80,10 @@ define webhosting::common(
                 gid => $real_run_gid,
                 manage_group => false,
                 managehome => false,
+                homedir => $operatingsystem ? {
+                    openbsd => "/var/www/htdocs/${name}",
+                    default => "/var/www/vhosts/${name}"
+                },
                 shell => $operatingsystem ? {
                     debian => '/usr/sbin/nologin',
                     ubuntu => '/usr/sbin/nologin',
