@@ -48,7 +48,7 @@ define webhosting::php::gallery2(
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
-    $nagios_check_code = 'OK',
+    $nagios_check_code = '302',
     $git_repo = 'absent',
     $mod_security = true,
     $manage_config = true,
