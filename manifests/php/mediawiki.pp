@@ -47,7 +47,7 @@ define webhosting::php::mediawiki(
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
-    $nagios_check_code = '301',
+    $nagios_check_code = 'OK',
     $mod_security = true,
     $image = 'absent',
     $config = 'unmanaged',
