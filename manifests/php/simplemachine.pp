@@ -56,6 +56,11 @@ define webhosting::php::simplemachine(
     $config_webwriteable = false,
     $manage_directories = true
 ){
+    if ($uid_name == 'absent'){
+      $real_uid_name = $name
+    } else {
+      $real_uid_name = $uid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
