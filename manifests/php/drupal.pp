@@ -20,6 +20,7 @@
 define webhosting::php::drupal(
     $ensure = present,
     $uid = 'absent',
+    $uid_name = 'absent',
     $gid = 'uid',
     $user_provider = 'local',
     $password = 'absent',
@@ -56,9 +57,15 @@ define webhosting::php::drupal(
     $manage_directories = true,
     $manage_cron = true
 ){
+    if ($uid_name == 'absent'){
+      $real_uid_name = $name
+    } else {
+      $real_uid_name = $uid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
+        uid_name => $uid_name,
         gid => $gid,
         user_provider => $user_provider,
         password => $password,
@@ -113,8 +120,8 @@ define webhosting::php::drupal(
             ensure => $ensure,
             git_repo => $git_repo,
             projectroot => $documentroot,
-            cloneddir_user => $name,
-            cloneddir_group => $name,
+            cloneddir_user => $real_uid_name,
+            cloneddir_group => $real_uid_name,
             before =>  Apache::Vhost::Php::Drupal[$name],
         }
         apache::vhost::file::documentrootdir{"drupalgitdir_${name}":
@@ -122,7 +129,7 @@ define webhosting::php::drupal(
             documentroot => $documentroot,
             filename => '.git',
             thedomain => $name,
-            owner => $name,
+            owner => $real_uid_name,
             group => 'root',
             mode => 400,
         }
@@ -140,25 +147,25 @@ define webhosting::php::drupal(
             $real_run_gid_name = $run_gid_name
           }
           Apache::Vhost::Php::Drupal[$name]{
-            documentroot_owner => $name,
-            documentroot_group => $name,
+            documentroot_owner => $real_uid_name,
+            documentroot_group => $real_uid_name,
             run_uid => $real_run_uid_name,
             run_gid => $real_run_gid_name,
-            require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+            require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
           }
           if ($git_repo != 'absent') and ($ensure != 'absent') {
             Git::Clone["git_clone_$name"]{
-              require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+              require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
             }
           }
         }
         default: {
             Apache::Vhost::Php::Drupal[$name]{
-                require => User::Sftp_only["${name}"],
+                require => User::Sftp_only["${real_uid_name}"],
             }
             if ($git_repo != 'absent') and ($ensure != 'absent') {
                 Git::Clone["git_clone_$name"]{
-                    require => User::Sftp_only["${name}"],
+                    require => User::Sftp_only["${real_uid_name}"],
                 }
             }
         }

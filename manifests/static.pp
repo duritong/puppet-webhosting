@@ -8,6 +8,7 @@
 define webhosting::static(
     $ensure = present,
     $uid = 'absent',
+    $uid_name = 'absent',
     $gid = 'uid',
     $user_provider = 'local',
     $password = 'absent',
@@ -32,9 +33,15 @@ define webhosting::static(
     $nagios_check_code = 'OK',
     $mod_security = false
 ){
+    if ($uid_name == 'absent'){
+      $real_uid_name = $name
+    } else {
+      $real_uid_name = $uid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
+        uid_name => $uid_name,
         gid => $gid,
         user_provider => $user_provider,
         password => $password,
@@ -56,7 +63,7 @@ define webhosting::static(
         domainalias => $domainalias,
         server_admin => 'absent',
         group => $group,
-        documentroot_owner => $name,
+        documentroot_owner => $real_uid_name,
         documentroot_group => $group,
         allow_override => $allow_override,
         do_includes => $do_includes,

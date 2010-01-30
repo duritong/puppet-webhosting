@@ -29,6 +29,7 @@
 define webhosting::php(
     $ensure = present,
     $uid = 'absent',
+    $uid_name = 'absent',
     $gid = 'uid',
     $user_provider = 'local',
     $user_access = 'sftp',
@@ -77,10 +78,16 @@ define webhosting::php(
             $real_group = $group
         }
     }
+    if ($uid_name == 'absent'){
+      $real_uid_name = $name
+    } else {
+      $real_uid_name = $uid_name
+    }
 
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
+        uid_name => $uid_name,
         gid => $gid,
         user_provider => $user_provider,
         user_access => $user_access,
@@ -137,22 +144,22 @@ define webhosting::php(
                 $real_run_gid_name = $run_gid_name
             }
             Apache::Vhost::Php::Standard[$name]{
-              documentroot_owner => $name,
-              documentroot_group => $name,
+              documentroot_owner => $real_uid_name,
+              documentroot_group => $real_uid_name,
               documentroot_mode => 0750,
               run_uid => $real_run_uid_name,
               run_gid => $real_run_gid_name,
             }
             if ($user_provider == 'local') {
                 Apache::Vhost::Php::Standard[$name]{
-                  require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+                  require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
                 }
             }
         }
         default: {
             if ($user_provider == 'local') {
                 Apache::Vhost::Php::Standard[$name]{
-                    require => User::Sftp_only["${name}"],
+                    require => User::Sftp_only["${real_uid_name}"],
                 }
             }
         }

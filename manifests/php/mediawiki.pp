@@ -20,6 +20,7 @@
 define webhosting::php::mediawiki(
     $ensure = present,
     $uid = 'absent',
+    $uid_name = 'absent',
     $gid = 'uid',
     $user_provider = 'local',
     $password = 'absent',
@@ -63,9 +64,15 @@ define webhosting::php::mediawiki(
     $language = 'de',
     $hashed_upload_dir = true
 ){
+    if ($uid_name == 'absent'){
+      $real_uid_name = $name
+    } else {
+      $real_uid_name = $uid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
+        uid_name => $uid_name,
         gid => $gid,
         user_provider => $user_provider,
         password => $password,
@@ -133,24 +140,24 @@ define webhosting::php::mediawiki(
             $real_run_gid_name = $run_gid_name
           }
           Apache::Vhost::Php::Mediawiki[$name]{
-            documentroot_owner => $name,
-            documentroot_group => $name,
+            documentroot_owner => $real_uid_name,
+            documentroot_group => $real_uid_name,
             run_uid => $real_run_uid_name,
             run_gid => $real_run_gid_name,
-            require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+            require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
           }
           Mediawiki::Instance[$name]{
-            documentroot_owner => $name,
-            documentroot_group => $name,
+            documentroot_owner => $real_uid_name,
+            documentroot_group => $real_uid_name,
             documentroot_mode => 0640,
-            require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
+            require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
           }
     } else {
       Apache::Vhost::Php::Mediawiki[$name]{
-        require => User::Sftp_only["${name}"],
+        require => User::Sftp_only["${real_uid_name}"],
       }
       Mediawiki::Instance[$name]{
-        require => User::Sftp_only["${name}"],
+        require => User::Sftp_only["${real_uid_name}"],
       }
     }
 }
