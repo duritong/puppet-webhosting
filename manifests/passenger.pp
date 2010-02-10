@@ -99,6 +99,8 @@ define webhosting::passenger(
         additional_options => $additional_options,
         default_charset => $default_charset,
         run_mode => $run_mode,
+        run_uid => $run_uid,
+        run_gid => $run_gid,
         ssl_mode => $ssl_mode,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
