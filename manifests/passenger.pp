@@ -64,6 +64,11 @@ define webhosting::passenger(
         }
     }
 
+    if ($uid_name == 'absent'){
+      $real_uid_name = $name
+    } else {
+      $real_uid_name = $uid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
@@ -110,11 +115,6 @@ define webhosting::passenger(
     }
     case $run_mode {
         'itk': {
-            if ($uid_name == 'absent'){
-                $real_uid_name = $name
-            } else {
-                $real_uid_name = $uid_name
-            }
             if ($run_uid_name == 'absent'){
                 $real_run_uid_name = "${name}_run"
             } else {
