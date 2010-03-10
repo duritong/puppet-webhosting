@@ -37,6 +37,7 @@ define webhosting::php(
     $webdav_ssl_mode = false,
     $password = 'absent',
     $password_crypted = true,
+    $domain = 'absent',
     $domainalias = 'www',
     $server_admin = 'absent',
     $owner = root,
@@ -112,6 +113,7 @@ define webhosting::php(
     }
     apache::vhost::php::standard{"${name}":
         ensure => $ensure,
+        domain => $domain,
         domainalias => $domainalias,
         server_admin => $server_admin,
         group => $real_group,

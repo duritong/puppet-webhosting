@@ -19,6 +19,7 @@ define webhosting::modperl(
     $user_provider = 'local',
     $password = 'absent',
     $password_crypted = true,
+    $domain = 'absent',
     $domainalias = 'www',
     $server_admin = 'absent',
     $owner = root,
@@ -71,6 +72,7 @@ define webhosting::modperl(
     }
     apache::vhost::modperl{"${name}":
         ensure => $ensure,
+        domain => $domain,
         domainalias => $domainalias,
         server_admin => 'absent',
         group => $group,
