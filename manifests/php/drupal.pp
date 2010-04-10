@@ -106,6 +106,8 @@ define webhosting::php::drupal(
         additional_options => $additional_options,
         default_charset => $default_charset,
         run_mode => $run_mode,
+        run_uid => $real_uid_name,
+        run_gid => $real_gid_name,
         ssl_mode => $ssl_mode,
         php_default_charset => $php_default_charset,
         php_safe_mode_exec_bins => $php_safe_mode_exec_bins,
