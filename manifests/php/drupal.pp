@@ -73,7 +73,6 @@ define webhosting::php::drupal(
         uid => $uid,
         uid_name => $real_uid_name,
         gid => $gid,
-        gid_name => $real_gid_name,
         user_provider => $user_provider,
         password => $password,
         password_crypted => $password_crypted,
