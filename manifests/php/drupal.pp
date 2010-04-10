@@ -22,6 +22,7 @@ define webhosting::php::drupal(
     $uid = 'absent',
     $uid_name = 'absent',
     $gid = 'uid',
+    $gid_name = 'absent',
     $user_provider = 'local',
     $password = 'absent',
     $password_crypted = true,
@@ -62,11 +63,17 @@ define webhosting::php::drupal(
     } else {
       $real_uid_name = $uid_name
     }
+    if ($gid_name == 'absent'){
+      $real_gid_name = $real_uid_name
+    } else {
+      $real_gid_name = $gid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
-        uid_name => $uid_name,
+        uid_name => $real_uid_name,
         gid => $gid,
+        gid_name => $real_gid_name,
         user_provider => $user_provider,
         password => $password,
         password_crypted => $password_crypted,
@@ -121,7 +128,7 @@ define webhosting::php::drupal(
             git_repo => $git_repo,
             projectroot => $documentroot,
             cloneddir_user => $real_uid_name,
-            cloneddir_group => $real_uid_name,
+            cloneddir_group => $real_gid_name,
             before =>  Apache::Vhost::Php::Drupal[$name],
         }
         apache::vhost::file::documentrootdir{"drupalgitdir_${name}":
