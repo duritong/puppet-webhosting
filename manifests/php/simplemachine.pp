@@ -22,6 +22,7 @@ define webhosting::php::simplemachine(
     $uid = 'absent',
     $uid_name = 'absent',
     $gid = 'uid',
+    $gid_name = 'absent',
     $user_provider = 'local',
     $password = 'absent',
     $password_crypted = true,
@@ -61,11 +62,17 @@ define webhosting::php::simplemachine(
     } else {
       $real_uid_name = $uid_name
     }
+    if ($gid_name == 'absent'){
+      $real_gid_name = $real_uid_name
+    } else {
+      $real_gid_name = $gid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
-        uid_name => $uid_name,
+        uid_name => $real_uid_name,
         gid => $gid,
+        gid_name => $real_gid_name,
         user_provider => $user_provider,
         password => $password,
         password_crypted => $password_crypted,
@@ -119,7 +126,7 @@ define webhosting::php::simplemachine(
             git_repo => $git_repo,
             projectroot => $documentroot,
             cloneddir_user => $real_uid_name,
-            cloneddir_group => $real_uid_name,
+            cloneddir_group => $real_gid_name,
             before =>  Apache::Vhost::Php::Simplemachine[$name],
         }
         apache::vhost::file::documentrootdir{"simplemachinesgitdir_${name}":
@@ -145,7 +152,7 @@ define webhosting::php::simplemachine(
       }
       Apache::Vhost::Php::Simplemachine[$name]{
         documentroot_owner => $real_uid_name,
-        documentroot_group => $real_uid_name,
+        documentroot_group => $real_gid_name,
         run_uid => $real_run_uid_name,
         run_gid => $real_run_gid_name,
         require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],

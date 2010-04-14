@@ -21,6 +21,7 @@ define webhosting::passenger(
     $uid = 'absent',
     $uid_name = 'absent',
     $gid = 'uid',
+    $gid_name = 'absent',
     $user_provider = 'local',
     $user_access = 'sftp',
     $webdav_domain = 'absent',
@@ -63,17 +64,22 @@ define webhosting::passenger(
             $real_group = $group
         }
     }
-
     if ($uid_name == 'absent'){
       $real_uid_name = $name
     } else {
       $real_uid_name = $uid_name
     }
+    if ($gid_name == 'absent'){
+      $real_gid_name = $real_uid_name
+    } else {
+      $real_gid_name = $gid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
-        uid_name => $uid_name,
+        uid_name => $real_uid_name,
         gid => $gid,
+        gid_name => $real_gid_name,
         user_provider => $user_provider,
         user_access => $user_access,
         webdav_domain => $webdav_domain,
@@ -127,7 +133,7 @@ define webhosting::passenger(
             }
             Apache::Vhost::Passenger[$name]{
               documentroot_owner => $real_uid_name,
-              documentroot_group => $real_uid_name,
+              documentroot_group => $real_gid_name,
               documentroot_mode => 0750,
               run_uid => $real_run_uid_name,
               run_gid => $real_run_gid_name,

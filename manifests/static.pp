@@ -10,6 +10,7 @@ define webhosting::static(
     $uid = 'absent',
     $uid_name = 'absent',
     $gid = 'uid',
+    $gid_name = 'absent',
     $user_provider = 'local',
     $password = 'absent',
     $password_crypted = true,
@@ -38,11 +39,17 @@ define webhosting::static(
     } else {
       $real_uid_name = $uid_name
     }
+    if ($gid_name == 'absent'){
+      $real_gid_name = $real_uid_name
+    } else {
+      $real_gid_name = $gid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
-        uid_name => $uid_name,
+        uid_name => $real_uid_name,
         gid => $gid,
+        gid_name => $real_gid_name,
         user_provider => $user_provider,
         password => $password,
         password_crypted => $password_crypted,

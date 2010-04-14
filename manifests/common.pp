@@ -16,6 +16,7 @@ define webhosting::common(
     $uid = 'absent',
     $uid_name = 'absent',
     $gid = 'uid',
+    $gid_name = 'absent',
     $user_provider = 'local',
     $user_access = 'sftp',
     $webdav_domain = 'absent',
@@ -49,11 +50,22 @@ define webhosting::common(
     } else {
         $real_uid_name = $uid_name
     }
+    if ($gid_name == 'absent'){
+        $real_gid_name = $real_uid_name
+    } else {
+        $real_gid_name = $gid_name
+    }
     if ($run_uid_name == 'absent'){
         $real_run_uid_name = "${name}_run"
     } else {
         $real_run_uid_name = $run_uid_name
     }
+#    not yet used below
+#    if ($run_gid_name == 'absent'){
+#        $real_run_gid_name = $real_run_uid_name
+#    } else {
+#        $real_run_gid_name = $run_gid_name
+#    }
     if ($user_provider == 'local') and ($user_access == 'sftp') {
         user::sftp_only{"${real_uid_name}":
             ensure => $ensure,

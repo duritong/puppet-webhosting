@@ -73,6 +73,7 @@ define webhosting::php::drupal(
         uid => $uid,
         uid_name => $real_uid_name,
         gid => $gid,
+        gid_name => $real_gid_name,
         user_provider => $user_provider,
         password => $password,
         password_crypted => $password_crypted,
@@ -156,7 +157,7 @@ define webhosting::php::drupal(
           }
           Apache::Vhost::Php::Drupal[$name]{
             documentroot_owner => $real_uid_name,
-            documentroot_group => $real_uid_name,
+            documentroot_group => $real_gid_name,
             run_uid => $real_run_uid_name,
             run_gid => $real_run_gid_name,
             require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
