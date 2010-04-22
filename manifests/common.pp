@@ -29,7 +29,6 @@ define webhosting::common(
     $run_uid = 'absent',
     $run_uid_name = 'absent',
     $run_gid = 'absent',
-    $run_gid_name = 'absent',
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
@@ -60,12 +59,6 @@ define webhosting::common(
     } else {
         $real_run_uid_name = $run_uid_name
     }
-#    not yet used below
-#    if ($run_gid_name == 'absent'){
-#        $real_run_gid_name = $real_run_uid_name
-#    } else {
-#        $real_run_gid_name = $run_gid_name
-#    }
     if ($user_provider == 'local') and ($user_access == 'sftp') {
         user::sftp_only{"${real_uid_name}":
             ensure => $ensure,

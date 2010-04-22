@@ -82,7 +82,6 @@ define webhosting::php::gallery2(
         run_uid => $run_uid,
         run_uid_name => $run_uid_name,
         run_gid => $run_gid,
-        run_gid_name => $run_gid_name,
         nagios_check => $nagios_check,
         nagios_check_domain => $nagios_check_domain,
         nagios_check_url => $nagios_check_url,
@@ -152,7 +151,10 @@ define webhosting::php::gallery2(
             $real_run_uid_name = $run_uid_name
           }
           if ($run_gid_name == 'absent'){
-            $real_run_gid_name = $name
+            $real_run_gid_name = $gid_name ? {
+              'absent' => $name,
+              default => $gid_name
+            }
           } else {
             $real_run_gid_name = $run_gid_name
           }
