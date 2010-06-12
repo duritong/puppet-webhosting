@@ -52,7 +52,7 @@ define webhosting::php::gallery2(
     $nagios_check_url = '/',
     $nagios_check_code = '302',
     $git_repo = 'absent',
-    $mod_security = true,
+    $mod_security = false,
     $manage_config = true,
     $config_webwriteable = false,
     $manage_directories = true
