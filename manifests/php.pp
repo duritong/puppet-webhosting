@@ -26,6 +26,12 @@
 # php_default_charset: default charset header for php.
 #                      *default*: absent, which will set the same as default_charset
 #                                 of apache
+#
+# logmode:
+#   - default: Do normal logging to CustomLog and ErrorLog
+#   - nologs: Send every logging to /dev/null
+#   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
+#   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::php(
     $ensure = present,
     $uid = 'absent',
@@ -40,6 +46,7 @@ define webhosting::php(
     $password_crypted = true,
     $domainalias = 'www',
     $server_admin = 'absent',
+    $logmode = 'default',
     $owner = root,
     $group = 'absent',
     $run_mode = 'normal',
@@ -117,6 +124,7 @@ define webhosting::php(
         ensure => $ensure,
         domainalias => $domainalias,
         server_admin => $server_admin,
+        logmode => $logmode,
         group => $real_group,
         allow_override => $allow_override,
         do_includes => $do_includes,

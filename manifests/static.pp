@@ -5,6 +5,12 @@
 # user_provider:
 #   - local: user will be crated locally (*default*)
 #   - everything else will currently do noting
+#
+# logmode:
+#   - default: Do normal logging to CustomLog and ErrorLog
+#   - nologs: Send every logging to /dev/null
+#   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
+#   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::static(
     $ensure = present,
     $uid = 'absent',
@@ -16,6 +22,7 @@ define webhosting::static(
     $password_crypted = true,
     $domainalias = 'www',
     $server_admin = 'absent',
+    $logmode = 'default',
     $owner = root,
     $group = 'sftponly',
     $allow_override = 'None',
@@ -63,7 +70,8 @@ define webhosting::static(
     apache::vhost::static{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
-        server_admin => 'absent',
+        server_admin => $server_admin,
+        logmode => $logmode,
         group => $group,
         documentroot_owner => $real_uid_name,
         documentroot_group => $group,

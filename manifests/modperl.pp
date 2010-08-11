@@ -11,6 +11,12 @@
 #          and run_uid and run_gid are used as vhost users
 # run_uid: the uid the vhost should run as with the itk module
 # run_gid: the gid the vhost should run as with the itk module
+#
+# logmode:
+#   - default: Do normal logging to CustomLog and ErrorLog
+#   - nologs: Send every logging to /dev/null
+#   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
+#   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::modperl(
     $ensure = present,
     $uid = 'absent',
@@ -22,6 +28,7 @@ define webhosting::modperl(
     $password_crypted = true,
     $domainalias = 'www',
     $server_admin = 'absent',
+    $logmode = 'default',
     $owner = root,
     $group = 'sftponly',
     $run_mode = 'normal',
@@ -78,7 +85,8 @@ define webhosting::modperl(
     apache::vhost::modperl{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
-        server_admin => 'absent',
+        server_admin => $server_admin,
+        logmode => $logmode,
         group => $group,
         allow_override => $allow_override,
         do_includes => $do_includes,
