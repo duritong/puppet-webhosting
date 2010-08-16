@@ -142,7 +142,8 @@ define webhosting::php::mediawiki(
       documentroot_write_mode => 0660,
     }
 
-    if ($run_mode == 'itk') {
+    case $run_mode {
+        'itk','proxy-itk','static-itk': {
           if ($run_uid_name == 'absent'){
             $real_run_uid_name = "${name}_run"
           } else {
@@ -169,12 +170,14 @@ define webhosting::php::mediawiki(
             documentroot_mode => 0640,
             require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
           }
-    } else {
-      Apache::Vhost::Php::Mediawiki[$name]{
-        require => User::Sftp_only["${real_uid_name}"],
       }
-      Mediawiki::Instance[$name]{
-        require => User::Sftp_only["${real_uid_name}"],
+      default: {
+        Apache::Vhost::Php::Mediawiki[$name]{
+          require => User::Sftp_only["${real_uid_name}"],
+        }
+        Mediawiki::Instance[$name]{
+          require => User::Sftp_only["${real_uid_name}"],
+        }
       }
     }
 }

@@ -146,39 +146,42 @@ define webhosting::php::simplemachine(
             mode => 400,
         }
     }
-    if ($run_mode == 'itk') {
-      if ($run_uid_name == 'absent'){
+    case $run_mode {
+      'itk','proxy-itk','static-itk': {
+        if ($run_uid_name == 'absent'){
           $real_run_uid_name = "${name}_run"
-      } else {
+        } else {
         $real_run_uid_name = $run_uid_name
-      }
-      if ($run_gid_name == 'absent'){
-            $real_run_gid_name = $gid_name ? {
-              'absent' => $name,
-              default => $gid_name
-            }
-      } else {
-        $real_run_gid_name = $run_gid_name
-      }
-      Apache::Vhost::Php::Simplemachine[$name]{
-        documentroot_owner => $real_uid_name,
-        documentroot_group => $real_gid_name,
-        run_uid => $real_run_uid_name,
-        run_gid => $real_run_gid_name,
-        require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
-      }
-      if ($git_repo != 'absent') and ($ensure != 'absent') {
-        Git::Clone["git_clone_$name"]{
+        }
+        if ($run_gid_name == 'absent'){
+          $real_run_gid_name = $gid_name ? {
+            'absent' => $name,
+            default => $gid_name
+          }
+        } else {
+          $real_run_gid_name = $run_gid_name
+        }
+        Apache::Vhost::Php::Simplemachine[$name]{
+          documentroot_owner => $real_uid_name,
+          documentroot_group => $real_gid_name,
+          run_uid => $real_run_uid_name,
+          run_gid => $real_run_gid_name,
           require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
         }
+        if ($git_repo != 'absent') and ($ensure != 'absent') {
+          Git::Clone["git_clone_$name"]{
+            require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
+          }
+        }
       }
-    } else {
-      Apache::Vhost::Php::Simplemachine[$name]{
-        require => User::Sftp_only["${real_uid_name}"],
-      }
-      if ($git_repo != 'absent') and ($ensure != 'absent') {
-        Git::Clone["git_clone_$name"]{
+      default: {
+        Apache::Vhost::Php::Simplemachine[$name]{
           require => User::Sftp_only["${real_uid_name}"],
+        }
+        if ($git_repo != 'absent') and ($ensure != 'absent') {
+          Git::Clone["git_clone_$name"]{
+            require => User::Sftp_only["${real_uid_name}"],
+          }
         }
       }
     }

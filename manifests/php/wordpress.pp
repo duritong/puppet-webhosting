@@ -148,7 +148,8 @@ define webhosting::php::wordpress(
             mode => 400,
         }
     }
-    if ($run_mode == 'itk') {
+    case $run_mode {
+      'itk','proxy-itk','static-itk': {
           if ($run_uid_name == 'absent'){
             $real_run_uid_name = "${name}_run"
           } else {
@@ -174,13 +175,15 @@ define webhosting::php::wordpress(
               require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
             }
           }
-    } else {
-      Apache::Vhost::Php::Wordpress[$name]{
-        require => User::Sftp_only["${real_uid_name}"],
       }
-      if ($git_repo != 'absent') and ($ensure != 'absent') {
-        Git::Clone["git_clone_$name"]{
+      default: {
+        Apache::Vhost::Php::Wordpress[$name]{
           require => User::Sftp_only["${real_uid_name}"],
+        }
+        if ($git_repo != 'absent') and ($ensure != 'absent') {
+          Git::Clone["git_clone_$name"]{
+            require => User::Sftp_only["${real_uid_name}"],
+          }
         }
       }
     }
