@@ -74,7 +74,8 @@ define webhosting::common(
         include apache::sftponly
     }
 
-   if ($run_mode == 'itk') {
+    case $run_mode {
+      'itk','proxy-itk','static-itk': {
         if ($run_uid=='absent') and ($ensure != 'absent') {
             fail("you need to define run_uid for $name on $fqdn to use itk")
         }
@@ -100,7 +101,7 @@ define webhosting::common(
                 User::Managed[$real_run_uid_name]{
                   before => User::Sftp_only[$real_uid_name],
                 }
-	      } else {
+              } else {
                 User::Managed[$real_run_uid_name]{
                   require => User::Sftp_only[$real_uid_name],
                 }
@@ -109,7 +110,24 @@ define webhosting::common(
                 }
               }
             }
+            user::groups::manage_user{"apache_in_${real_gid_name}":
+              group => $real_gid_name,
+              user => 'apache'
+            }
+            case $run_mode {
+              'static-itk': {
+                User::Groups::Manage_user["apache_in_${real_gid_name}"]{
+                  ensure => 'present'
+                }
+              }
+              default: {
+                User::Groups::Manage_user["apache_in_${real_gid_name}"]{
+                  ensure => 'absent'
+                }
+              }
+            }
         }
+      }
     }
 
     if ($user_access == 'webdav'){
