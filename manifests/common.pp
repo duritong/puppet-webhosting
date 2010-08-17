@@ -106,7 +106,6 @@ define webhosting::common(
                   require => User::Sftp_only[$real_uid_name],
                 }
                 User::Sftp_only["${real_uid_name}"]{
-                  managehome => true,
                   homedir_mode => 0755,
                 }
               }
