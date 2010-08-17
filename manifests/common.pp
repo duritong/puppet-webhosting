@@ -85,6 +85,7 @@ define webhosting::common(
                 uid => $run_uid,
                 gid => $real_run_gid,
                 manage_group => false,
+                managehome => false,
                 homedir => $operatingsystem ? {
                     openbsd => "/var/www/htdocs/${name}",
                     default => "/var/www/vhosts/${name}"
