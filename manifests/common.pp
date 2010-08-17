@@ -85,7 +85,6 @@ define webhosting::common(
                 uid => $run_uid,
                 gid => $real_run_gid,
                 manage_group => false,
-                managehome => false,
                 homedir => $operatingsystem ? {
                     openbsd => "/var/www/htdocs/${name}",
                     default => "/var/www/vhosts/${name}"
@@ -106,11 +105,13 @@ define webhosting::common(
                   require => User::Sftp_only[$real_uid_name],
                 }
                 User::Sftp_only["${real_uid_name}"]{
+                  managehome => true,
                   homedir_mode => 0755,
                 }
               }
             }
             user::groups::manage_user{"apache_in_${real_gid_name}":
+              require => User::Managed[$real_run_uid_name],
               group => $real_gid_name,
               user => 'apache'
             }
