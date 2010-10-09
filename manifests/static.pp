@@ -65,6 +65,7 @@ define webhosting::static(
         ssl_mode => $ssl_mode,
         run_mode => $run_mode ? {
           'itk' => 'static',
+          'proxy-itk' => 'static',
           'static-itk' => 'static',
           default => $run_mode
         },
@@ -87,6 +88,12 @@ define webhosting::static(
         additional_options => $additional_options,
         default_charset => $default_charset,
         ssl_mode => $ssl_mode,
+        run_mode => $run_mode ? {
+          'itk' => 'static',
+          'proxy-itk' => 'static',
+          'static-itk' => 'static',
+          default => $run_mode
+        },
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
