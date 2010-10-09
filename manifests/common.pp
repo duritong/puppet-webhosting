@@ -75,58 +75,68 @@ define webhosting::common(
     }
 
     case $run_mode {
+      'static','itk','proxy-itk','static-itk': {
+        if ($user_access == 'sftp') {
+          if ($ensure != 'absent') {
+            User::Sftp_only["${real_uid_name}"]{
+              homedir_mode => 0755,
+            }
+          }
+          user::groups::manage_user{"apache_in_${real_gid_name}":
+            group => $real_gid_name,
+            user => 'apache'
+          }
+          case $run_mode {
+            'static','static-itk': {
+              User::Groups::Manage_user["apache_in_${real_gid_name}"]{
+                ensure => 'present'
+              }
+            }
+            default: {
+              User::Groups::Manage_user["apache_in_${real_gid_name}"]{
+                ensure => 'absent'
+              }
+            }
+          }
+        }
+      }
+    }
+    case $run_mode {
       'itk','proxy-itk','static-itk': {
         if ($run_uid=='absent') and ($ensure != 'absent') {
             fail("you need to define run_uid for $name on $fqdn to use itk")
         }
         if ($user_provider == 'local') {
-            user::managed{$real_run_uid_name:
-                ensure => $ensure,
-                uid => $run_uid,
-                gid => $real_run_gid,
-                manage_group => false,
-                managehome => false,
-                homedir => $operatingsystem ? {
-                    openbsd => "/var/www/htdocs/${name}",
-                    default => "/var/www/vhosts/${name}"
-                },
-                shell => $operatingsystem ? {
-                    debian => '/usr/sbin/nologin',
-                    ubuntu => '/usr/sbin/nologin',
-                    default => '/sbin/nologin'
-                },
-            }
-            if ($user_access == 'sftp') {
-              if ($ensure == 'absent') {
-                User::Managed[$real_run_uid_name]{
-                  before => User::Sftp_only[$real_uid_name],
-                }
-              } else {
-                User::Managed[$real_run_uid_name]{
-                  require => User::Sftp_only[$real_uid_name],
-                }
-                User::Sftp_only["${real_uid_name}"]{
-                  homedir_mode => 0755,
-                }
+          user::managed{$real_run_uid_name:
+            ensure => $ensure,
+            uid => $run_uid,
+            gid => $real_run_gid,
+            manage_group => false,
+            managehome => false,
+            homedir => $operatingsystem ? {
+              openbsd => "/var/www/htdocs/${name}",
+              default => "/var/www/vhosts/${name}"
+            },
+            shell => $operatingsystem ? {
+              debian => '/usr/sbin/nologin',
+              ubuntu => '/usr/sbin/nologin',
+              default => '/sbin/nologin'
+            },
+          }
+          if ($user_access == 'sftp') {
+            if ($ensure == 'absent') {
+              User::Managed[$real_run_uid_name]{
+                before => User::Sftp_only[$real_uid_name],
+              }
+            } else {
+              User::Managed[$real_run_uid_name]{
+                require => User::Sftp_only[$real_uid_name],
               }
             }
-            user::groups::manage_user{"apache_in_${real_gid_name}":
-              require => User::Managed[$real_run_uid_name],
-              group => $real_gid_name,
-              user => 'apache'
-            }
-            case $run_mode {
-              'static-itk': {
-                User::Groups::Manage_user["apache_in_${real_gid_name}"]{
-                  ensure => 'present'
-                }
-              }
-              default: {
-                User::Groups::Manage_user["apache_in_${real_gid_name}"]{
-                  ensure => 'absent'
-                }
-              }
-            }
+          }
+          User::Groups::Manage_user["apache_in_${real_gid_name}"]{
+            require => User::Managed[$real_run_uid_name],
+          }
         }
       }
     }

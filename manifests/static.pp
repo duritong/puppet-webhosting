@@ -31,6 +31,7 @@ define webhosting::static(
     $additional_options = 'absent',
     $default_charset = 'absent',
     $ssl_mode = false,
+    $run_mode = 'normal',
     $vhost_mode = 'template',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
@@ -62,6 +63,11 @@ define webhosting::static(
         password_crypted => $password_crypted,
         htpasswd_file => $htpasswd_file,
         ssl_mode => $ssl_mode,
+        run_mode => $run_mode ? {
+          'itk' => 'static',
+          'static-itk' => 'static',
+          default => $run_mode
+        },
         nagios_check => $nagios_check,
         nagios_check_domain => $nagios_check_domain,
         nagios_check_url => $nagios_check_url,
