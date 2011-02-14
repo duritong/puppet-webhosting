@@ -110,7 +110,6 @@ define webhosting::common(
           user::managed{$real_run_uid_name:
             ensure => $ensure,
             uid => $run_uid,
-            gid => $real_run_gid,
             manage_group => false,
             managehome => false,
             homedir => $operatingsystem ? {
@@ -136,6 +135,12 @@ define webhosting::common(
           }
           User::Groups::Manage_user["apache_in_${real_gid_name}"]{
             require => User::Managed[$real_run_uid_name],
+          }
+
+          if ($ensure == 'present') {
+            User::Managed[$real_run_uid_name]{
+              gid => $real_run_gid,
+            }
           }
         }
       }
