@@ -89,7 +89,7 @@ define webhosting::common(
           case $run_mode {
             'static','static-itk': {
               User::Groups::Manage_user["apache_in_${real_gid_name}"]{
-                ensure => 'present'
+                ensure => $ensure,
               }
             }
             default: {
