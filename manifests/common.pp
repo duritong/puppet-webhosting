@@ -91,6 +91,11 @@ define webhosting::common(
               User::Groups::Manage_user["apache_in_${real_gid_name}"]{
                 ensure => $ensure,
               }
+              if $ensure == 'present' {
+                User::Groups::Manage_user["apache_in_${real_gid_name}"]{
+                  require => User::Sftp_only["${real_uid_name}"],
+                }
+              }
             }
             default: {
               User::Groups::Manage_user["apache_in_${real_gid_name}"]{
