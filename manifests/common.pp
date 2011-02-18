@@ -138,9 +138,6 @@ define webhosting::common(
               }
             }
           }
-          User::Groups::Manage_user["apache_in_${real_gid_name}"]{
-            require => User::Managed[$real_run_uid_name],
-          }
 
           if ($ensure == 'present') {
             User::Managed[$real_run_uid_name]{
