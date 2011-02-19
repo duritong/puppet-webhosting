@@ -58,6 +58,7 @@ define webhosting::php::spip(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
+    $nagios_use = 'generic-service',
     $mod_security = true
 ){
     if ($uid_name == 'absent'){
@@ -89,6 +90,7 @@ define webhosting::php::spip(
         nagios_check_domain => $nagios_check_domain,
         nagios_check_url => $nagios_check_url,
         nagios_check_code => $nagios_check_code,
+        nagios_use => $nagios_use,
     }
 
     $path = $operatingsystem ? {

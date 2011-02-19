@@ -58,6 +58,7 @@ define webhosting::php::gallery2(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = '302',
+    $nagios_use = 'generic-service',
     $git_repo = 'absent',
     $mod_security = false,
     $manage_config = true,
@@ -93,6 +94,7 @@ define webhosting::php::gallery2(
         nagios_check_domain => $nagios_check_domain,
         nagios_check_url => $nagios_check_url,
         nagios_check_code => $nagios_check_code,
+        nagios_use => $nagios_use,
     }
 
     $path = $operatingsystem ? {

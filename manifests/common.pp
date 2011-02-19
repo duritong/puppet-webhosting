@@ -33,6 +33,7 @@ define webhosting::common(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
+    $nagios_use = 'generic-service',
     $ldap_user = 'absent'
 ){
     if ($run_gid == 'absent') {
@@ -192,6 +193,7 @@ define webhosting::common(
             check_domain => $nagios_check_domain,
             ssl_mode => $ssl_mode,
             check_url => $nagios_check_url,
+            use => $nagios_use,
             check_code => $real_nagios_check_code,
         }
     }

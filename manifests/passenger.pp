@@ -58,6 +58,7 @@ define webhosting::passenger(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
+    $nagios_use = 'generic-service',
     $mod_security = true,
     $ldap_user = 'absent'
 ){
@@ -103,6 +104,7 @@ define webhosting::passenger(
         nagios_check_domain => $nagios_check_domain,
         nagios_check_url => $nagios_check_url,
         nagios_check_code => $nagios_check_code,
+        nagios_use => $nagios_use,
         ldap_user => $ldap_user,
     }
     apache::vhost::passenger{"${name}":
