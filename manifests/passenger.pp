@@ -61,7 +61,8 @@ define webhosting::passenger(
     $nagios_use = 'generic-service',
     $mod_security = true,
     $ldap_user = 'absent',
-    $passenger_ree = false
+    $passenger_ree = false,
+    $passenger_app = 'rails'
 ){
 
     if ($group == 'absent') and ($user_access == 'sftp') {
@@ -128,6 +129,7 @@ define webhosting::passenger(
         htpasswd_file => $htpasswd_file,
         mod_security => $mod_security,
         passenger_ree => $passenger_ree,
+        passenger_app => $passenger_app,
     }
     case $run_mode {
         'itk','proxy-itk','static-itk': {
