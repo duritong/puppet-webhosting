@@ -120,8 +120,6 @@ define webhosting::passenger(
         options => $options,
         additional_options => $additional_options,
         default_charset => $default_charset,
-        run_uid => $run_uid,
-        run_gid => $run_gid,
         ssl_mode => $ssl_mode,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
@@ -164,6 +162,23 @@ define webhosting::passenger(
                 Apache::Vhost::Passenger[$name]{
                     require => User::Sftp_only["${real_uid_name}"],
                 }
+            }
+            if ($run_uid_name == 'absent'){
+                $real_run_uid_name = 'apache'
+            } else {
+                $real_run_uid_name = $run_uid_name
+            }
+            if ($run_gid_name == 'absent'){
+              $real_run_gid_name = $gid_name ? {
+                'absent' => 'apache',
+                default => $gid_name
+              }
+            } else {
+                $real_run_gid_name = $run_gid_name
+            }            
+            Apache::Vhost::Passenger[$name]{
+              run_uid => $run_uid,
+              run_gid => $run_gid,
             }
         }
     }
