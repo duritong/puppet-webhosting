@@ -60,7 +60,8 @@ define webhosting::passenger(
     $nagios_check_code = 'OK',
     $nagios_use = 'generic-service',
     $mod_security = true,
-    $ldap_user = 'absent'
+    $ldap_user = 'absent',
+    $passenger_ree = false
 ){
 
     if ($group == 'absent') and ($user_access == 'sftp') {
@@ -118,7 +119,6 @@ define webhosting::passenger(
         options => $options,
         additional_options => $additional_options,
         default_charset => $default_charset,
-        run_mode => $run_mode,
         run_uid => $run_uid,
         run_gid => $run_gid,
         ssl_mode => $ssl_mode,
@@ -127,6 +127,7 @@ define webhosting::passenger(
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
         mod_security => $mod_security,
+        passenger_ree => $passenger_ree,
     }
     case $run_mode {
         'itk','proxy-itk','static-itk': {
