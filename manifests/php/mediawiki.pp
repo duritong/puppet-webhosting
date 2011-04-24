@@ -69,6 +69,7 @@ define webhosting::php::mediawiki(
     $sitename = 'unmanaged',
     $secret_key = 'unmanaged',
     $squid_servers = 'absent',
+    $file_extensions = 'absent',
     $extensions = 'absent',
     $language = 'de',
     $hashed_upload_dir = true
@@ -137,6 +138,7 @@ define webhosting::php::mediawiki(
       contact => $contact,
       sitename => $sitename,
       secret_key => $secret_key,
+      file_extensions => $file_extensions,
       extensions => $extensions,
       squid_servers => $squid_servers,
       language => $language,
