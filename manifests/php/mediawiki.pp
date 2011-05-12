@@ -42,7 +42,7 @@ define webhosting::php::mediawiki(
     $run_uid_name = 'absent',
     $run_gid = 'absent',
     $run_gid_name = 'absent',
-    $allow_override = 'FileInfo',
+    $allow_override = 'FileInfo Limit',
     $options = 'absent',
     $additional_options = 'absent',
     $default_charset = 'absent',
