@@ -88,7 +88,7 @@ define webhosting::common(
             user => 'apache'
           }
           case $run_mode {
-            'static','static-itk': {
+            'fcgid','static','static-itk': {
               User::Groups::Manage_user["apache_in_${real_gid_name}"]{
                 ensure => $ensure,
               }
