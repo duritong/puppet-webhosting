@@ -48,9 +48,10 @@ define webhosting::php::gallery2(
     $additional_options = 'absent',
     $default_charset = 'absent',
     $ssl_mode = false,
-    $php_safe_mode_exec_bins = 'absent',
-    $php_default_charset = 'absent',
+    $php_settings = {},
+    $php_options = {},
     $vhost_mode = 'template',
+    $template_partial = 'absent',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
     $htpasswd_file = 'absent',
@@ -103,11 +104,6 @@ define webhosting::php::gallery2(
     }
     $documentroot = "${path}/www"
 
-    $real_php_safe_mode_exec_bins = $php_safe_mode_exec_bins ? {
-        'absent' => [ '/usr/bin/convert', '/usr/bin/composite', '/usr/bin/identify' ],
-        default => "${php_safe_mode_exec_bins}"
-    }
-
     apache::vhost::php::gallery2{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
@@ -121,8 +117,8 @@ define webhosting::php::gallery2(
         default_charset => $default_charset,
         run_mode => $run_mode,
         ssl_mode => $ssl_mode,
-        php_default_charset => $php_default_charset,
-        php_safe_mode_exec_bins => $real_php_safe_mode_exec_bins,
+        php_settings => $php_settings,
+        php_options => $php_options,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
@@ -191,5 +187,11 @@ define webhosting::php::gallery2(
                 }
             }
         }
+    }
+    
+    if $template_partial != 'absent' {
+      Apache::Vhost::Php::Gallery2[$name]{
+        template_partial => $template_partial
+      }
     }
 }

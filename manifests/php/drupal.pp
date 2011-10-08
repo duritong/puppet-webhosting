@@ -48,9 +48,10 @@ define webhosting::php::drupal(
     $additional_options = 'absent',
     $default_charset = 'absent',
     $ssl_mode = false,
-    $php_safe_mode_exec_bins = 'absent',
-    $php_default_charset = 'absent',
+    $php_options = {},
+    $php_settings = {},
     $vhost_mode = 'template',
+    $template_partial = 'absent',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
     $htpasswd_file = 'absent',
@@ -117,8 +118,8 @@ define webhosting::php::drupal(
         default_charset => $default_charset,
         run_mode => $run_mode,
         ssl_mode => $ssl_mode,
-        php_default_charset => $php_default_charset,
-        php_safe_mode_exec_bins => $php_safe_mode_exec_bins,
+        php_settings => $php_settings,
+        php_options => $php_options,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
@@ -188,5 +189,10 @@ define webhosting::php::drupal(
                 }
             }
         }
+    }
+    if $template_partial != 'absent' {
+      Apache::Vhost::Php::Drupal[$name]{
+        template_partial => $template_partial,
+      }
     }
 }

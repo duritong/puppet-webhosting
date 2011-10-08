@@ -43,6 +43,7 @@ define webhosting::modperl(
     $default_charset = 'absent',
     $ssl_mode = false,
     $vhost_mode = 'template',
+    $template_partial = 'absent',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
     $htpasswd_file = 'absent',
@@ -139,5 +140,10 @@ define webhosting::modperl(
             }
           }
         }
+    }
+    if ($template_partial != 'absent') {
+      Apache::Vhost::Modperl[$name]{
+        template_partial => $template_partial,
+      }
     }
 }
