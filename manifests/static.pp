@@ -69,6 +69,7 @@ define webhosting::static(
           'itk' => 'static',
           'proxy-itk' => 'static',
           'static-itk' => 'static',
+          'fcgid' => 'static',
           default => $run_mode
         },
         nagios_check => $nagios_check,
