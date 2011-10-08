@@ -51,6 +51,7 @@ define webhosting::passenger(
     $default_charset = 'absent',
     $ssl_mode = false,
     $vhost_mode = 'template',
+    $template_partial = 'absent',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
     $htpasswd_file = 'absent',
@@ -181,6 +182,11 @@ define webhosting::passenger(
               run_gid => $run_gid,
             }
         }
+    }
+    if $template_partial != 'absent' {
+      Apache::Vhost::Passenger[$name]{
+        template_partial => $template_partial,
+      }
     }
 }
 

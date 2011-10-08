@@ -33,6 +33,7 @@ define webhosting::static(
     $ssl_mode = false,
     $run_mode = 'normal',
     $vhost_mode = 'template',
+    $template_partial = 'absent',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
     $htpasswd_file = 'absent',
@@ -96,6 +97,11 @@ define webhosting::static(
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
         mod_security => $mod_security,
+    }
+    if $template_partial != 'absent' {
+      Apache::Vhost::Static["${name}"]{
+        template_partial => $template_partial
+      }
     }
 }
 
