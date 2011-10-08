@@ -53,8 +53,6 @@ define webhosting::php(
     $options = 'absent',
     $additional_options = 'absent',
     $default_charset = 'absent',
-    $php_use_smarty = false,
-    $php_use_pear = false,
     $php_settings = {},
     $php_options = {},
     $ssl_mode = false,
