@@ -136,7 +136,7 @@ define webhosting::php(
         mod_security => $mod_security,
     }
     case $run_mode {
-        'itk','proxy-itk','static-itk': {
+        'fcgid','itk','proxy-itk','static-itk': {
             if ($run_uid_name == 'absent'){
                 $real_run_uid_name = "${name}_run"
             } else {
