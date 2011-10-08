@@ -101,6 +101,11 @@ define webhosting::php::mediawiki(
         nagios_use => $nagios_use,
     }
 
+    $mediawiki_php_settings = {
+      open_basedir => "/var/www/mediawiki:/var/www/vhosts/${name}/www:/var/www/upload_tmp_dir/${name}:/var/www/session.save_path/${name}",
+    }
+    $real_php_settings = merge($mediawiki_php_settings,$php_settings)
+
     apache::vhost::php::mediawiki{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
@@ -114,7 +119,7 @@ define webhosting::php::mediawiki(
         default_charset => $default_charset,
         run_mode => $run_mode,
         ssl_mode => $ssl_mode,
-        php_settings => $php_settings,
+        php_settings => $real_php_settings,
         php_options => $php_options,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
