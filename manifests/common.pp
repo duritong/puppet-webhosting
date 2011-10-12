@@ -7,6 +7,10 @@
 # user_access:
 #   - sftp: an sftp only user will be created (*default*)
 #   - webdav: a webdav vhost will be created which will point to the webhostings root
+# wwwmail:
+#   With a local user_provider this will include the web run user in a group called wwwmailers.
+#   This makes it easier to enable special rights on a webserver's mailserver to this group.
+#   - default: false
 # ldap_user: Used if you have set user_provider to `ldap`
 #   - absent: $name will be passed
 #   - any: any authenticated ldap user will work
@@ -29,6 +33,7 @@ define webhosting::common(
     $run_uid = 'absent',
     $run_uid_name = 'absent',
     $run_gid = 'absent',
+    $wwwmail = false,
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
@@ -140,6 +145,19 @@ define webhosting::common(
             }
           }
 
+          if $wwwmail {
+            user::groups::manage_user{"${real_run_uid_name}_in_wwwmailers":
+              ensure => $ensure,
+              group => 'wwwmailers',
+              user => $real_run_uid_name
+            }
+            if ($ensure == 'present') {
+              require webhosting::wwwmailers
+              User::Groups::Manage_user["${real_run_uid_name}_in_wwwmailers"]{
+                require => User::Managed[$real_run_uid_name],
+              }
+            }
+          }
           if ($ensure == 'present') {
             User::Managed[$real_run_uid_name]{
               gid => $real_run_gid,
