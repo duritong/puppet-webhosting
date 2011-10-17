@@ -109,7 +109,7 @@ define webhosting::php::spip(
         default_charset => $default_charset,
         run_mode => $run_mode,
         ssl_mode => $ssl_mode,
-        php_setttings => $php_setttings,
+        php_settings => $php_setttings,
         php_options => $php_options,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
