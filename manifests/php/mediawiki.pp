@@ -64,7 +64,7 @@ define webhosting::php::mediawiki(
     $contact = 'unmanaged',
     $sitename = 'unmanaged',
     $secret_key = 'unmanaged',
-    $squid_servers = 'absent',
+    $squid_servers = hiera('reverse_proxies','absent'),
     $file_extensions = 'absent',
     $extensions = 'absent',
     $language = 'de',
