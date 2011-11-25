@@ -66,11 +66,17 @@ define webhosting::common(
         $real_run_uid_name = $run_uid_name
     }
     if ($user_provider == 'local') and ($user_access == 'sftp') {
-        user::sftp_only{"${real_uid_name}":
+        user::sftp_only{$real_uid_name:
             ensure => $ensure,
-            uid => $uid,
+            uid => $uid ? {
+                'iuid' => iuid($real_uid_name,'webhosting'),
+                default => $uid
+            },
             gid => $gid,
-            password => $password,
+            password => $password ? {
+                'trocla' => trocla("webhosting_${real_uid_name}",'sha512crypt'),
+                default => $password
+            },
             password_crypted => $password_crypted,
             homedir => $operatingsystem ? {
                   openbsd => "/var/www/htdocs/${name}",
@@ -120,7 +126,10 @@ define webhosting::common(
         if ($user_provider == 'local') {
           user::managed{$real_run_uid_name:
             ensure => $ensure,
-            uid => $run_uid,
+            uid => $run_uid ? {
+                'iuid' => iuid($real_run_uid_name,'webhosting'),
+                default => $run_uid,
+            },
             manage_group => false,
             managehome => false,
             homedir => $operatingsystem ? {
@@ -160,7 +169,10 @@ define webhosting::common(
           }
           if ($ensure == 'present') {
             User::Managed[$real_run_uid_name]{
-              gid => $real_run_gid,
+              gid => $real_run_gid ? {
+                  'iuid' => iuid($real_uid_name,'webhosting'),
+                  default => $real_run_gid,
+              },
             }
           }
         }
@@ -170,7 +182,6 @@ define webhosting::common(
     if ($user_access == 'webdav'){
         apache::vhost::webdav{"webdav.${name}":
             domain => $webdav_domain,
-            run_mode => $run_mode,
             manage_webdir => false,
             path => $operatingsystem ? {
                 openbsd => "/var/www/htdocs/$name",
