@@ -59,7 +59,7 @@ define webhosting::php::mediawiki(
     $config = 'unmanaged',
     $db_server = 'unmanaged',
     $db_name = 'unmanaged',
-    $db_user = 'unmanaged',
+    $db_user = 'db_name',
     $db_pwd = 'unmanaged',
     $contact = 'unmanaged',
     $sitename = 'unmanaged',
