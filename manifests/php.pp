@@ -145,10 +145,7 @@ define webhosting::php(
                 $real_run_uid_name = $run_uid_name
             }
             if ($run_gid_name == 'absent'){
-              $real_run_gid_name = $gid_name ? {
-                'absent' => $name,
-                default => $gid_name
-              }
+              $real_run_gid_name = $real_gid_name
             } else {
                 $real_run_gid_name = $run_gid_name
             }
