@@ -58,6 +58,8 @@ define webhosting::php::wordpress(
     $nagios_check_code = 'OK',
     $nagios_use = 'generic-service',
     $git_repo = 'absent',
+    $autoinstall = true,
+    $blog_options = {},
     $mod_security = true,
     $manage_config = true,
     $config_webwriteable = false,
@@ -127,25 +129,13 @@ define webhosting::php::wordpress(
         manage_directories => $manage_directories,
     }
     if ($git_repo != 'absent') and ($ensure != 'absent') {
-        # create webdir
-        # for the cloning, $documentroot needs to be absent
-        git::clone{"git_clone_$name":
-            ensure => $ensure,
-            git_repo => $git_repo,
-            projectroot => $documentroot,
-            cloneddir_user => $real_uid_name,
-            cloneddir_group => $real_gid_name,
-            before =>  Apache::Vhost::Php::Wordpress[$name],
-        }
-        apache::vhost::file::documentrootdir{"wordpressgitdir_${name}":
-            ensure => $ensure,
-            documentroot => $documentroot,
-            filename => '.git',
-            thedomain => $name,
-            owner => $real_uid_name,
-            group => 'root',
-            mode => 400,
-        }
+      wordpress::instance{$name:
+        path => $documentroot,
+        autoinstall => $autoinstall,
+        blog_options => $blog_options,
+        uid_name => $real_uid_name,
+        gid_name => $real_gid_name,
+      }
     }
     case $run_mode {
       'fcgid','itk','proxy-itk','static-itk': {
