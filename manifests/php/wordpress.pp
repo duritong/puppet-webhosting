@@ -160,7 +160,7 @@ define webhosting::php::wordpress(
             require => [ User::Sftp_only["${name}"], User::Managed["${real_run_uid_name}"] ],
           }
           if ($git_repo != 'absent') and ($ensure != 'absent') {
-            Git::Clone["git_clone_$name"]{
+            Wordpress::Instance[$name]{
               require => [ User::Sftp_only["${real_uid_name}"], User::Managed["${real_run_uid_name}"] ],
             }
           }
@@ -170,7 +170,7 @@ define webhosting::php::wordpress(
           require => User::Sftp_only["${real_uid_name}"],
         }
         if ($git_repo != 'absent') and ($ensure != 'absent') {
-          Git::Clone["git_clone_$name"]{
+          Wordpress::Instance[$name]{
             require => User::Sftp_only["${real_uid_name}"],
           }
         }
