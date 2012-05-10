@@ -36,6 +36,7 @@ define webhosting::php::gallery2(
     $run_uid_name = 'absent',
     $run_gid = 'absent',
     $run_gid_name = 'absent',
+    $watch_adjust_webfiles = false,
     $wwwmail = false,
     $allow_override = 'None',
     $do_includes = false,
@@ -86,6 +87,7 @@ define webhosting::php::gallery2(
         run_uid => $run_uid,
         run_uid_name => $run_uid_name,
         run_gid => $run_gid,
+        watch_adjust_webfiles => $watch_adjust_webfiles,
         wwwmail => $wwwmail,
         nagios_check => $nagios_check,
         nagios_check_domain => $nagios_check_domain,
@@ -184,7 +186,7 @@ define webhosting::php::gallery2(
             }
         }
     }
-    
+
     if $template_partial != 'absent' {
       Apache::Vhost::Php::Gallery2[$name]{
         template_partial => $template_partial

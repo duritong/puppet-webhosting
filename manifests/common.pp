@@ -34,6 +34,7 @@ define webhosting::common(
     $run_uid_name = 'absent',
     $run_gid = 'absent',
     $wwwmail = false,
+    $watch_adjust_webfiles = false,
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
@@ -65,6 +66,12 @@ define webhosting::common(
     } else {
         $real_run_uid_name = $run_uid_name
     }
+
+    $vhost_path = $::operatingsystem ? {
+      openbsd => "/var/www/htdocs/${name}",
+      default => "/var/www/vhosts/${name}"
+    }
+
     if ($user_provider == 'local') and ($user_access == 'sftp') {
         user::sftp_only{$real_uid_name:
             ensure => $ensure,
@@ -78,10 +85,7 @@ define webhosting::common(
                 default => $password
             },
             password_crypted => $password_crypted,
-            homedir => $operatingsystem ? {
-                  openbsd => "/var/www/htdocs/${name}",
-                  default => "/var/www/vhosts/${name}"
-            },
+            homedir => $vhost_path,
         }
         include apache::sftponly
     }
@@ -132,11 +136,8 @@ define webhosting::common(
             },
             manage_group => false,
             managehome => false,
-            homedir => $operatingsystem ? {
-              openbsd => "/var/www/htdocs/${name}",
-              default => "/var/www/vhosts/${name}"
-            },
-            shell => $operatingsystem ? {
+            homedir => $vhost_path,
+            shell => $::operatingsystem ? {
               debian => '/usr/sbin/nologin',
               ubuntu => '/usr/sbin/nologin',
               default => '/sbin/nologin'
@@ -183,10 +184,7 @@ define webhosting::common(
         apache::vhost::webdav{"webdav.${name}":
             domain => $webdav_domain,
             manage_webdir => false,
-            path => $operatingsystem ? {
-                openbsd => "/var/www/htdocs/$name",
-                default => "/var/www/vhosts/$name"
-            },
+            path => $vhost_path,
             path_is_webdir => true,
             run_mode => $run_mode,
             run_uid => $run_uid,
@@ -206,7 +204,7 @@ define webhosting::common(
         }
     }
 
-    if $use_nagios and ($nagios_check != 'unmanaged') {
+    if hiera('use_nagios',false) and ($nagios_check != 'unmanaged') {
         if $nagios_check == 'ensure' {
             $nagios_ensure = $ensure
         } else {
@@ -225,5 +223,18 @@ define webhosting::common(
             use => $nagios_use,
             check_code => $real_nagios_check_code,
         }
+    }
+
+    if $watch_adjust_webfiles {
+      webhosting::watch_adjust_webfiles{
+        $name:
+          ensure => $watch_adjust_webfiles ? {
+            true => $ensure,
+            default => "absent"
+          },
+          path => "${vhost_path}/www/",
+          sftp_user => $real_uid_name,
+          run_user => $real_run_uid_name,
+      }
     }
 }
