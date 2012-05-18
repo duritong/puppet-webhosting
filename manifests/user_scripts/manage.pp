@@ -39,9 +39,9 @@ define webhosting::user_scripts::manage(
     File["user_scripts_${name}"]{
       ensure => directory,
       ignore   => [ '*.log' ],
-      owner => $sftp_user,
+      owner => root,
       group => $web_group,
-      mode => 0400
+      mode => 0440
     }
 
     if ('adjust_permissions' in $scripts) or ($scripts == 'ALL') {
@@ -55,7 +55,7 @@ define webhosting::user_scripts::manage(
         "${scripts_path}/adjust_permissions/adjust_permissions.dirs":
           content => template('webhosting/user_scripts/adjust_permissions/adjust_permissions.dirs.erb'),
           replace => false,
-          owner => $sftp_user, group => $web_group, mode => 0400;
+          owner => $sftp_user, group => $web_group, mode => 0600;
 
       }
       File["incron_adjust_permissions_${name}"] {
