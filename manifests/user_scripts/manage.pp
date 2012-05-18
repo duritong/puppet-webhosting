@@ -38,7 +38,6 @@ define webhosting::user_scripts::manage(
 
     File["user_scripts_${name}"]{
       ensure => directory,
-      ignore   => [ '*.log' ],
       owner => root,
       group => $web_group,
       mode => 0440
@@ -63,6 +62,10 @@ define webhosting::user_scripts::manage(
         owner => root,
         group => 0,
         mode => 0400,
+      }
+    } else {
+      File["incron_adjust_permissions_${name}"]{
+        ensure => 'absent',
       }
     }
   }
