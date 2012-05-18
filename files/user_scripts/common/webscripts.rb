@@ -4,7 +4,7 @@ require 'fileutils'
 require 'yaml'
 
 def usage
-  puts "#{File.basename(__FILE__)} /path/to/file.run"
+  puts "USAGE: #{File.basename(__FILE__)} /path/to/file.run"
   exit 1
 end
 
