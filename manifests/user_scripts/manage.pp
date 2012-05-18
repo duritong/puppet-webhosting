@@ -62,6 +62,7 @@ define webhosting::user_scripts::manage(
         owner => root,
         group => 0,
         mode => 0400,
+        require => File["${scripts_path}/adjust_permissions"],
       }
     } else {
       File["incron_adjust_permissions_${name}"]{
