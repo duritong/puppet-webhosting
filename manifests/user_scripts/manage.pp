@@ -1,0 +1,59 @@
+define webhosting::user_scripts::manage(
+  $ensure = 'present',
+  $base_path = 'absent',
+  $scripts = 'ALL',
+  $sftp_user,
+  $web_group,
+  $options = {}
+){
+  $scripts_path = $base_path ? {
+    'absent' => "/var/www/vhosts/${name}/scripts",
+    default => "${base_path}/scripts"
+  }
+
+  $default_options = {
+    'adjust_permissions' => {
+      'only_webreadable' => [],
+      'web_writable' => []
+    }
+  }
+  $user_scripts_options = merge($default_options,$options)
+
+  file{"user_scripts_${name}":
+    path => $scripts_path,
+    recurse  => true,
+    purge    => true,
+    force    => true,
+  }
+
+  if ($ensure == 'absent') {
+    File["user_scripts_${name}"]{
+      ensure => 'absent',
+    }
+  } else {
+    require ::webhosting::user_scripts
+
+    File["user_scripts_${name}"]{
+      ensure => directory,
+      ignore   => [ '*.log' ],
+      owner => $sftp_user,
+      group => $web_group,
+      mode => 0400
+    }
+
+    if ('adjust_permissions' in $scripts) or ($scripts == 'ALL') {
+      file{
+        "${scripts_path}/adjust_permissions":
+          ensure => directory,
+          owner => $sftp_user, group => $web_group, mode => 0600;
+        "${scripts_path}/adjust_permissions/adjust_permissions.options":
+          content => template('webhosting/user_scripts/adjust_permissions/adjust_permissions.options.erb'),
+          owner => root, group => $web_group, mode => 0440;
+        "${scripts_path}/adjust_permissions/adjust_permissions.dirs":
+          content => template('webhosting/user_scripts/adjust_permissions/adjust_permissions.dirs.erb'),
+          replace => false,
+          owner => $sftp_user, group => $web_group, mode => 0400;
+      }
+    }
+  }
+}

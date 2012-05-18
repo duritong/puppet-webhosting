@@ -35,6 +35,8 @@ define webhosting::common(
     $run_gid = 'absent',
     $wwwmail = false,
     $watch_adjust_webfiles = false,
+    $user_scripts = 'absent',
+    $user_scripts_options = {},
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
@@ -235,6 +237,20 @@ define webhosting::common(
           path => "${vhost_path}/www/",
           sftp_user => $real_uid_name,
           run_user => $real_run_uid_name,
+      }
+    }
+
+    if $ensure != 'absent' {
+      webhosting::user_scripts::manage{$name:
+        ensure => $user_scripts ? {
+          'absent' => 'absent',
+          default => 'present'
+        },
+        base_path => $vhost_path,
+        scripts => $user_scripts,
+        sftp_user => $real_uid_name,
+        web_group => $real_gid_name,
+        options => $user_scripts_options,
       }
     }
 }
