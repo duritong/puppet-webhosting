@@ -19,15 +19,18 @@ define webhosting::user_scripts::manage(
   }
   $user_scripts_options = merge($default_options,$options)
 
-  file{"user_scripts_${name}":
-    path => $scripts_path,
-    recurse  => true,
-    purge    => true,
-    force    => true,
+  file{
+    "user_scripts_${name}":
+      path => $scripts_path,
+      recurse  => true,
+      purge    => true,
+      force    => true;
+    "incron_adjust_permissions_${name}":
+      path => "/etc/incron.d/${name}_adjust_permissions",
   }
 
   if ($ensure == 'absent') {
-    File["user_scripts_${name}"]{
+    File["user_scripts_${name}","incron_adjust_permissions_${name}"]{
       ensure => 'absent',
     }
   } else {
@@ -53,6 +56,13 @@ define webhosting::user_scripts::manage(
           content => template('webhosting/user_scripts/adjust_permissions/adjust_permissions.dirs.erb'),
           replace => false,
           owner => $sftp_user, group => $web_group, mode => 0400;
+
+      }
+      File["incron_adjust_permissions_${name}"] {
+        content => "${scripts_path}/adjust_permissions/ IN_CREATE /opt/webhosting_user_scripts/common/run_incron.sh \$@ \$#\n",
+        owner => root,
+        group => 0,
+        mode => 0400,
       }
     }
   }
