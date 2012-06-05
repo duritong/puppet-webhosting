@@ -127,7 +127,7 @@ define webhosting::common(
     case $run_mode {
       'fcgid','itk','proxy-itk','static-itk': {
         if ($run_uid=='absent') and ($ensure != 'absent') {
-            fail("you need to define run_uid for $name on $fqdn to use itk")
+            fail("you need to define run_uid for $name on ${::fqdn} to use itk")
         }
         if ($user_provider == 'local') {
           user::managed{$real_run_uid_name:

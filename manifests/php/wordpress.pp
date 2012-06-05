@@ -100,7 +100,7 @@ define webhosting::php::wordpress(
         nagios_use => $nagios_use,
     }
 
-    $path = $operatingsystem ? {
+    $path = $::operatingsystem ? {
         openbsd => "/var/www/htdocs/${name}",
         default => "/var/www/vhosts/${name}"
     }
