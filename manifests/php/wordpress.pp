@@ -132,6 +132,7 @@ define webhosting::php::wordpress(
     }
     if ($git_repo != 'absent') and ($ensure != 'absent') {
       wordpress::instance{$name:
+        git_repo => $git_repo,
         path => $documentroot,
         autoinstall => $autoinstall,
         blog_options => $blog_options,
