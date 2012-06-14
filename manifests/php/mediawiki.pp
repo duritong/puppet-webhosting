@@ -67,7 +67,7 @@ define webhosting::php::mediawiki(
     $spam_protection = false,
     $wiki_options = {},
     $autoinstall = true,
-    $squid_servers = hiera('reverse_proxies','absent'),
+    $squid_servers = 'absent',
     $file_extensions = 'absent',
     $extensions = 'absent',
     $language = 'de',

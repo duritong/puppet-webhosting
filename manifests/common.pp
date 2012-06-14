@@ -206,7 +206,7 @@ define webhosting::common(
         }
     }
 
-    if hiera('use_nagios',false) and ($nagios_check != 'unmanaged') {
+    if $nagios_check != 'unmanaged' {
         if $nagios_check == 'ensure' {
             $nagios_ensure = $ensure
         } else {
