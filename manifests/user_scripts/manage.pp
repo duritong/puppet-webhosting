@@ -5,7 +5,8 @@ define webhosting::user_scripts::manage(
   $sftp_user,
   $web_group,
   $options = {},
-  $user_scripts_help = 'https://wiki.immerda.ch/index.php/WebhostingUserScripts'
+  $user_scripts_help = 'https://wiki.immerda.ch/index.php/WebhostingUserScripts',
+  $user_scripts_admin_address = 'admin@immerda.ch'
 ){
   $scripts_path = $base_path ? {
     'absent' => "/var/www/vhosts/${name}/scripts",
