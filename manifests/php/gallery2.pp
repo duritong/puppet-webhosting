@@ -133,8 +133,8 @@ define webhosting::php::gallery2(
             ensure => $ensure,
             git_repo => $git_repo,
             projectroot => $documentroot,
-            cloneddir_user => $name,
-            cloneddir_group => $name,
+            cloneddir_user => $real_uid_name,
+            cloneddir_group => $real_gid_name,
             before =>  Apache::Vhost::Php::Gallery2[$name],
         }
         apache::vhost::file::documentrootdir{"gallery2gitdir_${name}":
@@ -142,9 +142,9 @@ define webhosting::php::gallery2(
             documentroot => $documentroot,
             filename => '.git',
             thedomain => $name,
-            owner => $name,
-            group => 'root',
-            mode => 400,
+            owner => $real_uid_name,
+            group => $real_gid_name,
+            mode => 750;
         }
     }
     case $run_mode {

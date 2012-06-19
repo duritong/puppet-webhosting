@@ -145,8 +145,8 @@ define webhosting::php::drupal(
             filename => '.git',
             thedomain => $name,
             owner => $real_uid_name,
-            group => 'root',
-            mode => 400,
+            group => $real_gid_name,
+            mode => 750;
         }
     }
     case $run_mode {
