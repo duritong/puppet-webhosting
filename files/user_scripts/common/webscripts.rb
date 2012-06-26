@@ -63,6 +63,11 @@ def check_settings_files
   end
 end
 
+def cmd(str)
+  result = `#{str}`
+  raise "Error occured: #{result}" if $?.to_i > 0
+end
+
 @run_file = ARGV.shift
 usage if @run_file.nil? || !File.exists?(@run_file = File.expand_path(@run_file))
 

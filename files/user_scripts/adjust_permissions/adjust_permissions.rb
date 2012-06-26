@@ -57,13 +57,16 @@ def load_directories
 end
 
 def chmod_R(path, permissions)
-  result = `chmod -R #{permissions} #{path} 2>&1`
-  raise "Error occured: #{result}" if $?.to_i > 0
+  cmd("chmod -R #{permissions} #{path} 2>&1")
+end
+
+def chown_R(user,group,path)
+  cmd("chown -R --no-dereference #{user}:#{group} #{path} 2>&1")
 end
 
 def adjust(path, permissions)
   chmod_R(path, permissions)
-  FileUtils.chown_R(options['sftp_user'], options['group'], path)
+  chown_R(options['sftp_user'], options['group'], path)
   log "Adjusted #{path} with #{permissions} and #{options['sftp_user']}:#{options['group']}"
 rescue => e
   log "Error while adjusting path #{path}: #{e.message}"
