@@ -57,11 +57,11 @@ def load_directories
 end
 
 def chmod_R(path, permissions)
-  cmd("chmod -R #{permissions} #{path} 2>&1")
+  cmd("chmod -R #{permissions} #{shellescape(path)} 2>&1")
 end
 
 def chown_R(user,group,path)
-  cmd("chown -R --no-dereference #{user}:#{group} #{path} 2>&1")
+  cmd("chown -R --no-dereference #{user}:#{group} #{shellescape(path)} 2>&1")
 end
 
 def adjust(path, permissions)
