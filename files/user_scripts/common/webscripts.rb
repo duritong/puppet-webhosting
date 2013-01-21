@@ -84,7 +84,7 @@ def sftp_user_uid
   @sftp_user_uid ||= Etc.getpwnam(options['sftp_user']).uid
 end
 
-def gourp_gid
+def group_gid
   @group_gid ||= Etc.getgrnam(options['group']).gid
 end
 
