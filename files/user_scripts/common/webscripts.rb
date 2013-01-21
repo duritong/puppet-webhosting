@@ -22,7 +22,7 @@ def settings_files_map_and_check
     security_fail("#{file} does not exist.") unless File.exists?(file_path) 
     security_fail("#{file} has insecure permissions. Expected uid to be #{options[:uid]}") unless options[:uid].nil? || stat.uid == options[:uid]
     security_fail("#{file} has insecure permissions. Expected gid to be #{options[:gid]}") unless options[:gid].nil? || stat.gid == options[:gid]
-    security_fail("#{file} has insecure permissions. Mode should not apply to mask #{options[:reject_mmask]}") unless options[:reject_mmask].nil? || (stat.mode & options[:reject_mmask] != 0)
+    security_fail("#{file} has insecure permissions. Mode should not apply to mask #{options[:reject_mmask]}") unless options[:reject_mmask].nil? || (stat.mode & options[:reject_mmask] == 0)
     res[file] = file_path
   end
   res
