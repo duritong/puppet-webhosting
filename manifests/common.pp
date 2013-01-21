@@ -249,6 +249,7 @@ define webhosting::common(
         base_path => $vhost_path,
         scripts => $user_scripts,
         sftp_user => $real_uid_name,
+        run_user => $real_run_uid_name,
         web_group => $real_gid_name,
         options => $user_scripts_options,
       }

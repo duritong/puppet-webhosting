@@ -3,6 +3,7 @@ define webhosting::user_scripts::manage(
   $base_path = 'absent',
   $scripts = 'ALL',
   $sftp_user,
+  $run_user,
   $web_group,
   $options = {},
   $user_scripts_help = 'https://wiki.immerda.ch/index.php/WebhostingUserScripts',
