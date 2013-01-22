@@ -48,7 +48,7 @@ define webhosting::user_scripts::manage(
       mode => 0440
     }
 
-    File["${scripts_path}/vhost.options"]{
+    file{ "${scripts_path}/vhost.options":
           content => template('webhosting/user_scripts/vhost.options.erb'),
           owner => root, group => $web_group, mode => 0440
     }
@@ -62,6 +62,8 @@ define webhosting::user_scripts::manage(
           content => template('webhosting/user_scripts/adjust_permissions/adjust_permissions.dirs.erb'),
           replace => false,
           owner => $sftp_user, group => $web_group, mode => 0600;
+        "${scripts_path}/adjust_permissions/adjust_permissions.options":
+          ensure => absent;
       }
       File["incron_adjust_permissions_${name}"] {
         content => "${scripts_path}/adjust_permissions/ IN_CREATE /opt/webhosting_user_scripts/common/run_incron.sh \$@ \$#\n",
