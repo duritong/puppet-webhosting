@@ -30,7 +30,7 @@ end
 
 def settings_files
   {
-    "#{script_name}.options" => { 
+    options_filename => { 
       :uid => 0, 
       :gid => 0, 
       :reject_mmask => 0007 }
@@ -84,7 +84,7 @@ def load_options
 end
 
 def options_filename
-  @options_file ||= "#{script_name}.options"
+  "vhost.options"
 end
 
 def option_keys
