@@ -14,7 +14,7 @@ else
   exit 0
 fi
 
-current_owner=`stat -c %U '${file}'`
+current_owner=`stat -c %U "${file}"`
 
 if [ "${current_owner}" = "${run_user}" ]; then
   chmod ${target_mode} $file
