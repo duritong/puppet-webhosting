@@ -45,6 +45,17 @@ def script_name
   @script_name ||= File.basename($0,'.rb')
 end
 
+def stringify(object)
+  case object
+  when Hash
+    Hash[ object.collect {|k,v| [k.to_s, stringify(v)] } ]
+  when Array
+    object.collect {|v| stringify(v) }
+  else
+    object.to_s
+  end
+end
+
 def load_file(file, required_keys)
   file_path = settings_files[file]
   res = YAML.load_file(file_path) || {}
@@ -52,7 +63,7 @@ def load_file(file, required_keys)
     security_fail "File #{settings_files[file]} does not contain all the required settings: #{required_keys.join(', ')}. Please fix!"
   end
   # stringify keys and values for security reasons
-  Hash[ res.collect {|k,v| [k.to_s, v.to_s] } ]
+  stringify(res)
 end
 
 def lockfile
