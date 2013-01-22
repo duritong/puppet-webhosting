@@ -65,17 +65,30 @@ def chmod_R(path, permissions)
   cmd("chmod -R #{permissions} #{shellescape(path)} 2>&1")
 end
 
-def chown_R(user,group,path)
-  cmd("chown -R -P --no-dereference --quiet #{user}:#{group} #{shellescape(path)} 2>&1")
+def chown(user,group,path)
+  cmd("chown -P --no-dereference #{user}:#{group} #{shellescape(path)} 2>&1")
+end
+
+def file_list
+  @file_list ||= "#{(0...52).map{65.+(rand(26)).chr}.join}"      
 end
 
 def adjust(path, permissions)
-  # chown runs as run user and chowns all its files to the sftp user
+  # chowns all run user files to the sftp user
   sudo(run_user_uid,group_gid) do
-    chown_R(options['sftp_user'], options['group'], path)
+    cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > /tmp/#{file_list}")
+    cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> /tmp/#{file_list}")
   end
+  File.read(file_list).each_line do |path|
+    path = File.expand_path(path)
+    if path.start_with? "#{options['webdir']}" && File.stat(path).uid == run_user_uid
+      chown(options['sftp_user'], options['group'], path)
+    end
+  end
+  File.remove(file_list)
+
   # chmod runs as sftp user, which should own all the relevant files now
-  sudo(sftp_user_uid,group_gid) do                                               
+  sudo(sftp_user_uid,group_gid) do    
     chmod_R(path, permissions)
   end
   log "Adjusted #{path} with #{permissions} and #{options['sftp_user']}:#{options['group']}"

@@ -128,10 +128,10 @@ end
 def sudo(uid,gid)
   # fork off shell command to irrevocably drop all root privileges
   Process.waitpid fork do
-    Process::Sys.setregid(gid,gid,gid)
+    Process::Sys.setregid(gid,gid)
     security_fail('could not drop privileges') unless Process::Sys.getgid == gid
     security_fail('could not drop privileges') unless Process::Sys.getegid == gid
-    Process::Sys.setreuid(uid,uid,uid)
+    Process::Sys.setreuid(uid,uid)
     security_fail('could not drop privileges') unless Process::Sys.getuid == uid
     security_fail('could not drop privileges') unless Process::Sys.geteuid == uid
     yield
