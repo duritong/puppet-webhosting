@@ -2,9 +2,17 @@
 
 run_user=$1
 sftp_user=$2
-file=$3
+vhost=$3
+file=$4
 
-([ -z $run_user ] || [ -z $sftp_user ] || [ -z '$file' ]) && exit 1
+([ -z $run_user ] || [ -z $sftp_user ] || [ -z $vhost ] || [ -z "$file" ]) && exit 1
+
+# do not adjust permissions while a script is running on this vhost
+if [ -d $vhost/../scripts ]; then
+  if [ -n "`find $vhost/../scripts -name *.lock`" ]
+    exit
+  fi
+fi
 
 if [ -f '$file' ]; then
   target_mode=0660

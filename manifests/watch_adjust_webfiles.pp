@@ -10,7 +10,7 @@ define webhosting::watch_adjust_webfiles (
       ensure => $ensure,
       watch_directory => "${path}",
       watch_events => 'create,move_to',
-      watch_command => "/usr/local/sbin/chown_webfiles.sh ${run_user} ${sftp_user} \$filename",
+      watch_command => "/usr/local/sbin/chown_webfiles.sh ${run_user} ${sftp_user} ${path} \$filename",
   }
   file{
     "/etc/cron.daily/fix_webperms_${name}":
