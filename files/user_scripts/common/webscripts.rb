@@ -36,8 +36,7 @@ def settings_files_def
   {
     options_filename => { 
       :uid => 0, 
-      :gid => 0, 
-      :reject_mmask => 0007 }
+      :reject_mmask => 0027 }
   }
 end
 
