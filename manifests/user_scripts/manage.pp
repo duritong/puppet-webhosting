@@ -29,7 +29,9 @@ define webhosting::user_scripts::manage(
       purge    => true,
       force    => true;
     "incron_adjust_permissions_${name}":
-      path => "/etc/incron.d/${name}_adjust_permissions",
+      path => "/etc/incron.d/${name}_adjust_permissions";
+    "incron_update_mode_${name}":
+      path => "/etc/incron.d/${name}_update_mode";
   }
 
   if ($ensure == 'absent') {
