@@ -14,9 +14,9 @@ if [ -d $vhost/../scripts ]; then
   fi
 fi
 
-if [ -f '$file' ]; then
+if [ -f "$file" ]; then
   target_mode=0660
-elif [ -d '$file' ]; then
+elif [ -d "$file" ]; then
   target_mode=0770
 else
   exit 0
@@ -25,6 +25,6 @@ fi
 current_owner=`stat -c %U "${file}"`
 
 if [ "${current_owner}" = "${run_user}" ]; then
-  chmod ${target_mode} $file
-  chown ${sftp_user} $file
+  chmod ${target_mode} "$file"
+  chown ${sftp_user} "$file"
 fi
