@@ -11,7 +11,7 @@ def script_option_keys
 end
 
 # further settings files used by this script
-def script_settings_files                                                              
+def script_settings_files_def 
   {                                                                             
     'adjust_permissions.dirs' => { 
       :uid => sftp_user_uid, 

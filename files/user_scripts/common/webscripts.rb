@@ -10,11 +10,15 @@ end
 
 # maps filenames to validated paths
 def settings_files
-  @settings_files ||= settings_files_map_and_check
+  @settings_files or settings_files_map_and_check!
 end
 
-def settings_files_map_and_check
-  files = settings_files.merge(script_settings_files || {})
+def settings_files_map_and_check!
+  @settings_files = _settings_files_map_and_check(settings_files_def)
+  @settings_files.merge!(_settings_files_map_and_check(script_settings_files_def))
+end
+
+def _settings_files_map_and_check(files)
   res = {}
   files.each do |file, options|
     file_path = File.expand_path(File.join(@base_dir,file))
@@ -28,7 +32,7 @@ def settings_files_map_and_check
   res
 end
 
-def settings_files
+def settings_files_def
   {
     options_filename => { 
       :uid => 0, 
@@ -38,7 +42,7 @@ def settings_files
 end
 
 def options
-  @options
+  @options ||= load_options
 end
 
 def script_name
@@ -84,7 +88,7 @@ def load_options
 end
 
 def options_filename
-  "vhost.options"
+  "../vhost.options"
 end
 
 def option_keys
@@ -92,7 +96,7 @@ def option_keys
 end
 
 def sftp_user_uid
-  @sftp_user_uid ||= Etc.getpwnam(options['sftp_user']).uid
+  @stp_user_uid ||= Etc.getpwnam(options['sftp_user']).uid
 end
 
 def run_user_uid                                                               

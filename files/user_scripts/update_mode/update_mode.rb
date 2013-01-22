@@ -9,7 +9,7 @@ def script_option_keys
 end
 
 # further settings files used by this script
-def script_settings_files                                                              
+def script_settings_files_def                                                             
 end
 
 # verify security related things to that script
