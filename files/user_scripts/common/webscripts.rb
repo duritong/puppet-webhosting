@@ -19,6 +19,7 @@ def settings_files_map_and_check!
 end
 
 def _settings_files_map_and_check(files)
+  return {} unless files
   res = {}
   files.each do |file, options|
     file_path = File.expand_path(File.join(@base_dir,file))
@@ -109,6 +110,7 @@ end
 def cmd(str)
   result = `#{str}`
   raise "Error occured: #{result}" if $?.to_i > 0
+  result
 end
 
 def shellescape(str)
@@ -128,16 +130,36 @@ def shellescape(str)
   return str
 end
 
-def sudo(uid,gid)
+def sudo(uid,gid,&blk)
   # fork off shell command to irrevocably drop all root privileges
-  Process.waitpid fork do
+  pid = fork do
     Process::Sys.setregid(gid,gid)
     security_fail('could not drop privileges') unless Process::Sys.getgid == gid
     security_fail('could not drop privileges') unless Process::Sys.getegid == gid
     Process::Sys.setreuid(uid,uid)
     security_fail('could not drop privileges') unless Process::Sys.getuid == uid
     security_fail('could not drop privileges') unless Process::Sys.geteuid == uid
-    yield
+    yield blk
+  end
+  Process.wait pid
+end
+
+def on_filelist(list,owner)
+  list.each_line do |path|
+    path = File.expand_path(path.chomp)
+    if path.start_with? "#{options['webdir']}" 
+      if File.exists?(path)
+        if File.stat(path).uid == owner
+          yield path
+        else
+          log "#{path} does not belong to #{run_user_uid}"
+        end
+      else
+        log "#{path} does not exist"
+      end
+    else
+      log "#{path} is not in the webdir"
+    end
   end
 end
 

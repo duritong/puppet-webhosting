@@ -28,8 +28,8 @@ end
 # the main method
 def run_script
   log "Starting to adjust permissions"
-  directories['only_webreadable'].each { |path| adjust(path, 'u+rw,g-w,o-rwx') }
-  directories['web_writable'].each { |path| adjust(path, 'u+rw,g+w,o-rwx') }
+  directories['only_webreadable'].each { |path| adjust(path, 0640, 0750 ) }
+  directories['web_writable'].each { |path| adjust(path, 0660, 0770 ) }
   log "Finished adjusting permissions"
 end
 
@@ -61,29 +61,36 @@ def load_directories
   end
 end
 
+# file name to pass the list of files to chown from the unprivileged find process to the mother process
+@file_list = "/tmp/#{(0...32).map{65.+(rand(26)).chr}.join}"
 def file_list
-  @file_list ||= "#{(0...52).map{65.+(rand(26)).chr}.join}"      
+  @file_list
 end
 
-def adjust(path, permissions)
+def adjust(path, file_permissions, dir_permissions)
+
   # chowns all run user files to the sftp user
   sudo(run_user_uid,group_gid) do
-    cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > /tmp/#{file_list}")
-    cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> /tmp/#{file_list}")
+    cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > #{file_list}")
+    cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> #{file_list}")
   end
-  File.read(file_list).each_line do |path|
-    path = File.expand_path(path)
-    if path.start_with? "#{options['webdir']}" && File.stat(path).uid == run_user_uid
-      FileUtils.chown( options['sftp_user'], options['group'], path )
-    end
+  on_filelist(File.read(file_list),run_user_uid) do |path|
+    FileUtils.chown( options['sftp_user'], options['group'], path )
   end
-  File.remove(file_list)
+  File.delete(file_list)
 
   # chmod runs as sftp user, which should own all the relevant files now
-  sudo(sftp_user_uid,group_gid) do    
-    FileUtils.chmod_R(permissions, path)
+  sudo(sftp_user_uid,group_gid) do
+    dirs = cmd("find #{shellescape(path)} -type d ! -perm #{dir_permissions}")
+    files = cmd("find #{shellescape(path)} -type f ! -perm #{file_permissions}")
+    on_filelist(dirs,sftp_user_uid) do |path|
+      FileUtils.chmod(dir_permissions,path)
+    end
+    on_filelist(files,sftp_user_uid) do |path|
+      FileUtils.chmod(file_permissions,path)
+    end
   end
-  log "Adjusted #{path} with #{permissions} and #{options['sftp_user']}:#{options['group']}"
+  log "Adjusted #{path} with #{file_permissions} and #{options['sftp_user']}:#{options['group']}"
 rescue => e
   log "Error while adjusting path #{path}: #{e.message}"
 end
