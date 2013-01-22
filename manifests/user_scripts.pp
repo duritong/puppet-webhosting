@@ -25,4 +25,14 @@ class webhosting::user_scripts {
       source => 'puppet:///modules/webhosting/user_scripts/adjust_permissions/adjust_permissions.rb',
       owner => root, group => 0, mode => 0500;
   }
+  
+  # update mode script
+  file{
+    "/opt/webhosting_user_scripts/update_mode":
+      ensure => directory,
+      owner => root, group => 0, mode => 0400;
+    "/opt/webhosting_user_scripts/update_mode/update_mode.rb":
+      source => 'puppet:///modules/webhosting/user_scripts/update_mode/update_mode.rb',
+      owner => root, group => 0, mode => 0500;
+  }
 }
