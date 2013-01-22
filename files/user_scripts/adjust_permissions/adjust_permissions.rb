@@ -61,14 +61,6 @@ def load_directories
   end
 end
 
-def chmod_R(path, permissions)
-  cmd("chmod -R #{permissions} #{shellescape(path)} 2>&1")
-end
-
-def chown(user,group,path)
-  cmd("chown -P --no-dereference #{user}:#{group} #{shellescape(path)} 2>&1")
-end
-
 def file_list
   @file_list ||= "#{(0...52).map{65.+(rand(26)).chr}.join}"      
 end
@@ -82,14 +74,14 @@ def adjust(path, permissions)
   File.read(file_list).each_line do |path|
     path = File.expand_path(path)
     if path.start_with? "#{options['webdir']}" && File.stat(path).uid == run_user_uid
-      chown(options['sftp_user'], options['group'], path)
+      FileUtils.chown( options['sftp_user'], options['group'], path )
     end
   end
   File.remove(file_list)
 
   # chmod runs as sftp user, which should own all the relevant files now
   sudo(sftp_user_uid,group_gid) do    
-    chmod_R(path, permissions)
+    FileUtils.chmod_R(permissions, path)
   end
   log "Adjusted #{path} with #{permissions} and #{options['sftp_user']}:#{options['group']}"
 rescue => e
