@@ -88,11 +88,15 @@ def options_filename
 end
 
 def option_keys
-  @option_keys ||= [ 'sftp_user', 'group' ] | script_option_keys
+  @option_keys ||= [ 'sftp_user', 'run_user', 'group' ] | script_option_keys
 end
 
 def sftp_user_uid
   @sftp_user_uid ||= Etc.getpwnam(options['sftp_user']).uid
+end
+
+def run_user_uid                                                               
+  @run_user_uid ||= Etc.getpwnam(options['run_user']).uid                     
 end
 
 def group_gid

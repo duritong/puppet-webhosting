@@ -7,7 +7,7 @@ require 'etc'
 # which option entries beside sftp_user does
 # this script need?
 def script_option_keys
- ['webdir','run_user']
+ ['webdir']
 end
 
 # further settings files used by this script
@@ -19,10 +19,6 @@ def script_settings_files
       :reject_mmask => 0007 }
   }                                                                             
 end
-
-def run_user_uid                                                               
-  @run_user_uid ||= Etc.getpwnam(options['run_user']).uid                     
-end   
 
 # verify security related things to that script
 def script_security
