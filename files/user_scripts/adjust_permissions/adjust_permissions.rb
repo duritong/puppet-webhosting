@@ -28,8 +28,8 @@ end
 # the main method
 def run_script
   log "Starting to adjust permissions"
-  directories['only_webreadable'].each { |path| adjust(path, 0640, 0750 ) }
-  directories['web_writable'].each { |path| adjust(path, 0660, 0770 ) }
+  directories['only_webreadable'].each { |path| adjust(path, 'u+rwX,g-w,o-rwx' ) }
+  directories['web_writable'].each { |path| adjust(path, 'u+rwX,g+rwX,o-rwx' ) }
   log "Finished adjusting permissions"
 end
 
@@ -67,7 +67,7 @@ def file_list
   @file_list
 end
 
-def adjust(path, file_permissions, dir_permissions)
+def adjust(path, permissions)
 
   # chowns all run user files to the sftp user
   sudo(run_user_uid,group_gid) do
@@ -81,14 +81,7 @@ def adjust(path, file_permissions, dir_permissions)
 
   # chmod runs as sftp user, which should own all the relevant files now
   sudo(sftp_user_uid,group_gid) do
-    dirs = cmd("find #{shellescape(path)} -type d ! -perm #{dir_permissions}")
-    files = cmd("find #{shellescape(path)} -type f ! -perm #{file_permissions}")
-    on_filelist(dirs,sftp_user_uid) do |path|
-      FileUtils.chmod(dir_permissions,path)
-    end
-    on_filelist(files,sftp_user_uid) do |path|
-      FileUtils.chmod(file_permissions,path)
-    end
+    cmd("chmod -R #{permissions} #{shellescape(path)} 2>&1")
   end
   log "Adjusted #{path} with #{file_permissions} and #{options['sftp_user']}:#{options['group']}"
 rescue => e
