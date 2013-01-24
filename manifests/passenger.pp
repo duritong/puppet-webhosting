@@ -132,6 +132,32 @@ define webhosting::passenger(
         passenger_ree => $passenger_ree,
         passenger_app => $passenger_app,
     }
+
+    if $ensure == 'present' {
+      if $passenger_app =~ /^rails/ {
+        $rails_options = "\nexport RAILS_ENV=production"
+      } else {
+        $rails_options = ''
+      }
+      if $passenger_ree {
+        $path_options = "\nexport PATH=/opt/ruby-enterprise/bin/:\$PATH"
+      } else {
+        $path_options = ''
+      }
+      file{
+        "/var/www/vhosts/${name}/.bashrc":
+          content => "export GEM_HOME=~/gems/${path_options}${rails_options}",
+          owner   => $real_uid_name,
+          group   => $real_gid_name,
+          mode    => '0750';
+        "/var/www/vhosts/${name}/.gemrc":
+          content => "gem: --no-ri --no-rdoc\n",
+          owner   => $real_uid_name,
+          group   => $real_gid_name,
+          mode    => '0750';
+      }
+    }
+
     case $run_mode {
         'fcgid','itk','proxy-itk','static-itk': {
             if ($run_uid_name == 'absent'){
