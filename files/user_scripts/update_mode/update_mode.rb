@@ -34,29 +34,29 @@ def run_script
   log "done."
 end
 
-# file name to store the old permissions
-@perm_file = "/tmp/#{(0...32).map{65.+(rand(26)).chr}.join}"
 def perm_file
-  @perm_file
+  @perm_file ||= "/tmp/#{Process.pid}_#{(0...32).map{65.+(rand(26)).chr}.join}"
 end
 
 ## script specific methods
 
 def update_mode
-  sudo(sftp_user_uid,group_gid) do
-    cmd("getfacl --absolute-names -R #{shellescape(options['webdir'])} > #{perm_file}")
-  end
+  cmd("getfacl --absolute-names -R #{shellescape(options['webdir'])} > #{perm_file}")
   FileUtils.chmod 0400, "#{perm_file}"
-
-  sudo(sftp_user_uid,group_gid) do
-    cmd("chmod -R 'g+rwX' #{shellescape(options['webdir'])} 2>&1")
-  end
+  
+  chown_R(sftp_user_uid,options['run_user'])
 end
 
 def reset_update_mode
-  sudo(sftp_user_uid,group_gid) do
-    cmd("setfacl --restore=#{perm_file}")
+  File.read(perm_file).each_line do |line|
+    if line.start_with?('# file:') && ! line.start_with?("# file: #{options['webdir']}")
+      chown_R(run_user_uid,options['sftp_user'])
+      security_fail "Cannot correctly restore permissions, since permissions file is corrupt"
+    end
   end
+
+  cmd("setfacl --restore=#{perm_file}")
+
   File.delete(perm_file)
 
   # set group write permissions to newly created files, if they are in a 
