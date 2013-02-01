@@ -28,8 +28,11 @@ define webhosting::watch_adjust_webfiles (
     ensure => $file_ensure,
   }
 
-  if $job_ensure == 'present' {
+  if $ensure != 'absent' {
     require webhosting::watch_adjust_webfiles::base
+  }
+
+  if $job_ensure == 'present' {
     dirwatcher::job {$name :
       watch_directory => $path,
       watch_events    => 'create,move_to',
