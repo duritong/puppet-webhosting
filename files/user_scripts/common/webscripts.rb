@@ -107,9 +107,12 @@ def group_gid
   @group_gid ||= Etc.getgrnam(options['group']).gid
 end
 
-def cmd(str)
+def cmd(str, abort_on_error = true)
   result = `#{str}`
-  raise "Error occured: #{result}" if $?.to_i > 0
+  if $?.to_i > 0
+    log msg = "Error occured: #{result}"
+    raise msg if abort_on_error
+  end
   result
 end
 

@@ -55,7 +55,7 @@ def reset_update_mode
     end
   end
 
-  cmd("setfacl --restore=#{perm_file}")
+  cmd("setfacl --restore=#{perm_file}", false)
 
   File.delete(perm_file)
 
