@@ -28,13 +28,9 @@ define webhosting::watch_adjust_webfiles (
     ensure => $file_ensure,
   }
 
-  dirwatcher::job {$name :
-    ensure => $job_ensure,
-  }
-
   if $job_ensure == 'present' {
     require webhosting::watch_adjust_webfiles::base
-    Dirwatcher::Job[$name]{
+    dirwatcher::job {$name :
       watch_directory => $path,
       watch_events    => 'create,move_to',
       watch_command   => "/usr/local/sbin/chown_webfiles.sh ${run_user} ${sftp_user} ${path} \$filename",
