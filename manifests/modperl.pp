@@ -36,7 +36,7 @@ define webhosting::modperl(
     $run_uid_name = 'absent',
     $run_gid = 'absent',
     $run_gid_name = 'absent',
-    $watch_adjust_webfiles = false,
+    $watch_adjust_webfiles = 'absent',
     $wwwmail = false,
     $allow_override = 'None',
     $do_includes = false,

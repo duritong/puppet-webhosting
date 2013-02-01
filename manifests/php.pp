@@ -49,7 +49,7 @@ define webhosting::php(
     $run_gid = 'absent',
     $run_gid_name = 'absent',
     $wwwmail = false,
-    $watch_adjust_webfiles = false,
+    $watch_adjust_webfiles = 'absent',
     $user_scripts = 'absent',
     $user_scripts_options = {},
     $allow_override = 'None',

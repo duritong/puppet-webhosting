@@ -38,7 +38,7 @@ define webhosting::php::wordpress(
     $run_uid_name = 'absent',
     $run_gid = 'absent',
     $run_gid_name = 'absent',
-    $watch_adjust_webfiles = false,
+    $watch_adjust_webfiles = 'absent',
     $user_scripts = 'absent',
     $user_scripts_options = {},
     $wwwmail = false,
