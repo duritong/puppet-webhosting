@@ -186,6 +186,6 @@ begin
   File.open(lockfile,'w'){|f| f << $$ }
   run_script
 ensure
-  File.delete(@run_file)
+  File.delete(@run_file) if File.exists?(@run_file)
   File.delete(lockfile)
 end
