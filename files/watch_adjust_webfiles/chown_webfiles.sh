@@ -9,7 +9,7 @@ file=$4
 
 # do not adjust permissions while a script is running on this vhost
 if [ -d $vhost/../scripts ]; then
-  if [ -n "`find $vhost/../scripts -name *.lock`" ]
+  if [ -n "`find $vhost/../scripts -name *.lock`" ]; then
     exit
   fi
 fi
