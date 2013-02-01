@@ -83,7 +83,7 @@ def adjust(path, permissions)
   sudo(sftp_user_uid,group_gid) do
     cmd("chmod -R #{permissions} #{shellescape(path)} 2>&1")
   end
-  log "Adjusted #{path} with #{file_permissions} and #{options['sftp_user']}:#{options['group']}"
+  log "Adjusted #{path} with #{permissions} and #{options['sftp_user']}:#{options['group']}"
 rescue => e
   log "Error while adjusting path #{path}: #{e.message}"
 end
