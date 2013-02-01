@@ -148,14 +148,14 @@ def on_filelist(list,owner)
   list.each_line do |path|
     path = File.expand_path(path.chomp)
     if path.start_with? "#{options['webdir']}" 
-      if File.exists?(path)
+      if (File.directory?(path)||File.file?(path))
         if File.stat(path).uid == owner
           yield path
         else
           log "#{path} does not belong to #{run_user_uid}"
         end
       else
-        log "#{path} does not exist"
+        log "#{path} does not exist or is not a directory nor a file"
       end
     else
       log "#{path} is not in the webdir"
