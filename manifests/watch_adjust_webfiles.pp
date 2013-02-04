@@ -42,7 +42,7 @@ define webhosting::watch_adjust_webfiles (
 
   if $file_ensure == 'present' {
     File["/etc/cron.daily/fix_webperms_${name}"]{
-      content => "#!/bin/env bash\nfind ${path} -user ${run_user} -exec /usr/local/sbin/chown_webfiles.sh ${run_user} ${sftp_user} '{}' \\;\n",
+      content => "#!/bin/env bash\nfind ${path} -user ${run_user} -exec /usr/local/sbin/chown_webfiles.sh ${run_user} ${sftp_user} ${path} '{}' \\;\n",
       owner   => root,
       group   => 0,
       mode    => 0700,
