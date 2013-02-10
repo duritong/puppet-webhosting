@@ -81,7 +81,7 @@ def adjust(path, permissions)
 
   # chmod runs as sftp user, which should own all the relevant files now
   sudo(sftp_user_uid,group_gid) do
-    cmd("chmod -R #{permissions} #{shellescape(path)} 2>&1")
+    cmd("chmod -R #{permissions} #{shellescape(path)}")
   end
   log "Adjusted #{path} with #{permissions} and #{options['sftp_user']}:#{options['group']}"
 rescue => e
