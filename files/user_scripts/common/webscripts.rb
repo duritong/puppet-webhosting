@@ -108,9 +108,11 @@ def group_gid
 end
 
 def cmd(str, abort_on_error = true)
-  result = `#{str}`
-  if $?.to_i > 0
-    log msg = "Error occured: #{result}"
+  result = `#{str} 2>&1`
+  exit_code = $?.to_i
+  if exit_code > 0
+    msg = "Error occured: Cmd: #{str} - Exitcode: #{exit_code} - #{result}"
+    log msg
     raise msg if abort_on_error
   end
   result

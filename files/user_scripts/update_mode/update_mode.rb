@@ -30,6 +30,7 @@ def run_script
     end
   end
   log "Update mode is over. Resetting permissions."
+  log "Errors might occur, as files got removed or renamed. You can ignore them in this step."
   reset_update_mode
   log "done."
 end
