@@ -25,8 +25,9 @@ class webhosting::user_scripts {
       source => 'puppet:///modules/webhosting/user_scripts/adjust_permissions/adjust_permissions.rb',
       owner => root, group => 0, mode => 0500;
   }
-  
+
   # update mode script
+  include acl::requirements
   file{
     "/opt/webhosting_user_scripts/update_mode":
       ensure => directory,
