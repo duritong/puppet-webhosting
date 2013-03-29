@@ -140,21 +140,29 @@ define webhosting::passenger(
         $rails_options = ''
       }
       if $passenger_ree {
-        $path_options = "\nexport PATH=/opt/ruby-enterprise/bin/:\$PATH"
+        $path_options = "\nexport PATH=~/gems/bin:/opt/ruby-enterprise/bin/:\$PATH"
       } else {
-        $path_options = ''
+        $path_options = "\nexport PATH=~/gems/bin:\$PATH"
       }
       file{
-        "/var/www/vhosts/${name}/.bashrc":
-          content => "export GEM_HOME=~/gems/${path_options}${rails_options}",
+        "/var/www/vhosts/${name}/.ccache":
+          ensure  => directory,
           owner   => $real_uid_name,
           group   => $real_gid_name,
           mode    => '0750';
+        "/var/www/vhosts/${name}/.bashrc":
+          content => "export GEM_HOME=~/gems/${path_options}${rails_options}\n",
+          owner   => $real_uid_name,
+          group   => $real_gid_name,
+          mode    => '0640';
+        "/var/www/vhosts/${name}/.profile":
+          ensure  => link,
+          target  => "/var/www/vhosts/${name}/.bashrc";
         "/var/www/vhosts/${name}/.gemrc":
           content => "gem: --no-ri --no-rdoc\n",
           owner   => $real_uid_name,
           group   => $real_gid_name,
-          mode    => '0750';
+          mode    => '0640';
       }
     }
 
