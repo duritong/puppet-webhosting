@@ -1,0 +1,81 @@
+# This is the configuration file to adjust permissions in your webdirectory.
+#
+# This file contains a few information about what you can do. For further
+# information please have a look at: <%= user_scripts_help %>
+#
+# A few things to note:
+#
+# 1. This config file allows two options:
+#   * only_webreadable - a list of relative paths that should only be readable by
+#                        the webserver 
+#   * web_writable     - a list of relative paths that should be writable by the
+#                        webserver
+#
+# 2. It must be a valid yaml file. See http://en.wikipedia.org/wiki/YAML for more
+#    information
+#
+# 3. It may contain comments, a you can see here.
+#
+# 4. The paths must be relative to your www/ directory. We will filter out all
+#    other directories and only
+#    adjust permissions for paths within the www directory.
+#
+# 5. We will first *recursively* chown the only_webreadable paths and remove any
+#    possibility to write to them via the webserver.
+#    Afterwards we will *recursively* chown the web_writable paths. So one path
+#    might overwrite a previous one.
+#
+# 4. To configure these permissions you will have to touch/create the adjust_permissions.run
+#    file in this directory Once created this will trigger a run of our adjustment
+#    script. Do only create the adjust_permissions.run file if you like to apply
+#    your changes.
+#    Usually a simple `touch scripts/adjust_permissions/adjust_permissions.run`
+#    is sufficient.
+#    We will remove the run file automatically if our job is done.
+#
+# 5. We write some logs to a logfile in the corresponding directory. It will start
+#    with a timestamp, followed by the PID of the process and the actual message.
+#    You might want to verify there whether your changes have been applied correctly.
+#
+# 6. The file *must* contain both options. If nothing should be writable by the
+#    webserver, you should set it like that:
+#    web_writable: []
+#
+# 7. If you want to manage the www/ directory itself (for example, make it writable
+#    by the webserver), you can do that by including a simple . as an entry.
+#    Note: the www/ directory is managed also by other scripts and as we think,
+#          that having www/ writable by the webserver is a bad idea, this will
+#          be reverted when these scripts run.
+#
+# 8. We do a lot to prevent that you can do anything nasty with that script. If
+#    you find something to trick us, please let us know immediately: <%= user_scripts_admin_address %>
+#
+# The following example will show you a configuration to do the following changes:
+#   * The folders cms, include and the file index.php will only be readable.
+#   * The folders cms/plugins, cache, tmp, upload and the file config.php (nasty!)
+#     will be writable by the webserver.
+#
+# --- start example ---
+# only_webreadable:
+#   - cms
+#   - include
+#   - index.php
+# web_writable:
+#   - cms/plugins
+#   - cache
+#   - tmp
+#   - upload
+#   - config.php
+# --- end example ---
+#
+# by default we do nothing
+<% ['only_webreadable','web_writable' ].each do |option|
+   if user_scripts_options['adjust_permissions'][option].to_a.empty? -%>
+<%= option %>: []
+<% else -%>
+<%= option %>:
+<%   user_scripts_options['adjust_permissions'][option].to_a.each do |path| -%>
+  - <%= path %>
+<%   end
+   end
+end -%>

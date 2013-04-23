@@ -16,11 +16,18 @@
 #   - absent: $name will be passed
 #   - any: any authenticated ldap user will work
 #   - everything else will be used as a required ldap username
+#
+# logmode:
+#   - default: Do normal logging to CustomLog and ErrorLog
+#   - nologs: Send every logging to /dev/null
+#   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
+#   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::passenger(
     $ensure = present,
     $uid = 'absent',
     $uid_name = 'absent',
     $gid = 'uid',
+    $gid_name = 'absent',
     $user_provider = 'local',
     $user_access = 'sftp',
     $webdav_domain = 'absent',
@@ -29,6 +36,7 @@ define webhosting::passenger(
     $password_crypted = true,
     $domainalias = 'www',
     $server_admin = 'absent',
+    $logmode = 'default',
     $owner = root,
     $group = 'absent',
     $run_mode = 'normal',
@@ -36,6 +44,7 @@ define webhosting::passenger(
     $run_uid_name = 'absent',
     $run_gid = 'absent',
     $run_gid_name = 'absent',
+    $wwwmail = false,
     $allow_override = 'None',
     $do_includes = false,
     $options = 'absent',
@@ -43,6 +52,7 @@ define webhosting::passenger(
     $default_charset = 'absent',
     $ssl_mode = false,
     $vhost_mode = 'template',
+    $template_partial = 'absent',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
     $htpasswd_file = 'absent',
@@ -50,8 +60,11 @@ define webhosting::passenger(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
+    $nagios_use = 'generic-service',
     $mod_security = true,
-    $ldap_user = 'absent'
+    $ldap_user = 'absent',
+    $passenger_ree = false,
+    $passenger_app = 'rails'
 ){
 
     if ($group == 'absent') and ($user_access == 'sftp') {
@@ -63,12 +76,22 @@ define webhosting::passenger(
             $real_group = $group
         }
     }
-
+    if ($uid_name == 'absent'){
+      $real_uid_name = $name
+    } else {
+      $real_uid_name = $uid_name
+    }
+    if ($gid_name == 'absent'){
+      $real_gid_name = $real_uid_name
+    } else {
+      $real_gid_name = $gid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
-        uid_name => $uid_name,
+        uid_name => $real_uid_name,
         gid => $gid,
+        gid_name => $real_gid_name,
         user_provider => $user_provider,
         user_access => $user_access,
         webdav_domain => $webdav_domain,
@@ -81,51 +104,86 @@ define webhosting::passenger(
         run_uid => $run_uid,
         run_uid_name => $run_uid_name,
         run_gid => $run_gid,
-        run_gid_name => $run_gid_name,
+        wwwmail => $wwwmail,
         nagios_check => $nagios_check,
         nagios_check_domain => $nagios_check_domain,
         nagios_check_url => $nagios_check_url,
         nagios_check_code => $nagios_check_code,
+        nagios_use => $nagios_use,
         ldap_user => $ldap_user,
     }
     apache::vhost::passenger{"${name}":
         ensure => $ensure,
         domainalias => $domainalias,
         server_admin => $server_admin,
+        logmode => $logmode,
         group => $real_group,
         allow_override => $allow_override,
         do_includes => $do_includes,
         options => $options,
         additional_options => $additional_options,
         default_charset => $default_charset,
-        run_mode => $run_mode,
         ssl_mode => $ssl_mode,
         vhost_mode => $vhost_mode,
         vhost_source => $vhost_source,
         vhost_destination => $vhost_destination,
         htpasswd_file => $htpasswd_file,
         mod_security => $mod_security,
+        passenger_ree => $passenger_ree,
+        passenger_app => $passenger_app,
     }
+
+    if $ensure == 'present' {
+      if $passenger_app =~ /^rails/ {
+        $rails_options = "\nexport RAILS_ENV=production"
+      } else {
+        $rails_options = ''
+      }
+      if $passenger_ree {
+        $path_options = "\nexport PATH=~/gems/bin:/opt/ruby-enterprise/bin/:\$PATH"
+      } else {
+        $path_options = "\nexport PATH=~/gems/bin:\$PATH"
+      }
+      file{
+        "/var/www/vhosts/${name}/.ccache":
+          ensure  => directory,
+          owner   => $real_uid_name,
+          group   => $real_gid_name,
+          mode    => '0750';
+        "/var/www/vhosts/${name}/.bashrc":
+          content => "export GEM_HOME=~/gems/${path_options}${rails_options}\n",
+          owner   => $real_uid_name,
+          group   => $real_gid_name,
+          mode    => '0640';
+        "/var/www/vhosts/${name}/.profile":
+          ensure  => link,
+          target  => "/var/www/vhosts/${name}/.bashrc";
+        "/var/www/vhosts/${name}/.gemrc":
+          content => "gem: --no-ri --no-rdoc\n",
+          owner   => $real_uid_name,
+          group   => $real_gid_name,
+          mode    => '0640';
+      }
+    }
+
     case $run_mode {
-        'itk': {
-            if ($uid_name == 'absent'){
-                $real_uid_name = $name
-            } else {
-                $real_uid_name = $uid_name
-            }
+        'fcgid','itk','proxy-itk','static-itk': {
             if ($run_uid_name == 'absent'){
                 $real_run_uid_name = "${name}_run"
             } else {
                 $real_run_uid_name = $run_uid_name
             }
             if ($run_gid_name == 'absent'){
-                $real_run_gid_name = $name
+              $real_run_gid_name = $gid_name ? {
+                'absent' => $name,
+                default => $gid_name
+              }
             } else {
                 $real_run_gid_name = $run_gid_name
             }
             Apache::Vhost::Passenger[$name]{
               documentroot_owner => $real_uid_name,
-              documentroot_group => $real_uid_name,
+              documentroot_group => $real_gid_name,
               documentroot_mode => 0750,
               run_uid => $real_run_uid_name,
               run_gid => $real_run_gid_name,
@@ -142,7 +200,29 @@ define webhosting::passenger(
                     require => User::Sftp_only["${real_uid_name}"],
                 }
             }
+            if ($run_uid_name == 'absent'){
+                $real_run_uid_name = 'apache'
+            } else {
+                $real_run_uid_name = $run_uid_name
+            }
+            if ($run_gid_name == 'absent'){
+              $real_run_gid_name = $gid_name ? {
+                'absent' => 'apache',
+                default => $gid_name
+              }
+            } else {
+                $real_run_gid_name = $run_gid_name
+            }            
+            Apache::Vhost::Passenger[$name]{
+              run_uid => $run_uid,
+              run_gid => $run_gid,
+            }
         }
+    }
+    if $template_partial != 'absent' {
+      Apache::Vhost::Passenger[$name]{
+        template_partial => $template_partial,
+      }
     }
 }
 

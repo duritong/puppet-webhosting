@@ -11,17 +11,25 @@
 #          and run_uid and run_gid are used as vhost users
 # run_uid: the uid the vhost should run as with the itk module
 # run_gid: the gid the vhost should run as with the itk module
+#
+# logmode:
+#   - default: Do normal logging to CustomLog and ErrorLog
+#   - nologs: Send every logging to /dev/null
+#   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
+#   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::modperl(
     $ensure = present,
     $uid = 'absent',
     $uid_name = 'absent',
     $gid = 'uid',
+    $gid_name = 'absent',
     $user_provider = 'local',
     $password = 'absent',
     $password_crypted = true,
     $domain = 'absent',
     $domainalias = 'www',
     $server_admin = 'absent',
+    $logmode = 'default',
     $owner = root,
     $group = 'sftponly',
     $run_mode = 'normal',
@@ -29,6 +37,8 @@ define webhosting::modperl(
     $run_uid_name = 'absent',
     $run_gid = 'absent',
     $run_gid_name = 'absent',
+    $watch_adjust_webfiles = 'absent',
+    $wwwmail = false,
     $allow_override = 'None',
     $do_includes = false,
     $options = 'absent',
@@ -36,6 +46,7 @@ define webhosting::modperl(
     $default_charset = 'absent',
     $ssl_mode = false,
     $vhost_mode = 'template',
+    $template_partial = 'absent',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
     $htpasswd_file = 'absent',
@@ -43,6 +54,7 @@ define webhosting::modperl(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
+    $nagios_use = 'generic-service',
     $mod_security = true
 ){
     if ($uid_name == 'absent'){
@@ -50,11 +62,17 @@ define webhosting::modperl(
     } else {
       $real_uid_name = $uid_name
     }
+    if ($gid_name == 'absent'){
+      $real_gid_name = $real_uid_name
+    } else {
+      $real_gid_name = $gid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
-        uid_name => $uid_name,
+        uid_name => $real_uid_name,
         gid => $gid,
+        gid_name => $real_gid_name,
         user_provider => $user_provider,
         password => $password,
         password_crypted => $password_crypted,
@@ -64,17 +82,20 @@ define webhosting::modperl(
         run_uid => $run_uid,
         run_uid_name => $run_uid_name,
         run_gid => $run_gid,
-        run_gid_name => $run_gid_name,
+        watch_adjust_webfiles => $watch_adjust_webfiles,
+        wwwmail => $wwwmail,
         nagios_check => $nagios_check,
         nagios_check_domain => $nagios_check_domain,
         nagios_check_url => $nagios_check_url,
         nagios_check_code => $nagios_check_code,
+        nagios_use => $nagios_use,
     }
     apache::vhost::modperl{"${name}":
         ensure => $ensure,
         domain => $domain,
         domainalias => $domainalias,
-        server_admin => 'absent',
+        server_admin => $server_admin,
+        logmode => $logmode,
         group => $group,
         allow_override => $allow_override,
         do_includes => $do_includes,
@@ -90,21 +111,24 @@ define webhosting::modperl(
         mod_security => $mod_security,
     }
     case $run_mode {
-        'itk': {
+        'fcgid','itk','proxy-itk','static-itk': {
           if ($run_uid_name == 'absent'){
             $real_run_uid_name = "${name}_run"
           } else {
             $real_run_uid_name = $run_uid_name
           }
           if ($run_gid_name == 'absent'){
-            $real_run_gid_name = $name
+              $real_run_gid_name = $gid_name ? {
+                'absent' => $name,
+                default => $gid_name
+              }
           } else {
             $real_run_gid_name = $run_gid_name
           }
 
           Apache::Vhost::Modperl[$name]{
             documentroot_owner => $real_uid_name,
-            documentroot_group => $real_uid_name,
+            documentroot_group => $real_gid_name,
             documentroot_mode => 0750,
             run_uid => $real_run_uid_name,
             run_gid => $real_run_gid_name,
@@ -122,5 +146,10 @@ define webhosting::modperl(
             }
           }
         }
+    }
+    if ($template_partial != 'absent') {
+      Apache::Vhost::Modperl[$name]{
+        template_partial => $template_partial,
+      }
     }
 }

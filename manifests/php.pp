@@ -20,17 +20,18 @@
 #   - absent: $name will be passed
 #   - any: any authenticated ldap user will work
 #   - everything else will be used as a required ldap username
-# php_safe_mode_exec_bins: An array of local binaries which should be linked in the
-#                          safe_mode_exec_bin for this hosting
-#                          *default*: None
-# php_default_charset: default charset header for php.
-#                      *default*: absent, which will set the same as default_charset
-#                                 of apache
+#
+# logmode:
+#   - default: Do normal logging to CustomLog and ErrorLog
+#   - nologs: Send every logging to /dev/null
+#   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
+#   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::php(
     $ensure = present,
     $uid = 'absent',
     $uid_name = 'absent',
     $gid = 'uid',
+    $gid_name = 'absent',
     $user_provider = 'local',
     $user_access = 'sftp',
     $webdav_domain = 'absent',
@@ -40,6 +41,7 @@ define webhosting::php(
     $domain = 'absent',
     $domainalias = 'www',
     $server_admin = 'absent',
+    $logmode = 'default',
     $owner = root,
     $group = 'absent',
     $run_mode = 'normal',
@@ -47,20 +49,20 @@ define webhosting::php(
     $run_uid_name = 'absent',
     $run_gid = 'absent',
     $run_gid_name = 'absent',
+    $wwwmail = false,
+    $watch_adjust_webfiles = 'absent',
+    $user_scripts = 'absent',
+    $user_scripts_options = {},
     $allow_override = 'None',
     $do_includes = false,
     $options = 'absent',
     $additional_options = 'absent',
     $default_charset = 'absent',
-    $php_use_smarty = false,
-    $php_use_pear = false,
-    $php_safe_mode = true,
-    $php_safe_mode_exec_bins = 'absent',
-    $php_default_charset = 'absent',
-    $php_additional_open_basedirs = 'absent',
-    $php_additional_options = 'absent',
+    $php_settings = {},
+    $php_options = {},
     $ssl_mode = false,
     $vhost_mode = 'template',
+    $template_partial = 'absent',
     $vhost_source = 'absent',
     $vhost_destination = 'absent',
     $htpasswd_file = 'absent',
@@ -68,6 +70,7 @@ define webhosting::php(
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
     $nagios_check_code = 'OK',
+    $nagios_use = 'generic-service',
     $mod_security = true,
     $ldap_user = 'absent'
 ){
@@ -86,12 +89,17 @@ define webhosting::php(
     } else {
       $real_uid_name = $uid_name
     }
-
+    if ($gid_name == 'absent'){
+      $real_gid_name = $real_uid_name
+    } else {
+      $real_gid_name = $gid_name
+    }
     webhosting::common{$name:
         ensure => $ensure,
         uid => $uid,
-        uid_name => $uid_name,
+        uid_name => $real_uid_name,
         gid => $gid,
+        gid_name => $real_gid_name,
         user_provider => $user_provider,
         user_access => $user_access,
         webdav_domain => $webdav_domain,
@@ -104,11 +112,15 @@ define webhosting::php(
         run_uid => $run_uid,
         run_uid_name => $run_uid_name,
         run_gid => $run_gid,
-        run_gid_name => $run_gid_name,
+        watch_adjust_webfiles => $watch_adjust_webfiles,
+        user_scripts => $user_scripts,
+        user_scripts_options => $user_scripts_options,
+        wwwmail => $wwwmail,
         nagios_check => $nagios_check,
         nagios_check_domain => $nagios_check_domain,
         nagios_check_url => $nagios_check_url,
         nagios_check_code => $nagios_check_code,
+        nagios_use => $nagios_use,
         ldap_user => $ldap_user,
     }
     apache::vhost::php::standard{"${name}":
@@ -116,19 +128,15 @@ define webhosting::php(
         domain => $domain,
         domainalias => $domainalias,
         server_admin => $server_admin,
+        logmode => $logmode,
         group => $real_group,
         allow_override => $allow_override,
         do_includes => $do_includes,
         options => $options,
         additional_options => $additional_options,
         default_charset => $default_charset,
-        php_use_smarty => $php_use_smarty,
-        php_use_pear => $php_use_pear,
-        php_safe_mode => $php_safe_mode,
-        php_safe_mode_exec_bins => $php_safe_mode_exec_bins,
-        php_default_charset => $php_default_charset,
-        php_additional_open_basedirs => $php_additional_open_basedirs,
-        php_additional_options => $php_additional_options,
+        php_settings => $php_settings,
+        php_options => $php_options,
         run_mode => $run_mode,
         ssl_mode => $ssl_mode,
         vhost_mode => $vhost_mode,
@@ -138,20 +146,20 @@ define webhosting::php(
         mod_security => $mod_security,
     }
     case $run_mode {
-        'itk': {
+        'fcgid','itk','proxy-itk','static-itk': {
             if ($run_uid_name == 'absent'){
                 $real_run_uid_name = "${name}_run"
             } else {
                 $real_run_uid_name = $run_uid_name
             }
             if ($run_gid_name == 'absent'){
-                $real_run_gid_name = $name
+              $real_run_gid_name = $real_gid_name
             } else {
                 $real_run_gid_name = $run_gid_name
             }
             Apache::Vhost::Php::Standard[$name]{
               documentroot_owner => $real_uid_name,
-              documentroot_group => $real_uid_name,
+              documentroot_group => $real_gid_name,
               documentroot_mode => 0750,
               run_uid => $real_run_uid_name,
               run_gid => $real_run_gid_name,
@@ -169,6 +177,11 @@ define webhosting::php(
                 }
             }
         }
+    }
+    if $template_partial != 'absent' {
+      Apache::Vhost::Php::Standard[$name]{
+        template_partial => $template_partial
+      }
     }
 }
 
