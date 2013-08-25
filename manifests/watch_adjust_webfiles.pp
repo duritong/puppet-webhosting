@@ -46,8 +46,8 @@ define webhosting::watch_adjust_webfiles (
 
   if $file_ensure == 'present' {
     $cron_cmd = "#!/bin/env bash
-find ${path} -ignore_readdir_race -user ${run_user} -exec ${chown_script}\\ 
-${run_user} ${sftp_user} ${path} '{}' \\;"
+find ${path} -ignore_readdir_race -user ${run_user} -exec ${chown_script} \\
+     ${run_user} ${sftp_user} ${path} '{}' \\;"
 
     File["/etc/cron.daily/fix_webperms_${name}"]{
       content => $cron_cmd,
