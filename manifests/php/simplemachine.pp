@@ -150,6 +150,9 @@ define webhosting::php::simplemachine(
       group         => $real_gid_name,
       mode          => 750,
     }
+
+    # include an update script if we deploy it the git way
+    include webhosting::php::simplemachine::base
   }
   case $run_mode {
     'fcgid','itk','proxy-itk','static-itk': {
