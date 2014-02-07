@@ -59,7 +59,7 @@ define webhosting::passenger(
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
-    $nagios_check_code = 'OK',
+    $nagios_check_code = '200',
     $nagios_use = 'generic-service',
     $mod_security = true,
     $ldap_user = 'absent',
@@ -212,7 +212,7 @@ define webhosting::passenger(
               }
             } else {
                 $real_run_gid_name = $run_gid_name
-            }            
+            }
             Apache::Vhost::Passenger[$name]{
               run_uid => $run_uid,
               run_gid => $run_gid,

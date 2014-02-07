@@ -69,7 +69,7 @@ define webhosting::php(
     $nagios_check = 'ensure',
     $nagios_check_domain = 'absent',
     $nagios_check_url = '/',
-    $nagios_check_code = 'OK',
+    $nagios_check_code = '200',
     $nagios_use = 'generic-service',
     $mod_security = true,
     $ldap_user = 'absent'
