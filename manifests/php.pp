@@ -66,6 +66,7 @@ define webhosting::php(
   $vhost_source           = 'absent',
   $vhost_destination      = 'absent',
   $htpasswd_file          = 'absent',
+  $htpasswd_path          = 'absent',
   $nagios_check           = 'ensure',
   $nagios_check_domain    = 'absent',
   $nagios_check_url       = '/',
@@ -143,6 +144,7 @@ define webhosting::php(
     vhost_source        => $vhost_source,
     vhost_destination   => $vhost_destination,
     htpasswd_file       => $htpasswd_file,
+    htpasswd_path       => $htpasswd_path,
     mod_security        => $mod_security,
   }
   case $run_mode {
