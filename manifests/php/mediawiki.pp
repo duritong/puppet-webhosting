@@ -106,11 +106,14 @@ define webhosting::php::mediawiki(
     nagios_use           => $nagios_use,
   }
 
-  $mediawiki_php_settings = {
-    open_basedir => "/var/www/mediawiki:/var/www/vhosts/${name}/www:/var/www/upload_tmp_dir/${name}:/var/www/session.save_path/${name}",
-  }
   if $wwwmail and ($contact != 'unmanaged'){
-    $mediawiki_php_settings['sendmail_path'] = "/usr/sbin/sendmail -t -f${contact} -i"
+    $sendmail_path = "/usr/sbin/sendmail -t -f${contact} -i"
+  } else {
+    $sendmail_path = undef
+  }
+  $mediawiki_php_settings = {
+    open_basedir  => "/var/www/mediawiki:/var/www/vhosts/${name}/www:/var/www/upload_tmp_dir/${name}:/var/www/session.save_path/${name}",
+    sendmail_path => $sendmail_path,
   }
   $real_php_settings = merge($mediawiki_php_settings,$php_settings)
 

@@ -1,7 +1,7 @@
 # This is the configuration file to adjust permissions in your webdirectory.
 #
 # This file contains a few information about what you can do. For further
-# information please have a look at: <%= user_scripts_help %>
+# information please have a look at: <%= @user_scripts_help %>
 #
 # A few things to note:
 #
@@ -48,7 +48,7 @@
 #          be reverted when these scripts run.
 #
 # 8. We do a lot to prevent that you can do anything nasty with that script. If
-#    you find something to trick us, please let us know immediately: <%= user_scripts_admin_address %>
+#    you find something to trick us, please let us know immediately: <%= @user_scripts_admin_address %>
 #
 # The following example will show you a configuration to do the following changes:
 #   * The folders cms, include and the file index.php will only be readable.
@@ -70,11 +70,11 @@
 #
 # by default we do nothing
 <% ['only_webreadable','web_writable' ].each do |option|
-   if user_scripts_options['adjust_permissions'][option].to_a.empty? -%>
+   if Array(@user_scripts_options['adjust_permissions'][option]).empty? -%>
 <%= option %>: []
 <% else -%>
 <%= option %>:
-<%   user_scripts_options['adjust_permissions'][option].to_a.each do |path| -%>
+<%   Array(@user_scripts_options['adjust_permissions'][option]).each do |path| -%>
   - <%= path %>
 <%   end
    end
