@@ -139,7 +139,7 @@ define webhosting::php::joomla(
       projectroot     => $documentroot,
       cloneddir_user  => $real_uid_name,
       cloneddir_group => $real_gid_name,
-      before          =>  Apache::Vhost::Php::Joomla[$name],
+      before          => File[$documentroot],
     }
     apache::vhost::file::documentrootdir{"joomlagitdir_${name}":
       ensure        => $ensure,

@@ -139,7 +139,7 @@ define webhosting::php::gallery2(
       projectroot     => $documentroot,
       cloneddir_user  => $real_uid_name,
       cloneddir_group => $real_gid_name,
-      before          =>  Apache::Vhost::Php::Gallery2[$name],
+      before          => File[$documentroot],
     }
     apache::vhost::file::documentrootdir{"gallery2gitdir_${name}":
       ensure        => $ensure,

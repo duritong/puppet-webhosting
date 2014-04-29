@@ -141,7 +141,7 @@ define webhosting::php::drupal(
       projectroot     => $documentroot,
       cloneddir_user  => $real_uid_name,
       cloneddir_group => $real_gid_name,
-      before          =>  Apache::Vhost::Php::Drupal[$name],
+      before          => File[$documentroot],
     }
     apache::vhost::file::documentrootdir{"drupalgitdir_${name}":
       ensure          => $ensure,

@@ -139,7 +139,7 @@ define webhosting::php::simplemachine(
       projectroot     => $documentroot,
       cloneddir_user  => $real_uid_name,
       cloneddir_group => $real_gid_name,
-      before          => Apache::Vhost::Php::Simplemachine[$name],
+      before          => File[$documentroot],
     }
     apache::vhost::file::documentrootdir{"simplemachinesgitdir_${name}":
       ensure        => $ensure,

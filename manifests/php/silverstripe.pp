@@ -139,7 +139,7 @@ define webhosting::php::silverstripe(
       projectroot     => $documentroot,
       cloneddir_user  => $real_uid_name,
       cloneddir_group => $real_gid_name,
-      before          =>  Apache::Vhost::Php::Silverstripe[$name],
+      before          => File[$documentroot],
     }
     apache::vhost::file::documentrootdir{"silverstripegitdir_${name}":
       ensure        => $ensure,
