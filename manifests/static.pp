@@ -13,6 +13,7 @@
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::static(
     $ensure               = present,
+    $configuration        = {},
     $uid                  = 'absent',
     $uid_name             = 'absent',
     $gid                  = 'uid',
@@ -56,6 +57,7 @@ define webhosting::static(
     }
     webhosting::common{$name:
         ensure              => $ensure,
+        configuration       => $configuration,
         uid                 => $uid,
         uid_name            => $real_uid_name,
         gid                 => $gid,
@@ -74,6 +76,7 @@ define webhosting::static(
     }
     apache::vhost::static{$name:
         ensure              => $ensure,
+        configuration       => $configuration,
         domain              => $domain,
         domainalias         => $domainalias,
         server_admin        => $server_admin,

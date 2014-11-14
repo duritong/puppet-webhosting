@@ -19,6 +19,7 @@
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::php::drupal(
   $ensure                 = present,
+  $configuration          = {},
   $uid                    = 'absent',
   $uid_name               = 'absent',
   $gid                    = 'uid',
@@ -77,6 +78,7 @@ define webhosting::php::drupal(
   }
   webhosting::common{$name:
     ensure                => $ensure,
+    configuration         => $configuration,
     uid                   => $uid,
     uid_name              => $real_uid_name,
     gid                   => $gid,
@@ -109,6 +111,7 @@ define webhosting::php::drupal(
 
   apache::vhost::php::drupal{$name:
     ensure              => $ensure,
+    configuration       => $configuration,
     domainalias         => $domainalias,
     server_admin        => $server_admin,
     logmode             => $logmode,

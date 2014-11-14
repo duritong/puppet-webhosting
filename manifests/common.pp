@@ -17,6 +17,7 @@
 #   - everything else will be used as a required ldap username
 define webhosting::common(
   $ensure                 = present,
+  $configuration          = {},
   $uid                    = 'absent',
   $uid_name               = 'absent',
   $gid                    = 'uid',
@@ -187,6 +188,7 @@ define webhosting::common(
   if ($user_access == 'webdav'){
     apache::vhost::webdav{"webdav.${name}":
       domain          => $webdav_domain,
+      configuration   => $configuration,
       manage_webdir   => false,
       path            => $vhost_path,
       path_is_webdir  => true,

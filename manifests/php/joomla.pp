@@ -19,6 +19,7 @@
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::php::joomla(
   $ensure                 = present,
+  $configuration          = {},
   $uid                    = 'absent',
   $uid_name               = 'absent',
   $gid                    = 'uid',
@@ -76,6 +77,7 @@ define webhosting::php::joomla(
   }
   webhosting::common{$name:
     ensure                => $ensure,
+    configuration         => $configuration,
     uid                   => $uid,
     uid_name              => $real_uid_name,
     gid                   => $gid,
@@ -108,6 +110,7 @@ define webhosting::php::joomla(
 
   apache::vhost::php::joomla{$name:
     ensure              => $ensure,
+    configuration       => $configuration,
     domainalias         => $domainalias,
     server_admin        => $server_admin,
     logmode             => $logmode,

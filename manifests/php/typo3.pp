@@ -19,6 +19,7 @@
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::php::typo3(
   $ensure                   = present,
+  $configuration            = {},
   $uid                      = 'absent',
   $uid_name                 = 'absent',
   $gid                      = 'uid',
@@ -76,6 +77,7 @@ define webhosting::php::typo3(
   }
   webhosting::common{$name:
     ensure                => $ensure,
+    configuration         => $configuration,
     uid                   => $uid,
     uid_name              => $real_uid_name,
     gid                   => $gid,
@@ -108,6 +110,7 @@ define webhosting::php::typo3(
 
   apache::vhost::php::typo3{$name:
     ensure              => $ensure,
+    configuration       => $configuration,
     domainalias         => $domainalias,
     server_admin        => $server_admin,
     logmode             => $logmode,
