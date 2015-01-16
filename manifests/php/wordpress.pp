@@ -107,44 +107,44 @@ define webhosting::php::wordpress(
   }
 
   $path = $::operatingsystem ? {
-    openbsd => "/var/www/htdocs/${name}",
-    default => "/var/www/vhosts/${name}"
+    'openbsd' => "/var/www/htdocs/${name}",
+    default   => "/var/www/vhosts/${name}"
   }
   $documentroot = "${path}/www"
 
   apache::vhost::php::wordpress{$name:
-    ensure                => $ensure,
-    configuration         => $configuration,
-    domainalias           => $domainalias,
-    server_admin          => $server_admin,
-    logmode               => $logmode,
-    group                 => $group,
-    allow_override        => $allow_override,
-    do_includes           => $do_includes,
-    options               => $options,
-    additional_options    => $additional_options,
-    default_charset       => $default_charset,
-    run_mode              => $run_mode,
-    ssl_mode              => $ssl_mode,
-    php_settings          => $php_settings,
-    php_options           => $php_options,
-    vhost_mode            => $vhost_mode,
-    vhost_source          => $vhost_source,
-    vhost_destination     => $vhost_destination,
-    htpasswd_file         => $htpasswd_file,
-    mod_security          => $mod_security,
-    manage_config         => $manage_config,
-    config_webwriteable   => $config_webwriteable,
-    manage_directories    => $manage_directories,
+    ensure              => $ensure,
+    configuration       => $configuration,
+    domainalias         => $domainalias,
+    server_admin        => $server_admin,
+    logmode             => $logmode,
+    group               => $group,
+    allow_override      => $allow_override,
+    do_includes         => $do_includes,
+    options             => $options,
+    additional_options  => $additional_options,
+    default_charset     => $default_charset,
+    run_mode            => $run_mode,
+    ssl_mode            => $ssl_mode,
+    php_settings        => $php_settings,
+    php_options         => $php_options,
+    vhost_mode          => $vhost_mode,
+    vhost_source        => $vhost_source,
+    vhost_destination   => $vhost_destination,
+    htpasswd_file       => $htpasswd_file,
+    mod_security        => $mod_security,
+    manage_config       => $manage_config,
+    config_webwriteable => $config_webwriteable,
+    manage_directories  => $manage_directories,
   }
   if ($git_repo != 'absent') and ($ensure != 'absent') {
     wordpress::instance{$name:
-      git_repo      => $git_repo,
-      path          => $documentroot,
-      autoinstall   => $autoinstall,
-      blog_options  => $blog_options,
-      uid_name      => $real_uid_name,
-      gid_name      => $real_gid_name,
+      git_repo     => $git_repo,
+      path         => $documentroot,
+      autoinstall  => $autoinstall,
+      blog_options => $blog_options,
+      uid_name     => $real_uid_name,
+      gid_name     => $real_gid_name,
     }
   }
   case $run_mode {
