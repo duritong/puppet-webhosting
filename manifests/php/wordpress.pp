@@ -43,7 +43,7 @@ define webhosting::php::wordpress(
   $user_scripts           = 'absent',
   $user_scripts_options   = {},
   $wwwmail                = false,
-  $allow_override         = 'FileInfo',
+  $allow_override         = 'FileInfo Indexes',
   $do_includes            = false,
   $options                = 'absent',
   $additional_options     = 'absent',
