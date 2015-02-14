@@ -49,6 +49,7 @@ define webhosting::php::joomla(
   $ssl_mode               = false,
   $php_settings           = {},
   $php_options            = {},
+  $php_installation       = 'system',
   $vhost_mode             = 'template',
   $vhost_source           = 'absent',
   $vhost_destination      = 'absent',
@@ -103,7 +104,7 @@ define webhosting::php::joomla(
   }
 
   $path = $::operatingsystem ? {
-    openbsd => "/var/www/htdocs/${name}",
+    'openbsd' => "/var/www/htdocs/${name}",
     default => "/var/www/vhosts/${name}"
   }
   $documentroot = "${path}/www"
@@ -124,6 +125,7 @@ define webhosting::php::joomla(
     ssl_mode            => $ssl_mode,
     php_settings        => $php_settings,
     php_options         => $php_options,
+    php_installation    => $php_installation,
     vhost_mode          => $vhost_mode,
     vhost_source        => $vhost_source,
     vhost_destination   => $vhost_destination,
@@ -145,13 +147,13 @@ define webhosting::php::joomla(
       before          => File[$documentroot],
     }
     apache::vhost::file::documentrootdir{"joomlagitdir_${name}":
-      ensure        => $ensure,
-      documentroot  => $documentroot,
-      filename      => '.git',
-      thedomain     => $name,
-      owner         => $real_uid_name,
-      group         => $real_gid_name,
-      mode          => '0750',
+      ensure       => $ensure,
+      documentroot => $documentroot,
+      filename     => '.git',
+      thedomain    => $name,
+      owner        => $real_uid_name,
+      group        => $real_gid_name,
+      mode         => '0750',
     }
   }
   case $run_mode {
