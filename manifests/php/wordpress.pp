@@ -139,42 +139,42 @@ define webhosting::php::wordpress(
   }
   if ($git_repo != 'absent') and ($ensure != 'absent') {
     wordpress::instance{$name:
-      path            => $documentroot,
-      autoinstall     => $autoinstall,
-      blog_options    => $blog_options,
-      uid_name        => $real_uid_name,
-      gid_name        => $real_gid_name,
+      path         => $documentroot,
+      autoinstall  => $autoinstall,
+      blog_options => $blog_options,
+      uid_name     => $real_uid_name,
+      gid_name     => $real_gid_name,
     }
   }
   case $run_mode {
     'fcgid','itk','proxy-itk','static-itk': {
-        if ($run_uid_name == 'absent'){
-          $real_run_uid_name = "${name}_run"
-        } else {
-          $real_run_uid_name = $run_uid_name
+      if ($run_uid_name == 'absent'){
+        $real_run_uid_name = "${name}_run"
+      } else {
+        $real_run_uid_name = $run_uid_name
+      }
+      if ($run_gid_name == 'absent'){
+        $real_run_gid_name = $gid_name ? {
+          'absent'  => $name,
+          default   => $gid_name
         }
-        if ($run_gid_name == 'absent'){
-          $real_run_gid_name = $gid_name ? {
-            'absent'  => $name,
-            default   => $gid_name
-          }
-        } else {
-          $real_run_gid_name = $run_gid_name
+      } else {
+        $real_run_gid_name = $run_gid_name
+      }
+      Apache::Vhost::Php::Wordpress[$name]{
+        documentroot_owner => $real_uid_name,
+        documentroot_group => $real_gid_name,
+        run_uid            => $real_run_uid_name,
+        run_gid            => $real_run_gid_name,
+        require            => [ User::Sftp_only[$name],
+                                User::Managed[$real_run_uid_name] ],
+      }
+      if ($git_repo != 'absent') and ($ensure != 'absent') {
+        Wordpress::Instance[$name]{
+          require => [User::Sftp_only[$real_uid_name],
+                      User::Managed[$real_run_uid_name] ],
         }
-        Apache::Vhost::Php::Wordpress[$name]{
-          documentroot_owner  => $real_uid_name,
-          documentroot_group  => $real_gid_name,
-          run_uid             => $real_run_uid_name,
-          run_gid             => $real_run_gid_name,
-          require             => [User::Sftp_only[$name],
-                                  User::Managed[$real_run_uid_name] ],
-        }
-        if ($git_repo != 'absent') and ($ensure != 'absent') {
-          Wordpress::Instance[$name]{
-            require => [User::Sftp_only[$real_uid_name],
-                        User::Managed[$real_run_uid_name] ],
-          }
-        }
+      }
     }
     default: {
       Apache::Vhost::Php::Wordpress[$name]{
