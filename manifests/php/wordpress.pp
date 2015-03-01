@@ -64,8 +64,6 @@ define webhosting::php::wordpress(
   $git_repo               = 'absent',
   $autoinstall            = true,
   $blog_options           = {},
-  $default_plugins        = ['si-captcha-for-wordpress',
-    'wp-super-cache', 'backupwordpress' ],
   $mod_security           = true,
   $manage_config          = true,
   $config_webwriteable    = false,
@@ -146,7 +144,6 @@ define webhosting::php::wordpress(
       blog_options    => $blog_options,
       uid_name        => $real_uid_name,
       gid_name        => $real_gid_name,
-      default_plugins => $default_plugins,
     }
   }
   case $run_mode {
