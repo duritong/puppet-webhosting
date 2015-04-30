@@ -168,26 +168,27 @@ def on_filelist(list,owner)
   end
 end
 
-@run_file = ARGV.shift
-usage if @run_file.nil? || !File.exists?(@run_file = File.expand_path(@run_file))
-
-@base_dir = File.dirname(@run_file)
-
-# Verify various security related things
-security_fail("The run file is not owned by the sftp user. This is a security violation! Exiting...") unless File.stat(@run_file).uid == sftp_user_uid
-
-# test script specific security things
-script_security
-
-if File.exists?(lockfile)
-  pid = File.read(lockfile).chomp
-  if File.directory?("/proc/#{pid}")
-    security_fail "Lockfile #{lockfile} exists with pid #{pid} and this process still seems to be running. Exiting..."
-  else
-    log "Overwrite staled lockfile #{lockfile}. Old pid was #{pid}, but this process seems not to be running anymore."
-  end
-end
 begin
+  @run_file = ARGV.shift
+  usage if @run_file.nil? || !File.exists?(@run_file = File.expand_path(@run_file))
+
+  @base_dir = File.dirname(@run_file)
+
+  # Verify various security related things
+  security_fail("The run file is not owned by the sftp user. This is a security violation! Exiting...") unless File.stat(@run_file).uid == sftp_user_uid
+
+  # test script specific security things
+  script_security
+
+  if File.exists?(lockfile)
+    pid = File.read(lockfile).chomp
+    if File.directory?("/proc/#{pid}")
+      security_fail "Lockfile #{lockfile} exists with pid #{pid} and this process still seems to be running. Exiting..."
+    else
+      log "Overwrite staled lockfile #{lockfile}. Old pid was #{pid}, but this process seems not to be running anymore."
+    end
+  end
+
   File.open(lockfile,'w'){|f| f << $$ }
   run_script
 ensure
