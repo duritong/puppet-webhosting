@@ -85,27 +85,27 @@ define webhosting::php::mediawiki(
     $real_gid_name = $gid_name
   }
   webhosting::common{$name:
-    ensure               => $ensure,
-    configuration        => $configuration,
-    uid                  => $uid,
-    uid_name             => $real_uid_name,
-    gid                  => $gid,
-    gid_name             => $real_gid_name,
-    user_provider        => $user_provider,
-    password             => $password,
-    password_crypted     => $password_crypted,
-    htpasswd_file        => $htpasswd_file,
-    ssl_mode             => $ssl_mode,
-    run_mode             => $run_mode,
-    run_uid              => $run_uid,
-    run_uid_name         => $run_uid_name,
-    run_gid              => $run_gid,
-    wwwmail              => $wwwmail,
-    nagios_check         => $nagios_check,
-    nagios_check_domain  => $nagios_check_domain,
-    nagios_check_url     => $nagios_check_url,
-    nagios_check_code    => $nagios_check_code,
-    nagios_use           => $nagios_use,
+    ensure              => $ensure,
+    configuration       => $configuration,
+    uid                 => $uid,
+    uid_name            => $real_uid_name,
+    gid                 => $gid,
+    gid_name            => $real_gid_name,
+    user_provider       => $user_provider,
+    password            => $password,
+    password_crypted    => $password_crypted,
+    htpasswd_file       => $htpasswd_file,
+    ssl_mode            => $ssl_mode,
+    run_mode            => $run_mode,
+    run_uid             => $run_uid,
+    run_uid_name        => $run_uid_name,
+    run_gid             => $run_gid,
+    wwwmail             => $wwwmail,
+    nagios_check        => $nagios_check,
+    nagios_check_domain => $nagios_check_domain,
+    nagios_check_url    => $nagios_check_url,
+    nagios_check_code   => $nagios_check_code,
+    nagios_use          => $nagios_use,
   }
 
   if $wwwmail and ($contact != 'unmanaged'){
@@ -161,7 +161,7 @@ define webhosting::php::mediawiki(
     squid_servers           => $squid_servers,
     language                => $language,
     hashed_upload_dir       => $hashed_upload_dir,
-    documentroot_write_mode => 0660,
+    documentroot_write_mode => '0660',
   }
 
   case $run_mode {
@@ -190,7 +190,7 @@ define webhosting::php::mediawiki(
       Mediawiki::Instance[$name]{
         documentroot_owner => $real_uid_name,
         documentroot_group => $real_gid_name,
-        documentroot_mode  => 0640,
+        documentroot_mode  => '0640',
         require            => [ User::Sftp_only[$real_uid_name],
                                 User::Managed[$real_run_uid_name] ],
       }
