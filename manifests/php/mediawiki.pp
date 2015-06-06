@@ -38,7 +38,7 @@ define webhosting::php::mediawiki(
   $run_gid              = 'absent',
   $run_gid_name         = 'absent',
   $wwwmail              = false,
-  $allow_override       = 'FileInfo Limit',
+  $allow_override       = 'FileInfo Limit Options=FollowSymLinks',
   $options              = 'absent',
   $additional_options   = 'absent',
   $default_charset      = 'absent',
