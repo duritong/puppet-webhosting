@@ -10,7 +10,7 @@ end
 
 # maps filenames to validated paths
 def settings_files
-  @settings_files or settings_files_map_and_check!
+  @settings_files || settings_files_map_and_check!
 end
 
 def settings_files_map_and_check!
@@ -60,6 +60,9 @@ def stringify(object)
   end
 end
 
+# gives you the parsed content of
+# a file, but only if all required keys
+# are in.
 def load_file(file, required_keys)
   file_path = settings_files[file]
   res = YAML.load_file(file_path) || {}

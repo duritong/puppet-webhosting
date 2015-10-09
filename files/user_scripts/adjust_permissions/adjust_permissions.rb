@@ -62,9 +62,8 @@ def load_directories
 end
 
 # file name to pass the list of files to chown from the unprivileged find process to the mother process
-@file_list = "/tmp/#{(0...32).map{65.+(rand(26)).chr}.join}"
 def file_list
-  @file_list
+  @file_list ||= "/tmp/#{Process.pid}_#{(0...32).map{65.+(rand(26)).chr}.join('')}"
 end
 
 def adjust(path, permissions)
@@ -74,8 +73,8 @@ def adjust(path, permissions)
     cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > #{file_list}")
     cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> #{file_list}")
   end
-  on_filelist(File.read(file_list),run_user_uid) do |path|
-    FileUtils.chown( options['sftp_user'], options['group'], path )
+  on_filelist(File.read(file_list),run_user_uid) do |p|
+    FileUtils.chown( options['sftp_user'], options['group'], p)
   end
   File.delete(file_list)
 

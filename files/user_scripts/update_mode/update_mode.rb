@@ -36,7 +36,7 @@ def run_script
 end
 
 def perm_file
-  @perm_file ||= "/tmp/#{Process.pid}_#{(0...32).map{65.+(rand(26)).chr}.join}"
+  @perm_file ||= "/tmp/#{Process.pid}_#{(0...32).map{65.+(rand(26)).chr}.join('')}"
 end
 
 ## script specific methods
@@ -70,11 +70,11 @@ def reset_update_mode
     # them writeable by the group
     dirs = cmd("find #{shellescape(path)} -user #{options['run_user']} -type d")
     files = cmd("find #{shellescape(path)} -user #{options['run_user']} -type f")
-    on_filelist(dirs,run_user_uid) do |path|
-      FileUtils.chmod(0770,path)
+    on_filelist(dirs,run_user_uid) do |p|
+      FileUtils.chmod(0770,p)
     end
-    on_filelist(files,run_user_uid) do |path|
-      FileUtils.chmod(0660,path)
+    on_filelist(files,run_user_uid) do |p|
+      FileUtils.chmod(0660,p)
     end
   end
 
