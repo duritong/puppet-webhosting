@@ -86,7 +86,6 @@ define webhosting::user_scripts::manage(
       }
     }
     if ('update_wordpress' in $scripts) or ($scripts == 'ALL') {
-      require wordpress::base
       file{
         "${scripts_path}/update_wordpress":
           ensure => directory,
