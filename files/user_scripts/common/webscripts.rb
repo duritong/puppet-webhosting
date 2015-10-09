@@ -24,7 +24,7 @@ def _settings_files_map_and_check(files)
   files.each do |file, options|
     file_path = File.expand_path(File.join(@base_dir,file))
     stat = File.stat(file_path)
-    security_fail("#{file} does not exist.") unless File.exists?(file_path) 
+    security_fail("#{file} does not exist.") unless File.exists?(file_path)
     security_fail("#{file} has insecure permissions. Expected uid to be #{options[:uid]}") unless options[:uid].nil? || stat.uid == options[:uid]
     security_fail("#{file} has insecure permissions. Expected gid to be #{options[:gid]}") unless options[:gid].nil? || stat.gid == options[:gid]
     security_fail("#{file} has insecure permissions. Mode should not apply to mask #{options[:reject_mmask]}") unless options[:reject_mmask].nil? || (stat.mode & options[:reject_mmask] == 0)
@@ -35,8 +35,8 @@ end
 
 def settings_files_def
   {
-    options_filename => { 
-      :uid => 0, 
+    options_filename => {
+      :uid => 0,
       :reject_mmask => 0027 }
   }
 end
@@ -99,8 +99,8 @@ def sftp_user_uid
   @stp_user_uid ||= Etc.getpwnam(options['sftp_user']).uid
 end
 
-def run_user_uid                                                               
-  @run_user_uid ||= Etc.getpwnam(options['run_user']).uid                     
+def run_user_uid
+  @run_user_uid ||= Etc.getpwnam(options['run_user']).uid
 end
 
 def group_gid
@@ -152,7 +152,7 @@ end
 def on_filelist(list,owner)
   list.each_line do |path|
     path = File.expand_path(path.chomp)
-    if path.start_with? "#{options['webdir']}" 
+    if path.start_with? "#{options['webdir']}"
       if (File.directory?(path)||File.file?(path))
         if File.stat(path).uid == owner
           yield path

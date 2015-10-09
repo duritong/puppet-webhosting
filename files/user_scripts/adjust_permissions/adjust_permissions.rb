@@ -11,13 +11,13 @@ def script_option_keys
 end
 
 # further settings files used by this script
-def script_settings_files_def 
-  {                                                                             
-    'adjust_permissions.dirs' => { 
-      :uid => sftp_user_uid, 
-      :gid => group_gid, 
+def script_settings_files_def
+  {
+    'adjust_permissions.dirs' => {
+      :uid => sftp_user_uid,
+      :gid => group_gid,
       :reject_mmask => 0007 }
-  }                                                                             
+  }
 end
 
 # verify security related things to that script

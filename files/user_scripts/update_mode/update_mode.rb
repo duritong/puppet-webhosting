@@ -9,7 +9,7 @@ def script_option_keys
 end
 
 # further settings files used by this script
-def script_settings_files_def                                                             
+def script_settings_files_def
 end
 
 # verify security related things to that script
@@ -44,7 +44,7 @@ end
 def update_mode
   cmd("getfacl --absolute-names -R #{shellescape(options['webdir'])} > #{perm_file}")
   FileUtils.chmod 0400, "#{perm_file}"
-  
+
   chown_R(sftp_user_uid,options['run_user'])
 end
 
@@ -60,13 +60,13 @@ def reset_update_mode
 
   File.delete(perm_file)
 
-  # set group write permissions to newly created files, if they are in a 
+  # set group write permissions to newly created files, if they are in a
   # preexisting folder, which has group write permissions:
   # --
   # First collect preexisting directories with group write access
   dirs = cmd("find #{shellescape(options['webdir'])} -user #{options['sftp_user']} -type d -perm /g+w")
   on_filelist(dirs,sftp_user_uid) do |path|
-    # collect any newly created file or folder within and make 
+    # collect any newly created file or folder within and make
     # them writeable by the group
     dirs = cmd("find #{shellescape(path)} -user #{options['run_user']} -type d")
     files = cmd("find #{shellescape(path)} -user #{options['run_user']} -type f")
