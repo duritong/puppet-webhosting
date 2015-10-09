@@ -33,6 +33,8 @@ define webhosting::user_scripts::manage(
       path    => "/etc/incron.d/${name}_adjust_permissions";
     "incron_update_mode_${name}":
       path    => "/etc/incron.d/${name}_update_mode";
+    "incron_update_wordpress_${name}":
+      path    => "/etc/incron.d/${name}_update_wordpress";
   }
 
   if ($ensure == 'absent') {
