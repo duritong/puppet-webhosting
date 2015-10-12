@@ -52,17 +52,19 @@ class webhosting::user_scripts {
       mode   => '0500';
   }
 
-  require ::wordpress::base
-  file{
-    '/opt/webhosting_user_scripts/update_wordpress':
-      ensure => directory,
-      owner  => root,
-      group  => 0,
-      mode   => '0400';
-    '/opt/webhosting_user_scripts/update_wordpress/update_wordpress.rb':
-      source => 'puppet:///modules/webhosting/user_scripts/update_wordpress/update_wordpress.rb',
-      owner  => root,
-      group  => 0,
-      mode   => '0500';
+  if versioncmp($::operatingsystemmajrelease,'5') > 0 {
+    require ::wordpress::base
+    file{
+      '/opt/webhosting_user_scripts/update_wordpress':
+        ensure => directory,
+        owner  => root,
+        group  => 0,
+        mode   => '0400';
+      '/opt/webhosting_user_scripts/update_wordpress/update_wordpress.rb':
+        source => 'puppet:///modules/webhosting/user_scripts/update_wordpress/update_wordpress.rb',
+        owner  => root,
+        group  => 0,
+        mode   => '0500';
+    }
   }
 }
