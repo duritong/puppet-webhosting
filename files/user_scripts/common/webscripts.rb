@@ -194,6 +194,8 @@ begin
 
   File.open(lockfile,'w'){|f| f << $$ }
   run_script
+rescue => e
+  log "Error while running script: #{e.message}"
 ensure
   File.delete(@run_file) if File.exists?(@run_file)
   File.delete(lockfile)
