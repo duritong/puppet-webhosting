@@ -2,6 +2,7 @@
 
 require 'fileutils'
 require 'yaml'
+require 'tempfile'
 
 def usage
   puts "USAGE: #{File.basename(__FILE__)} /path/to/file.run"
@@ -169,6 +170,14 @@ def on_filelist(list,owner)
       log "#{path} is not in the webdir"
     end
   end
+end
+
+def with_tempfile(&blk)
+  tf = Tempfile.new("#{Process.pid}_")
+  tf.close
+  yield tf.path
+ensure
+  tf.unlink
 end
 
 begin

@@ -62,22 +62,18 @@ def load_directories
 end
 
 # file name to pass the list of files to chown from the unprivileged find process to the mother process
-def file_list
-  @file_list ||= "/tmp/#{Process.pid}_#{(0...32).map{65.+(rand(26)).chr}.join('')}"
-end
-
 def adjust(path, permissions)
 
   # chowns all run user files to the sftp user
-  sudo(run_user_uid,group_gid) do
-    cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > #{file_list}")
-    cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> #{file_list}")
+  with_tempfile do |tf|
+    sudo(run_user_uid,group_gid) do
+      cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > #{tf}")
+      cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> #{tf}")
+    end
+    on_filelist(File.read(tf),run_user_uid) do |p|
+      FileUtils.chown( options['sftp_user'], options['group'], p)
+    end
   end
-  on_filelist(File.read(file_list),run_user_uid) do |p|
-    FileUtils.chown( options['sftp_user'], options['group'], p)
-  end
-  File.delete(file_list)
-
   # chmod runs as sftp user, which should own all the relevant files now
   sudo(sftp_user_uid,group_gid) do
     cmd("chmod -R #{permissions} #{shellescape(path)}")

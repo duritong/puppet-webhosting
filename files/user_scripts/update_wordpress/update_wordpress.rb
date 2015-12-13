@@ -37,11 +37,6 @@ def wp_directories
   @wp_directories ||= load_directories
 end
 
-def file_list
-  @file_list ||= "/tmp/#{Process.pid}_#{(0...32).map{65.+(rand(26)).chr}.join('')}"
-end
-
-
 # sanitize that we only get directories
 # within the webdirectory. So no one
 # can do anything dirty.
@@ -65,14 +60,15 @@ def upgrade_wordpress(wd)
   # chowns all run user files to the sftp user
   # to ensure that we can run the upgrade
   log "Starting to upgrade wordpress in #{wd}"
-  sudo(run_user_uid,group_gid) do
-    cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > #{file_list}")
-    cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> #{file_list}")
+  with_tempfile do |tf|
+    sudo(run_user_uid,group_gid) do
+      cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > #{tf}")
+      cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> #{tf}")
+    end
+    on_filelist(File.read(tf),run_user_uid) do |p|
+      FileUtils.chown( options['sftp_user'], options['group'], p)
+    end
   end
-  on_filelist(File.read(file_list),run_user_uid) do |p|
-    FileUtils.chown( options['sftp_user'], options['group'], p)
-  end
-  File.delete(file_list)
 
   # run the upgrade as sftp user
   log "Running the upgrade script in #{wd}"
