@@ -37,7 +37,7 @@ def wp_directories
   @wp_directories ||= load_directories
 end
 
-def file_ist
+def file_list
   @file_list ||= "/tmp/#{Process.pid}_#{(0...32).map{65.+(rand(26)).chr}.join('')}"
 end
 
