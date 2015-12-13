@@ -65,6 +65,7 @@ end
 def upgrade_wordpress
   # chowns all run user files to the sftp user
   # to ensure that we can run the upgrade
+  log "Preparing #{wp_directory} to match our requirements"
   sudo(run_user_uid,group_gid) do
     cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > #{file_list}")
     cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> #{file_list}")
@@ -75,10 +76,10 @@ def upgrade_wordpress
   File.delete(file_list)
 
   # run the upgrade as sftp user
+  log "Running the upgrade script in #{wp_directory}"
   sudo(sftp_user_uid,group_gid) do
-    cmd("/usr/local/sbin/upgrade_wordpress #{shellescape(wp_directory)}")
+    cmd("/usr/local/bin/upgrade_wordpress #{shellescape(wp_directory)}")
   end
-  log "Upgrade wordpress in #{wp_directory}"
 rescue => e
   log "Error while upgrading wordpress in #{wp_directory}: #{e.message}"
 end
