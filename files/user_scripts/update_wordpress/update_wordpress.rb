@@ -11,7 +11,7 @@ end
 # further settings files used by this script
 def script_settings_files_def
   {
-    'update_wordpress.dir' => {
+    'update_wordpress.dirs' => {
       'wp_directories' => ['.']
     }
   }
