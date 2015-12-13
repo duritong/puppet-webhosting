@@ -12,7 +12,7 @@ end
 def script_settings_files_def
   {
     'update_wordpress.dir' => {
-      'wp_directory' => '.'
+      'wp_directories' => ['.']
     }
   }
 end
@@ -25,14 +25,16 @@ end
 # the main method
 def run_script
   log "Starting wordpress upgrade"
-  upgrade_wordpress
+  wp_directories.each do |wd|
+    upgrade_wordpress(wd)
+  end
   log "Finished wordpress upgrade"
 end
 
 ## script specific methods
 
-def wp_directory
-  @wp_directory ||= load_directory['wp_directory']
+def wp_directories
+  @wp_directories ||= load_directories
 end
 
 def file_ist
@@ -43,29 +45,26 @@ end
 # sanitize that we only get directories
 # within the webdirectory. So no one
 # can do anything dirty.
-def load_directory
-  load_file('update_wordpress.dirs',['wp_directory']).inject({}) do |res,items|
-    k,item = items
-    res[k] = begin
-      path = File.expand_path(File.join(options['webdir'],item))
-      if !File.exists?(path) || !File.directory?(path)
-        log "#{path} is not a directory or doesn't exist. Skipping..."
-        nil
-      elsif path.start_with?("#{options['webdir']}")
-        path
-      else
-        log "#{path} is outside the webdir #{options['webdir']}, so we're dropping it"
-        nil
-      end
-    end.flatten.compact
-    res
-  end
+def load_directories
+  fd = load_file('update_wordpress.dirs',['wp_directories'])['wp_directories']
+  Array(fd).collect do |d|
+    path = File.expand_path(File.join(options['webdir'],d))
+    if !File.exists?(path) || !File.directory?(path)
+      log "#{path} is not a directory or doesn't exist. Skipping..."
+      nil
+    elsif path.start_with?("#{options['webdir']}")
+      path
+    else
+      log "#{path} is outside the webdir #{options['webdir']}, so we're dropping it"
+      nil
+    end
+  end.flatten.compact
 end
 
-def upgrade_wordpress
+def upgrade_wordpress(wd)
   # chowns all run user files to the sftp user
   # to ensure that we can run the upgrade
-  log "Preparing #{wp_directory} to match our requirements"
+  log "Starting to upgrade wordpress in #{wd}"
   sudo(run_user_uid,group_gid) do
     cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > #{file_list}")
     cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> #{file_list}")
@@ -76,12 +75,13 @@ def upgrade_wordpress
   File.delete(file_list)
 
   # run the upgrade as sftp user
-  log "Running the upgrade script in #{wp_directory}"
+  log "Running the upgrade script in #{wd}"
   sudo(sftp_user_uid,group_gid) do
-    cmd("/usr/local/bin/upgrade_wordpress #{shellescape(wp_directory)}")
+    cmd("/usr/local/bin/upgrade_wordpress #{shellescape(wd)}")
   end
+  log "Upgrading Wordpress in #{wd} finished."
 rescue => e
-  log "Error while upgrading wordpress in #{wp_directory}: #{e.message}"
+  log "Error while upgrading wordpress in #{wd}: #{e.message}"
 end
 
 # this will also trigger the run of the script

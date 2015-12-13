@@ -1,13 +1,17 @@
 # The update_wordpress script easily updates
-# a wordpress installation for your.
+# a wordpress installation for you.
 # It will first backup your installation, then
 # update the core, all plugins, themes and so on.
 #
 # This configuration file allows you to configure
-# the location if your wordpress installation.
+# the location of your wordpress installations.
 # NOTE: this must be a relative path to your www/
 #       directory!
 # In most of the times you don't need to adjust
-# the only allowed option `wp_directory`.
+# the only allowed option `wp_directories`.
+#
+# wp_directories must be an array and it can point
+# to multiple wordpress installations within your
+# webhosting.
 ---
-wp_directory: '.'
+wp_directories: ['.']

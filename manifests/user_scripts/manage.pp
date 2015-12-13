@@ -92,8 +92,8 @@ define webhosting::user_scripts::manage(
           owner  => $sftp_user,
           group  => $web_group,
           mode   => '0600';
-        "${scripts_path}/update_wordpress/update_wordpress.dir":
-          content => template('webhosting/user_scripts/update_wordpress/update_wordpress.dir.erb'),
+        "${scripts_path}/update_wordpress/update_wordpress.dirs":
+          content => template('webhosting/user_scripts/update_wordpress/update_wordpress.dirs.erb'),
           replace => false,
           owner   => $sftp_user,
           group   => $web_group,
