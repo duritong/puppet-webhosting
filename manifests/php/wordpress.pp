@@ -157,7 +157,7 @@ define webhosting::php::wordpress(
       }
       if ($run_gid_name == 'absent'){
         $real_run_gid_name = $gid_name ? {
-          'absent'  => $name,
+          'absent'  => $real_gid_name,
           default   => $gid_name
         }
       } else {
