@@ -7,10 +7,9 @@
 #   - everything else will currently do noting
 # run_mode:
 #   - normal: nothing special (*default*)
-#   - itk: apache is running with the itk module
-#          and run_uid and run_gid are used as vhost users
-# run_uid: the uid the vhost should run as with the itk module
-# run_gid: the gid the vhost should run as with the itk module
+#   - fcgid: apache is running with fcgid and suexec
+# run_uid: the uid the vhost should run as with the suexec module
+# run_gid: the gid the vhost should run as with the suexec module
 #
 # logmode:
 #   - default: Do normal logging to CustomLog and ErrorLog
@@ -34,8 +33,6 @@ define webhosting::php::wordpress(
   $group                  = 'sftponly',
   $run_mode               = 'normal',
   $run_uid                = 'absent',
-  $run_uid_name           = 'absent',
-  $run_gid                = 'absent',
   $run_uid_name           = 'absent',
   $run_gid                = 'absent',
   $run_gid_name           = 'absent',
@@ -62,11 +59,10 @@ define webhosting::php::wordpress(
   $nagios_check_url       = '/',
   $nagios_check_code      = '200,301',
   $nagios_use             = 'generic-service',
-  $git_repo               = 'absent',
   $autoinstall            = true,
   $blog_options           = {},
   $mod_security           = true,
-  $manage_config          = true,
+  $manage_config          = false,
   $config_webwriteable    = false,
   $manage_directories     = true,
 ){
@@ -80,6 +76,10 @@ define webhosting::php::wordpress(
   } else {
     $real_gid_name = $gid_name
   }
+
+  $path = "/var/www/vhosts/${name}"
+  $documentroot = "${path}/www"
+
   webhosting::common{$name:
     ensure                => $ensure,
     configuration         => $configuration,
@@ -107,12 +107,6 @@ define webhosting::php::wordpress(
     nagios_use            => $nagios_use,
   }
 
-  $path = $::operatingsystem ? {
-    'openbsd' => "/var/www/htdocs/${name}",
-    default   => "/var/www/vhosts/${name}"
-  }
-  $documentroot = "${path}/www"
-
   apache::vhost::php::wordpress{$name:
     ensure              => $ensure,
     configuration       => $configuration,
@@ -138,55 +132,46 @@ define webhosting::php::wordpress(
     manage_config       => $manage_config,
     config_webwriteable => $config_webwriteable,
     manage_directories  => $manage_directories,
+    require             => User::Sftp_only[$real_uid_name],
   }
-  if ($git_repo != 'absent') and ($ensure != 'absent') {
+  if $run_mode == 'fcgid' {
+    if ($run_uid_name == 'absent'){
+      $real_run_uid_name = "${name}_run"
+    } else {
+      $real_run_uid_name = $run_uid_name
+    }
+    if ($run_gid_name == 'absent'){
+      $real_run_gid_name = $gid_name ? {
+        'absent'  => $name,
+        default   => $gid_name
+      }
+    } else {
+      $real_run_gid_name = $run_gid_name
+    }
+    Apache::Vhost::Php::Wordpress[$name]{
+      documentroot_owner => $real_uid_name,
+      documentroot_group => $real_gid_name,
+      run_uid            => $real_run_uid_name,
+      run_gid            => $real_run_gid_name,
+    }
+    User::Managed[$real_run_uid_name] -> Apache::Vhost::Php::Wordpress[$name]
+  }
+  if $ensure != 'absent' {
     wordpress::instance{$name:
       path         => $documentroot,
       autoinstall  => $autoinstall,
       blog_options => $blog_options,
       uid_name     => $real_uid_name,
       gid_name     => $real_gid_name,
+      require      => User::Sftp_only[$real_uid_name],
     }
-  }
-  case $run_mode {
-    'fcgid','itk','proxy-itk','static-itk': {
-      if ($run_uid_name == 'absent'){
-        $real_run_uid_name = "${name}_run"
-      } else {
-        $real_run_uid_name = $run_uid_name
-      }
-      if ($run_gid_name == 'absent'){
-        $real_run_gid_name = $gid_name ? {
-          'absent'  => $name,
-          default   => $gid_name
-        }
-      } else {
-        $real_run_gid_name = $run_gid_name
-      }
-      Apache::Vhost::Php::Wordpress[$name]{
-        documentroot_owner => $real_uid_name,
-        documentroot_group => $real_gid_name,
-        run_uid            => $real_run_uid_name,
-        run_gid            => $real_run_gid_name,
-        require            => [ User::Sftp_only[$name],
-                                User::Managed[$real_run_uid_name] ],
-      }
-      if ($git_repo != 'absent') and ($ensure != 'absent') {
-        Wordpress::Instance[$name]{
-          require => [User::Sftp_only[$real_uid_name],
-                      User::Managed[$real_run_uid_name] ],
-        }
+    if $manage_directories {
+      Wordpress::Instance[$name]{
+        before => File["${documentroot}/wp-content/uploads"],
       }
     }
-    default: {
-      Apache::Vhost::Php::Wordpress[$name]{
-        require => User::Sftp_only[$real_uid_name],
-      }
-      if ($git_repo != 'absent') and ($ensure != 'absent') {
-        Wordpress::Instance[$name]{
-          require => User::Sftp_only[$real_uid_name],
-        }
-      }
+    if $run_mode == 'fcgid' {
+      User::Managed[$real_run_uid_name] -> Wordpress::Instance[$name]
     }
   }
   if $template_partial != 'absent' {

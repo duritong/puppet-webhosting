@@ -7,10 +7,10 @@
 #   - everything else will currently do noting
 # run_mode:
 #   - normal: nothing special (*default*)
-#   - itk: apache is running with the itk module
+#   - fcgid: apache is running with the fcgid module and suexec
 #          and run_uid and run_gid are used as vhost users
-# run_uid: the uid the vhost should run as with the itk module
-# run_gid: the gid the vhost should run as with the itk module
+# run_uid: the uid the vhost should run as with the suexec module
+# run_gid: the gid the vhost should run as with the suexec module
 #
 # logmode:
 #   - default: Do normal logging to CustomLog and ErrorLog
@@ -101,12 +101,10 @@ define webhosting::php::joomla(
     nagios_check_url      => $nagios_check_url,
     nagios_check_code     => $nagios_check_code,
     nagios_use            => $nagios_use,
+    git_repo              => $git_repo,
   }
 
-  $path = $::operatingsystem ? {
-    'openbsd' => "/var/www/htdocs/${name}",
-    default => "/var/www/vhosts/${name}"
-  }
+  $path = "/var/www/vhosts/${name}"
   $documentroot = "${path}/www"
 
   apache::vhost::php::joomla{$name:
@@ -135,29 +133,8 @@ define webhosting::php::joomla(
     config_webwriteable => $config_webwriteable,
     manage_directories  => $manage_directories,
   }
-  if ($git_repo != 'absent') and ($ensure != 'absent') {
-    # create webdir
-    # for the cloning, $documentroot needs to be absent
-    git::clone{"git_clone_${name}":
-      ensure          => $ensure,
-      git_repo        => $git_repo,
-      projectroot     => $documentroot,
-      cloneddir_user  => $real_uid_name,
-      cloneddir_group => $real_gid_name,
-      before          => File[$documentroot],
-    }
-    apache::vhost::file::documentrootdir{"joomlagitdir_${name}":
-      ensure       => $ensure,
-      documentroot => $documentroot,
-      filename     => '.git',
-      thedomain    => $name,
-      owner        => $real_uid_name,
-      group        => $real_gid_name,
-      mode         => '0750',
-    }
-  }
   case $run_mode {
-    'fcgid','itk','proxy-itk','static-itk': {
+    'fcgid': {
       if ($run_uid_name == 'absent'){
         $real_run_uid_name = "${name}_run"
       } else {
@@ -165,35 +142,24 @@ define webhosting::php::joomla(
       }
       if ($run_gid_name == 'absent'){
         $real_run_gid_name = $gid_name ? {
-          'absent'  => $name,
-          default   => $gid_name
+          'absent' => $name,
+          default  => $gid_name
         }
       } else {
         $real_run_gid_name = $run_gid_name
       }
       Apache::Vhost::Php::Joomla[$name]{
-        documentroot_owner  => $real_uid_name,
-        documentroot_group  => $real_gid_name,
-        run_uid             => $real_run_uid_name,
-        run_gid             => $real_run_gid_name,
-        require             => [User::Sftp_only[$real_uid_name],
+        documentroot_owner => $real_uid_name,
+        documentroot_group => $real_gid_name,
+        run_uid            => $real_run_uid_name,
+        run_gid            => $real_run_gid_name,
+        require            => [User::Sftp_only[$real_uid_name],
                                 User::Managed[$real_run_uid_name] ],
-      }
-      if ($git_repo != 'absent') and ($ensure != 'absent') {
-        Git::Clone["git_clone_${name}"]{
-          require => [User::Sftp_only[$real_uid_name],
-                      User::Managed[$real_run_uid_name] ],
-        }
       }
     }
     default: {
       Apache::Vhost::Php::Joomla[$name]{
         require => User::Sftp_only[$real_uid_name],
-      }
-      if ($git_repo != 'absent') and ($ensure != 'absent') {
-        Git::Clone["git_clone_${name}"]{
-          require => User::Sftp_only[$real_uid_name],
-        }
       }
     }
   }

@@ -4,23 +4,14 @@
 #   - default: add the string
 # user_provider:
 #   - local: user will be crated locally (*default*)
-#   - ldap: ldap settings will be passed and ldap authorization
-#           is mandatory using webdav as user_access
 #   - everything else will currently do noting
 # run_mode:
 #   - normal: nothing special (*default*)
-#   - itk: apache is running with the itk module
-#          and run_uid and run_gid are used as vhost users
-# run_uid: the uid the vhost should run as with the itk module
-# run_gid: the gid the vhost should run as with the itk module
+#   - fcgid: apache is running with the fcgid module and suexec
+# run_uid: the uid the vhost should run as with the suexec module
+# run_gid: the gid the vhost should run as with the suexec module
 # user_access:
 #   - sftp: an sftp only user will be created (*default*)
-#   - webdav: a webdav vhost will be created which will point to the webhostings root
-# ldap_user: Used if you have set user_provider to `ldap`
-#   - absent: $name will be passed
-#   - any: any authenticated ldap user will work
-#   - everything else will be used as a required ldap username
-#
 # logmode:
 #   - default: Do normal logging to CustomLog and ErrorLog
 #   - nologs: Send every logging to /dev/null
@@ -35,8 +26,6 @@ define webhosting::php(
   $gid_name               = 'absent',
   $user_provider          = 'local',
   $user_access            = 'sftp',
-  $webdav_domain          = 'absent',
-  $webdav_ssl_mode        = false,
   $password               = 'absent',
   $password_crypted       = true,
   $domain                 = 'absent',
@@ -75,7 +64,7 @@ define webhosting::php(
   $nagios_check_code      = '200',
   $nagios_use             = 'generic-service',
   $mod_security           = true,
-  $ldap_user              = 'absent'
+  $git_repo               = 'absent',
 ){
 
   if ($group == 'absent') and ($user_access == 'sftp') {
@@ -106,8 +95,6 @@ define webhosting::php(
     gid_name              => $real_gid_name,
     user_provider         => $user_provider,
     user_access           => $user_access,
-    webdav_domain         => $webdav_domain,
-    webdav_ssl_mode       => $webdav_ssl_mode,
     password              => $password,
     password_crypted      => $password_crypted,
     htpasswd_file         => $htpasswd_file,
@@ -125,35 +112,35 @@ define webhosting::php(
     nagios_check_url      => $nagios_check_url,
     nagios_check_code     => $nagios_check_code,
     nagios_use            => $nagios_use,
-    ldap_user             => $ldap_user,
+    git_repo              => $git_repo,
   }
   apache::vhost::php::standard{$name:
-    ensure              => $ensure,
-    configuration       => $configuration,
-    domain              => $domain,
-    domainalias         => $domainalias,
-    server_admin        => $server_admin,
-    logmode             => $logmode,
-    group               => $real_group,
-    allow_override      => $allow_override,
-    do_includes         => $do_includes,
-    options             => $options,
-    additional_options  => $additional_options,
-    default_charset     => $default_charset,
-    php_settings        => $php_settings,
-    php_options         => $php_options,
-    php_installation    => $php_installation,
-    run_mode            => $run_mode,
-    ssl_mode            => $ssl_mode,
-    vhost_mode          => $vhost_mode,
-    vhost_source        => $vhost_source,
-    vhost_destination   => $vhost_destination,
-    htpasswd_file       => $htpasswd_file,
-    htpasswd_path       => $htpasswd_path,
-    mod_security        => $mod_security,
+    ensure             => $ensure,
+    configuration      => $configuration,
+    domain             => $domain,
+    domainalias        => $domainalias,
+    server_admin       => $server_admin,
+    logmode            => $logmode,
+    group              => $real_group,
+    allow_override     => $allow_override,
+    do_includes        => $do_includes,
+    options            => $options,
+    additional_options => $additional_options,
+    default_charset    => $default_charset,
+    php_settings       => $php_settings,
+    php_options        => $php_options,
+    php_installation   => $php_installation,
+    run_mode           => $run_mode,
+    ssl_mode           => $ssl_mode,
+    vhost_mode         => $vhost_mode,
+    vhost_source       => $vhost_source,
+    vhost_destination  => $vhost_destination,
+    htpasswd_file      => $htpasswd_file,
+    htpasswd_path      => $htpasswd_path,
+    mod_security       => $mod_security,
   }
   case $run_mode {
-    'fcgid','itk','proxy-itk','static-itk': {
+    'fcgid': {
       if ($run_uid_name == 'absent'){
         $real_run_uid_name = "${name}_run"
       } else {
@@ -173,7 +160,8 @@ define webhosting::php(
       }
       if ($user_provider == 'local') {
         Apache::Vhost::Php::Standard[$name]{
-          require => [ User::Sftp_only[$real_uid_name], User::Managed[$real_run_uid_name] ],
+          require => [User::Sftp_only[$real_uid_name],
+                      User::Managed[$real_run_uid_name] ],
         }
       }
     }

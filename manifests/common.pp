@@ -1,49 +1,40 @@
 # Manages common things amongst webhostings
 # user_provider:
 #   - local: user will be crated locally (*default*)
-#   - ldap: ldap settings will be passed and ldap authorization
-#           is mandatory using webdav as user_access
 #   - everything else will currently do noting
 # user_access:
 #   - sftp: an sftp only user will be created (*default*)
-#   - webdav: a webdav vhost will be created which will point to the webhostings root
 # wwwmail:
 #   With a local user_provider this will include the web run user in a group called wwwmailers.
 #   This makes it easier to enable special rights on a webserver's mailserver to this group.
 #   - default: false
-# ldap_user: Used if you have set user_provider to `ldap`
-#   - absent: $name will be passed
-#   - any: any authenticated ldap user will work
-#   - everything else will be used as a required ldap username
 define webhosting::common(
-  $ensure                 = present,
-  $configuration          = {},
-  $uid                    = 'absent',
-  $uid_name               = 'absent',
-  $gid                    = 'uid',
-  $gid_name               = 'absent',
-  $user_provider          = 'local',
-  $user_access            = 'sftp',
-  $webdav_domain          = 'absent',
-  $webdav_ssl_mode        = false,
-  $password               = 'absent',
-  $password_crypted       = true,
-  $htpasswd_file          = 'absent',
-  $ssl_mode               = false,
-  $run_mode               = 'normal',
-  $run_uid                = 'absent',
-  $run_uid_name           = 'absent',
-  $run_gid                = 'absent',
-  $wwwmail                = false,
-  $watch_adjust_webfiles  = 'absent',
-  $user_scripts           = 'absent',
-  $user_scripts_options   = {},
-  $nagios_check           = 'ensure',
-  $nagios_check_domain    = 'absent',
-  $nagios_check_url       = '/',
-  $nagios_check_code      = '200',
-  $nagios_use             = 'generic-service',
-  $ldap_user              = 'absent'
+  $ensure                = present,
+  $configuration         = {},
+  $uid                   = 'absent',
+  $uid_name              = 'absent',
+  $gid                   = 'uid',
+  $gid_name              = 'absent',
+  $user_provider         = 'local',
+  $user_access           = 'sftp',
+  $password              = 'absent',
+  $password_crypted      = true,
+  $htpasswd_file         = 'absent',
+  $ssl_mode              = false,
+  $run_mode              = 'normal',
+  $run_uid               = 'absent',
+  $run_uid_name          = 'absent',
+  $run_gid               = 'absent',
+  $wwwmail               = false,
+  $watch_adjust_webfiles = 'absent',
+  $user_scripts          = 'absent',
+  $user_scripts_options  = {},
+  $nagios_check          = 'ensure',
+  $nagios_check_domain   = 'absent',
+  $nagios_check_url      = '/',
+  $nagios_check_code     = '200',
+  $nagios_use            = 'generic-service',
+  $git_repo              = 'absent',
 ){
   if ($run_gid == 'absent') {
     if ($gid == 'uid') {
@@ -70,35 +61,34 @@ define webhosting::common(
     $real_run_uid_name = $run_uid_name
   }
 
-  $vhost_path = $::operatingsystem ? {
-    openbsd => "/var/www/htdocs/${name}",
-    default => "/var/www/vhosts/${name}"
-  }
+  $vhost_path = "/var/www/vhosts/${name}"
 
   if ($user_provider == 'local') and ($user_access == 'sftp') {
-      user::sftp_only{$real_uid_name:
-          ensure            => $ensure,
-          password_crypted  => $password_crypted,
-          homedir           => $vhost_path,
-          gid               => $gid,
-          uid               => $uid ? {
-              'iuid'  => iuid($real_uid_name,'webhosting'),
-              default => $uid
-          },
-          password          => $password ? {
-              'trocla'  => trocla("webhosting_${real_uid_name}",'sha512crypt'),
-              default   => $password
-          },
-      }
-      include apache::sftponly
+    $real_uid = $uid ? {
+      'iuid'  => iuid($real_uid_name,'webhosting'),
+      default => $uid
+    }
+    $real_password = $password ? {
+      'trocla' => trocla("webhosting_${real_uid_name}",'sha512crypt'),
+      default  => $password
+    }
+    user::sftp_only{$real_uid_name:
+      ensure           => $ensure,
+      password_crypted => $password_crypted,
+      homedir          => $vhost_path,
+      gid              => $gid,
+      uid              => $real_uid,
+      password         => $real_password,
+    }
+    include ::apache::sftponly
   }
 
   case $run_mode {
-    'fcgid','static','itk','proxy-itk','static-itk': {
+    'fcgid','static': {
       if ($user_access == 'sftp') {
         if ($ensure != 'absent') {
           User::Sftp_only[$real_uid_name]{
-            homedir_mode => 0755,
+            homedir_mode => '0755',
           }
         }
         user::groups::manage_user{
@@ -106,46 +96,38 @@ define webhosting::common(
             group => $real_gid_name,
             user  => 'apache'
         }
-        case $run_mode {
-          'fcgid','static','static-itk': {
-            User::Groups::Manage_user["apache_in_${real_gid_name}"]{
-              ensure => $ensure,
-            }
-            if $ensure == 'present' {
-              User::Groups::Manage_user["apache_in_${real_gid_name}"]{
-                require => User::Sftp_only[$real_uid_name],
-              }
-            }
-          }
-          default: {
-            User::Groups::Manage_user["apache_in_${real_gid_name}"]{
-              ensure => 'absent'
-            }
+        User::Groups::Manage_user["apache_in_${real_gid_name}"]{
+          ensure => $ensure,
+        }
+        if $ensure == 'present' {
+          User::Groups::Manage_user["apache_in_${real_gid_name}"]{
+            require => User::Sftp_only[$real_uid_name],
           }
         }
       }
     }
   }
   case $run_mode {
-    'fcgid','itk','proxy-itk','static-itk': {
+    'fcgid': {
       if ($run_uid=='absent') and ($ensure != 'absent') {
-          fail("you need to define run_uid for ${name} on ${::fqdn} to use itk")
+          fail("you need to define run_uid for ${name} on ${::fqdn} to use fcgid")
       }
       if ($user_provider == 'local') {
+        $real_run_uid = $run_uid ? {
+          'iuid'  => iuid($real_run_uid_name,'webhosting'),
+          default => $run_uid,
+        }
+        $shell = $::operatingsystem ? {
+          /^(Debian|Ubuntu)$/ => '/usr/sbin/nologin',
+          default             => '/sbin/nologin',
+        }
         user::managed{$real_run_uid_name:
-          ensure        => $ensure,
-          uid           => $run_uid ? {
-            'iuid'  => iuid($real_run_uid_name,'webhosting'),
-            default => $run_uid,
-          },
-          manage_group  => false,
-          managehome    => false,
-          homedir       => $vhost_path,
-          shell         => $::operatingsystem ? {
-            debian  => '/usr/sbin/nologin',
-            ubuntu  => '/usr/sbin/nologin',
-            default => '/sbin/nologin'
-          },
+          ensure       => $ensure,
+          manage_group => false,
+          managehome   => false,
+          homedir      => $vhost_path,
+          uid          => $real_run_uid,
+          shell        => $shell,
         }
         if ($user_access == 'sftp') {
           if ($ensure == 'absent') {
@@ -162,50 +144,26 @@ define webhosting::common(
         if $wwwmail {
           user::groups::manage_user{
             "${real_run_uid_name}_in_wwwmailers":
-              ensure  => $ensure,
-              group   => 'wwwmailers',
-              user    => $real_run_uid_name
+              ensure => $ensure,
+              group  => 'wwwmailers',
+              user   => $real_run_uid_name
           }
           if ($ensure == 'present') {
-            require webhosting::wwwmailers
+            require ::webhosting::wwwmailers
             User::Groups::Manage_user["${real_run_uid_name}_in_wwwmailers"]{
               require => User::Managed[$real_run_uid_name],
             }
           }
         }
         if ($ensure == 'present') {
+          $rreal_run_gid = $real_run_gid ? {
+            'iuid'  => iuid($real_uid_name,'webhosting'),
+            default => $real_run_gid,
+          }
           User::Managed[$real_run_uid_name]{
-            gid => $real_run_gid ? {
-              'iuid' => iuid($real_uid_name,'webhosting'),
-              default => $real_run_gid,
-            },
+            gid => $rreal_run_gid,
           }
         }
-      }
-    }
-  }
-
-  if ($user_access == 'webdav'){
-    apache::vhost::webdav{"webdav.${name}":
-      domain          => $webdav_domain,
-      configuration   => $configuration,
-      manage_webdir   => false,
-      path            => $vhost_path,
-      path_is_webdir  => true,
-      run_mode        => $run_mode,
-      run_uid         => $run_uid,
-      run_gid         => $run_gid,
-      ssl_mode        => $webdav_ssl_mode,
-    }
-    if ($user_provider == 'ldap'){
-      if ($ldap_user == 'absent') {
-        $real_ldap_user = $name
-      } else {
-        $real_ldap_user = $ldap_user
-      }
-      Apache::Vhost::Webdav["webdav.${name}"]{
-        ldap_auth => true,
-        ldap_user => $real_ldap_user,
       }
     }
   }
@@ -222,36 +180,49 @@ define webhosting::common(
     }
 
     nagios::service::http{$name:
-      ensure        => $nagios_ensure,
-      check_domain  => $nagios_check_domain,
-      ssl_mode      => $ssl_mode,
-      check_url     => $nagios_check_url,
-      use           => $nagios_use,
-      check_code    => $real_nagios_check_code,
+      ensure       => $nagios_ensure,
+      check_domain => $nagios_check_domain,
+      ssl_mode     => $ssl_mode,
+      check_url    => $nagios_check_url,
+      use          => $nagios_use,
+      check_code   => $real_nagios_check_code,
     }
   }
 
+  $watch_webfiles_ensure = $ensure ? {
+    'absent'  => 'absent',
+    default   => $watch_adjust_webfiles,
+  }
   webhosting::watch_adjust_webfiles{
     $name:
-      ensure    => $ensure ? {
-        'absent'  => 'absent',
-        default   => $watch_adjust_webfiles,
-      },
+      ensure    => $watch_webfiles_ensure,
       path      => "${vhost_path}/www/",
       sftp_user => $real_uid_name,
       run_user  => $real_run_uid_name,
   }
 
+  $user_scripts_ensure = $ensure ? {
+    'absent'  => 'absent',
+    default   => $user_scripts
+  }
   webhosting::user_scripts::manage{$name:
-    ensure    => $ensure ? {
-      'absent'  => 'absent',
-      default   => $user_scripts
-    },
+    ensure    => $user_scripts_ensure,
     base_path => $vhost_path,
     scripts   => $user_scripts,
     sftp_user => $real_uid_name,
     run_user  => $real_run_uid_name,
     web_group => $real_gid_name,
     options   => $user_scripts_options,
+  }
+  if ($git_repo != 'absent') and ($ensure != 'absent') {
+    webhosting::utils::clone{
+      $name:
+        git_repo     => $git_repo,
+        documentroot => "${vhost_path}/www",
+        uid_name     => $uid_name,
+        run_uid_name => $real_run_uid_name,
+        gid_name     => $gid_name,
+        run_mode     => $run_mode,
+    }
   }
 }

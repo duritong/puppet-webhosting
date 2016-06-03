@@ -7,10 +7,9 @@
 #   - everything else will currently do noting
 # run_mode:
 #   - normal: nothing special (*default*)
-#   - itk: apache is running with the itk module
-#          and run_uid and run_gid are used as vhost users
-# run_uid: the uid the vhost should run as with the itk module
-# run_gid: the gid the vhost should run as with the itk module
+#   - fcgid: apache is running with the fcgid module and suexec
+# run_uid: the uid the vhost should run as with the suexec module
+# run_gid: the gid the vhost should run as with the suexec module
 #
 # logmode:
 #   - default: Do normal logging to CustomLog and ErrorLog
@@ -18,61 +17,61 @@
 #   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::php::mediawiki(
-  $ensure               = present,
-  $configuration        = {},
-  $uid                  = 'absent',
-  $uid_name             = 'absent',
-  $gid                  = 'uid',
-  $gid_name             = 'absent',
-  $user_provider        = 'local',
-  $password             = 'absent',
-  $password_crypted     = true,
-  $domainalias          = 'www',
-  $server_admin         = 'absent',
-  $logmode              = 'default',
-  $owner                = root,
-  $group                = 'sftponly',
-  $run_mode             = 'normal',
-  $run_uid              = 'absent',
-  $run_uid_name         = 'absent',
-  $run_gid              = 'absent',
-  $run_gid_name         = 'absent',
-  $wwwmail              = false,
-  $allow_override       = 'FileInfo Limit Options=FollowSymLinks',
-  $options              = 'absent',
-  $additional_options   = 'absent',
-  $default_charset      = 'absent',
-  $ssl_mode             = false,
-  $php_settings         = {},
-  $php_options          = {},
-  $vhost_mode           = 'template',
-  $template_partial     = 'absent',
-  $vhost_source         = 'absent',
-  $vhost_destination    = 'absent',
-  $htpasswd_file        = 'absent',
-  $nagios_check         = 'ensure',
-  $nagios_check_domain  = 'absent',
-  $nagios_check_url     = '/',
-  $nagios_check_code    = '200',
-  $nagios_use           = 'generic-service',
-  $mod_security         = true,
-  $image                = 'absent',
-  $config               = 'unmanaged',
-  $db_server            = 'unmanaged',
-  $db_name              = 'unmanaged',
-  $db_user              = 'db_name',
-  $db_pwd               = 'unmanaged',
-  $contact              = 'unmanaged',
-  $sitename             = 'unmanaged',
-  $secret_key           = 'unmanaged',
-  $spam_protection      = false,
-  $wiki_options         = {},
-  $autoinstall          = true,
-  $squid_servers        = 'absent',
-  $file_extensions      = 'absent',
-  $extensions           = 'absent',
-  $language             = 'de',
-  $hashed_upload_dir    = true
+  $ensure              = present,
+  $configuration       = {},
+  $uid                 = 'absent',
+  $uid_name            = 'absent',
+  $gid                 = 'uid',
+  $gid_name            = 'absent',
+  $user_provider       = 'local',
+  $password            = 'absent',
+  $password_crypted    = true,
+  $domainalias         = 'www',
+  $server_admin        = 'absent',
+  $logmode             = 'default',
+  $owner               = root,
+  $group               = 'sftponly',
+  $run_mode            = 'normal',
+  $run_uid             = 'absent',
+  $run_uid_name        = 'absent',
+  $run_gid             = 'absent',
+  $run_gid_name        = 'absent',
+  $wwwmail             = false,
+  $allow_override      = 'FileInfo Limit Options=FollowSymLinks',
+  $options             = 'absent',
+  $additional_options  = 'absent',
+  $default_charset     = 'absent',
+  $ssl_mode            = false,
+  $php_settings        = {},
+  $php_options         = {},
+  $vhost_mode          = 'template',
+  $template_partial    = 'absent',
+  $vhost_source        = 'absent',
+  $vhost_destination   = 'absent',
+  $htpasswd_file       = 'absent',
+  $nagios_check        = 'ensure',
+  $nagios_check_domain = 'absent',
+  $nagios_check_url    = '/',
+  $nagios_check_code   = '200',
+  $nagios_use          = 'generic-service',
+  $mod_security        = true,
+  $image               = 'absent',
+  $config              = 'unmanaged',
+  $db_server           = 'unmanaged',
+  $db_name             = 'unmanaged',
+  $db_user             = 'db_name',
+  $db_pwd              = 'unmanaged',
+  $contact             = 'unmanaged',
+  $sitename            = 'unmanaged',
+  $secret_key          = 'unmanaged',
+  $spam_protection     = false,
+  $wiki_options        = {},
+  $autoinstall         = true,
+  $squid_servers       = 'absent',
+  $file_extensions     = 'absent',
+  $extensions          = 'absent',
+  $language            = 'de',
+  $hashed_upload_dir   = true
 ){
   if ($uid_name == 'absent'){
     $real_uid_name = $name
@@ -165,7 +164,7 @@ define webhosting::php::mediawiki(
   }
 
   case $run_mode {
-    'fcgid','itk','proxy-itk','static-itk': {
+    'fcgid': {
       if ($run_uid_name == 'absent'){
         $real_run_uid_name = "${name}_run"
       } else {
