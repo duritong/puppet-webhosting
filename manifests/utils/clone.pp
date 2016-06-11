@@ -9,21 +9,23 @@ define webhosting::utils::clone(
 ){
   # create webdir
   # for the cloning, $documentroot needs to be absent
-  git::clone{$name:
-    git_repo        => $git_repo,
+  if $run_mode == 'fcgid' {
+    $req = [User::Sftp_only[$uid_name], User::Managed[$run_uid_name] ]
+  } else {
+    $req = User::Sftp_only[$uid_name]
+  }
+  $default_git_params = {
     projectroot     => $documentroot,
     cloneddir_user  => $uid_name,
     cloneddir_group => $gid_name,
-    before          => File[$documentroot],
+    require         => $req,
   }
-  if $run_mode == 'fcgid' {
-    Git::Clone[$name]{
-      require => [User::Sftp_only[$uid_name],
-                  User::Managed[$run_uid_name] ],
-    }
+  if is_hash($git_repo) {
+    $git_options = $git_repo
   } else {
-    Git::Clone[$name]{
-      require => User::Sftp_only[$uid_name],
+    $git_options = {
+      git_repo        => $git_repo,
     }
   }
+  create_resources('git::clone',{ $name => $git_options },$default_git_params)
 }
