@@ -55,7 +55,7 @@ define webhosting::passenger(
   $nagios_use           = 'generic-service',
   $mod_security         = true,
   $passenger_ree        = false,
-  $passenger_app        = 'rails'
+  $passenger_app        = 'rails',
   $git_repo             = 'absent',
 ){
 
