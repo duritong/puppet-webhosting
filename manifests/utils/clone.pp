@@ -27,5 +27,5 @@ define webhosting::utils::clone(
       git_repo        => $git_repo,
     }
   }
-  create_resources('git::clone',{ $name => $git_options },$default_git_params)
+  create_resources('git::clone',{ "${name}" => $git_options },$default_git_params)
 }
