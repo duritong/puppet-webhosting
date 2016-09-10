@@ -54,6 +54,7 @@ class webhosting::user_scripts {
 
   if versioncmp($::operatingsystemmajrelease,'5') > 0 {
     require ::wordpress::base
+    require ::tmpwatch
     file{
       '/opt/webhosting_user_scripts/update_wordpress':
         ensure => directory,
