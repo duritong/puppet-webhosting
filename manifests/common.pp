@@ -201,18 +201,16 @@ define webhosting::common(
       run_user  => $real_run_uid_name,
   }
 
-  $user_scripts_ensure = $ensure ? {
-    'absent'  => 'absent',
-    default   => $user_scripts
-  }
-  webhosting::user_scripts::manage{$name:
-    ensure    => $user_scripts_ensure,
-    base_path => $vhost_path,
-    scripts   => $user_scripts,
-    sftp_user => $real_uid_name,
-    run_user  => $real_run_uid_name,
-    web_group => $real_gid_name,
-    options   => $user_scripts_options,
+  if $ensure != 'absent' {
+    webhosting::user_scripts::manage{$name:
+      ensure    => $user_scripts,
+      base_path => $vhost_path,
+      scripts   => $user_scripts,
+      sftp_user => $real_uid_name,
+      run_user  => $real_run_uid_name,
+      web_group => $real_gid_name,
+      options   => $user_scripts_options,
+    }
   }
   if ($git_repo != 'absent') and ($ensure != 'absent') {
     webhosting::utils::clone{
