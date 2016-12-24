@@ -62,24 +62,24 @@ define webhosting::php(
   $mod_security           = true,
   $git_repo               = 'absent',
 ){
-  if ($gid_name == 'absent'){
-    $real_gid_name = $real_uid_name
-  } else {
-    $real_gid_name = $gid_name
-  }
   if ($uid_name == 'absent'){
     $real_uid_name = $name
   } else {
     $real_uid_name = $uid_name
   }
-  if ($group == 'absent') and ($user_access == 'sftp') {
-      $real_group = $real_gid_name
+  if ($gid_name == 'absent'){
+    $real_gid_name = $real_uid_name
   } else {
-      if ($group == 'absent') {
-          $real_group = 'apache'
-      } else {
-          $real_group = $group
-      }
+    $real_gid_name = $gid_name
+  }
+  if ($group == 'absent') and ($user_access == 'sftp') {
+    $real_group = $real_gid_name
+  } else {
+    if ($group == 'absent') {
+      $real_group = 'apache'
+    } else {
+      $real_group = $group
+    }
   }
   webhosting::common{$name:
     ensure                => $ensure,
