@@ -27,7 +27,7 @@ define webhosting::php::silverstripe(
   $server_admin          = 'absent',
   $logmode               = 'default',
   $owner                 = root,
-  $group                 = 'sftponly',
+  $group                 = 'absent',
   $run_mode              = 'normal',
   $run_uid               = 'absent',
   $run_uid_name          = 'absent',
