@@ -2,9 +2,6 @@
 #   - www: add as well a www.${name} entry
 #   - absent: do nothing
 #   - default: add the string
-# user_provider:
-#   - local: user will be crated locally (*default*)
-#   - everything else will currently do noting
 # run_uid: the uid the vhost should run as with the mod_passenger module
 # run_gid: the gid the vhost should run as with the mod_passenger module
 # user_access:
@@ -22,7 +19,6 @@ define webhosting::passenger(
   $uid_name             = 'absent',
   $gid                  = 'uid',
   $gid_name             = 'absent',
-  $user_provider        = 'local',
   $user_access          = 'sftp',
   $password             = 'absent',
   $password_crypted     = true,
@@ -59,15 +55,6 @@ define webhosting::passenger(
   $git_repo             = 'absent',
 ){
 
-  if ($group == 'absent') and ($user_access == 'sftp') {
-    $real_group = 'sftponly'
-  } else {
-    if ($group == 'absent') {
-      $real_group = 'apache'
-    } else {
-      $real_group = $group
-    }
-  }
   if ($uid_name == 'absent'){
     $real_uid_name = $name
   } else {
@@ -78,6 +65,15 @@ define webhosting::passenger(
   } else {
     $real_gid_name = $gid_name
   }
+  if ($group == 'absent') and ($user_access == 'sftp') {
+    $real_group = $real_gid_name
+  } else {
+    if ($group == 'absent') {
+      $real_group = 'apache'
+    } else {
+      $real_group = $group
+    }
+  }
   webhosting::common{$name:
     ensure              => $ensure,
     configuration       => $configuration,
@@ -85,7 +81,6 @@ define webhosting::passenger(
     uid_name            => $real_uid_name,
     gid                 => $gid,
     gid_name            => $real_gid_name,
-    user_provider       => $user_provider,
     user_access         => $user_access,
     password            => $password,
     password_crypted    => $password_crypted,
@@ -180,18 +175,14 @@ define webhosting::passenger(
         run_uid             => $real_run_uid_name,
         run_gid             => $real_run_gid_name,
       }
-      if ($user_provider == 'local') {
-        Apache::Vhost::Passenger[$name]{
-          require => [ User::Sftp_only[$real_uid_name],
-            User::Managed[$real_run_uid_name] ],
-        }
+      Apache::Vhost::Passenger[$name]{
+        require => [ User::Sftp_only[$real_uid_name],
+          User::Managed[$real_run_uid_name] ],
       }
     }
     default: {
-      if ($user_provider == 'local') {
-        Apache::Vhost::Passenger[$name]{
-          require => User::Sftp_only[$real_uid_name],
-        }
+      Apache::Vhost::Passenger[$name]{
+        require => User::Sftp_only[$real_uid_name],
       }
       if ($run_uid_name == 'absent'){
         $real_run_uid_name = 'apache'

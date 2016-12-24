@@ -2,9 +2,6 @@
 #   - www: add as well a www.${name} entry
 #   - absent: do nothing
 #   - default: add the string
-# user_provider:
-#   - local: user will be crated locally (*default*)
-#   - everything else will currently do noting
 # run_mode:
 #   - normal: nothing special (*default*)
 #   - fcgid: apache is running with the fcgid module and suexec
@@ -24,7 +21,6 @@ define webhosting::php::silverstripe(
   $uid_name              = 'absent',
   $gid                   = 'uid',
   $gid_name              = 'absent',
-  $user_provider         = 'local',
   $password              = 'absent',
   $password_crypted      = true,
   $domainalias           = 'www',
@@ -75,6 +71,11 @@ define webhosting::php::silverstripe(
   } else {
     $real_gid_name = $gid_name
   }
+  if ($group == 'absent') {
+    $real_group = $real_gid_name
+  } else {
+    $real_group = 'apache'
+  }
   $path = "/var/www/vhosts/${name}"
   $documentroot = "${path}/www"
 
@@ -85,7 +86,6 @@ define webhosting::php::silverstripe(
     uid_name              => $real_uid_name,
     gid                   => $gid,
     gid_name              => $real_gid_name,
-    user_provider         => $user_provider,
     password              => $password,
     password_crypted      => $password_crypted,
     htpasswd_file         => $htpasswd_file,
@@ -103,7 +103,7 @@ define webhosting::php::silverstripe(
     nagios_check_url      => $nagios_check_url,
     nagios_check_code     => $nagios_check_code,
     nagios_use            => $nagios_use,
-    git_repo              => $git_repos,
+    git_repo              => $git_repo,
   }
 
   apache::vhost::php::silverstripe{$name:

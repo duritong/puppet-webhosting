@@ -1,12 +1,10 @@
 # Manages common things amongst webhostings
-# user_provider:
-#   - local: user will be crated locally (*default*)
-#   - everything else will currently do noting
 # user_access:
 #   - sftp: an sftp only user will be created (*default*)
 # wwwmail:
-#   With a local user_provider this will include the web run user in a group called wwwmailers.
-#   This makes it easier to enable special rights on a webserver's mailserver to this group.
+#   This will include the web run user in a group called wwwmailers.
+#   This makes it easier to enable special rights on a webserver's mailserver to
+#   this group.
 #   - default: false
 define webhosting::common(
   $ensure                = present,
@@ -15,7 +13,6 @@ define webhosting::common(
   $uid_name              = 'absent',
   $gid                   = 'uid',
   $gid_name              = 'absent',
-  $user_provider         = 'local',
   $user_access           = 'sftp',
   $password              = 'absent',
   $password_crypted      = true,
@@ -63,7 +60,7 @@ define webhosting::common(
 
   $vhost_path = "/var/www/vhosts/${name}"
 
-  if ($user_provider == 'local') and ($user_access == 'sftp') {
+  if ($user_access == 'sftp') {
     $real_uid = $uid ? {
       'iuid'  => iuid($real_uid_name,'webhosting'),
       default => $uid
@@ -83,87 +80,81 @@ define webhosting::common(
     include ::apache::sftponly
   }
 
-  case $run_mode {
-    'fcgid','static': {
-      if ($user_access == 'sftp') {
-        if ($ensure != 'absent') {
-          User::Sftp_only[$real_uid_name]{
-            homedir_mode => '0755',
-          }
+  if $run_mode in ['fcgid','static'] {
+    if ($user_access == 'sftp') {
+      if ($ensure != 'absent') {
+        User::Sftp_only[$real_uid_name]{
+          homedir_mode => '0750',
         }
-        user::groups::manage_user{
-          "apache_in_${real_gid_name}":
-            group => $real_gid_name,
-            user  => 'apache',
-        }
+      }
+      user::groups::manage_user{
+        "apache_in_${real_gid_name}":
+          group => $real_gid_name,
+          user  => 'apache',
+      }
+      User::Groups::Manage_user["apache_in_${real_gid_name}"]{
+        ensure => $ensure,
+      }
+      if $ensure == 'present' {
         User::Groups::Manage_user["apache_in_${real_gid_name}"]{
-          ensure => $ensure,
-        }
-        if $ensure == 'present' {
-          User::Groups::Manage_user["apache_in_${real_gid_name}"]{
-            require => User::Sftp_only[$real_uid_name],
-          }
+          require => User::Sftp_only[$real_uid_name],
         }
       }
     }
   }
-  case $run_mode {
-    'fcgid': {
-      if ($run_uid=='absent') and ($ensure != 'absent') {
-        fail("you need to define run_uid for ${name} on ${::fqdn} to use fcgid")
+  if $run_mode == 'fcgid' {
+    if ($run_uid=='absent') and ($ensure != 'absent') {
+      fail("you need to define run_uid for ${name} on ${::fqdn} to use fcgid")
+    }
+    $real_run_uid = $run_uid ? {
+      'iuid'  => iuid($real_run_uid_name,'webhosting'),
+      default => $run_uid,
+    }
+    $shell = $::operatingsystem ? {
+      /^(Debian|Ubuntu)$/ => '/usr/sbin/nologin',
+      default             => '/sbin/nologin',
+    }
+    user::managed{$real_run_uid_name:
+      ensure       => $ensure,
+      manage_group => false,
+      managehome   => false,
+      homedir      => $vhost_path,
+      uid          => $real_run_uid,
+      shell        => $shell,
+    }
+    if ($user_access == 'sftp') {
+      if ($ensure == 'absent') {
+        User::Managed[$real_run_uid_name]{
+          before => User::Sftp_only[$real_uid_name],
+        }
+      } else {
+        User::Managed[$real_run_uid_name]{
+          require => User::Sftp_only[$real_uid_name],
+        }
       }
-      if ($user_provider == 'local') {
-        $real_run_uid = $run_uid ? {
-          'iuid'  => iuid($real_run_uid_name,'webhosting'),
-          default => $run_uid,
-        }
-        $shell = $::operatingsystem ? {
-          /^(Debian|Ubuntu)$/ => '/usr/sbin/nologin',
-          default             => '/sbin/nologin',
-        }
-        user::managed{$real_run_uid_name:
-          ensure       => $ensure,
-          manage_group => false,
-          managehome   => false,
-          homedir      => $vhost_path,
-          uid          => $real_run_uid,
-          shell        => $shell,
-        }
-        if ($user_access == 'sftp') {
-          if ($ensure == 'absent') {
-            User::Managed[$real_run_uid_name]{
-              before => User::Sftp_only[$real_uid_name],
-            }
-          } else {
-            User::Managed[$real_run_uid_name]{
-              require => User::Sftp_only[$real_uid_name],
-            }
-          }
-        }
+    }
 
-        if $wwwmail {
-          user::groups::manage_user{
-            "${real_run_uid_name}_in_wwwmailers":
-              ensure => $ensure,
-              group  => 'wwwmailers',
-              user   => $real_run_uid_name,
-          }
-          if ($ensure == 'present') {
-            require ::webhosting::wwwmailers
-            User::Groups::Manage_user["${real_run_uid_name}_in_wwwmailers"]{
-              require => User::Managed[$real_run_uid_name],
-            }
-          }
+    if $wwwmail {
+      user::groups::manage_user{
+        "${real_run_uid_name}_in_wwwmailers":
+          ensure => $ensure,
+          group  => 'wwwmailers',
+          user   => $real_run_uid_name,
+      }
+      if ($ensure == 'present') {
+        require ::webhosting::wwwmailers
+        User::Groups::Manage_user["${real_run_uid_name}_in_wwwmailers"]{
+          require => User::Managed[$real_run_uid_name],
         }
-        if ($ensure == 'present') {
-          $rreal_run_gid = $real_run_gid ? {
-            'iuid'  => iuid($real_uid_name,'webhosting'),
-            default => $real_run_gid,
-          }
-          User::Managed[$real_run_uid_name]{
-            gid => $rreal_run_gid,
-          }
-        }
+      }
+    }
+    if ($ensure == 'present') {
+      $rreal_run_gid = $real_run_gid ? {
+        'iuid'  => iuid($real_uid_name,'webhosting'),
+        default => $real_run_gid,
+      }
+      User::Managed[$real_run_uid_name]{
+        gid => $rreal_run_gid,
       }
     }
   }

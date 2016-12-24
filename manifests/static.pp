@@ -2,9 +2,6 @@
 #   - www: add as well a www.${name} entry
 #   - absent: do nothing
 #   - default: add the string
-# user_provider:
-#   - local: user will be crated locally (*default*)
-#   - everything else will currently do noting
 #
 # logmode:
 #   - default: Do normal logging to CustomLog and ErrorLog
@@ -18,7 +15,6 @@ define webhosting::static(
   $uid_name            = 'absent',
   $gid                 = 'uid',
   $gid_name            = 'absent',
-  $user_provider       = 'local',
   $password            = 'absent',
   $password_crypted    = true,
   $domain              = 'absent',
@@ -26,7 +22,7 @@ define webhosting::static(
   $server_admin        = 'absent',
   $logmode             = 'default',
   $owner               = root,
-  $group               = 'sftponly',
+  $group               = 'absent',
   $allow_override      = 'None',
   $do_includes         = false,
   $options             = 'absent',
@@ -56,6 +52,11 @@ define webhosting::static(
   } else {
     $real_gid_name = $gid_name
   }
+  if ($group == 'absent') {
+    $real_group = $real_gid_name
+  } else {
+    $real_group = 'apache'
+  }
   webhosting::common{$name:
     ensure              => $ensure,
     configuration       => $configuration,
@@ -63,7 +64,6 @@ define webhosting::static(
     uid_name            => $real_uid_name,
     gid                 => $gid,
     gid_name            => $real_gid_name,
-    user_provider       => $user_provider,
     password            => $password,
     password_crypted    => $password_crypted,
     htpasswd_file       => $htpasswd_file,
@@ -83,9 +83,9 @@ define webhosting::static(
     domainalias        => $domainalias,
     server_admin       => $server_admin,
     logmode            => $logmode,
-    group              => $group,
+    group              => $real_group,
     documentroot_owner => $real_uid_name,
-    documentroot_group => $group,
+    documentroot_group => $real_group,
     allow_override     => $allow_override,
     do_includes        => $do_includes,
     options            => $options,

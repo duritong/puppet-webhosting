@@ -2,9 +2,6 @@
 #   - www: add as well a www.${name} entry
 #   - absent: do nothing
 #   - default: add the string
-# user_provider:
-#   - local: user will be crated locally (*default*)
-#   - everything else will currently do noting
 # run_mode:
 #   - normal: nothing special (*default*)
 #   - fcgid: apache is running with the fcgid module and suexec
@@ -24,7 +21,6 @@ define webhosting::php(
   $uid_name               = 'absent',
   $gid                    = 'uid',
   $gid_name               = 'absent',
-  $user_provider          = 'local',
   $user_access            = 'sftp',
   $password               = 'absent',
   $password_crypted       = true,
@@ -66,25 +62,24 @@ define webhosting::php(
   $mod_security           = true,
   $git_repo               = 'absent',
 ){
-
-  if ($group == 'absent') and ($user_access == 'sftp') {
-      $real_group = 'sftponly'
+  if ($gid_name == 'absent'){
+    $real_gid_name = $real_uid_name
   } else {
-      if ($group == 'absent') {
-          $real_group = 'apache'
-      } else {
-          $real_group = $group
-      }
+    $real_gid_name = $gid_name
   }
   if ($uid_name == 'absent'){
     $real_uid_name = $name
   } else {
     $real_uid_name = $uid_name
   }
-  if ($gid_name == 'absent'){
-    $real_gid_name = $real_uid_name
+  if ($group == 'absent') and ($user_access == 'sftp') {
+      $real_group = $real_gid_name
   } else {
-    $real_gid_name = $gid_name
+      if ($group == 'absent') {
+          $real_group = 'apache'
+      } else {
+          $real_group = $group
+      }
   }
   webhosting::common{$name:
     ensure                => $ensure,
@@ -93,7 +88,6 @@ define webhosting::php(
     uid_name              => $real_uid_name,
     gid                   => $gid,
     gid_name              => $real_gid_name,
-    user_provider         => $user_provider,
     user_access           => $user_access,
     password              => $password,
     password_crypted      => $password_crypted,
@@ -158,18 +152,14 @@ define webhosting::php(
         run_uid             => $real_run_uid_name,
         run_gid             => $real_run_gid_name,
       }
-      if ($user_provider == 'local') {
-        Apache::Vhost::Php::Standard[$name]{
-          require => [User::Sftp_only[$real_uid_name],
-                      User::Managed[$real_run_uid_name] ],
-        }
+      Apache::Vhost::Php::Standard[$name]{
+        require => [User::Sftp_only[$real_uid_name],
+                    User::Managed[$real_run_uid_name] ],
       }
     }
     default: {
-      if ($user_provider == 'local') {
-        Apache::Vhost::Php::Standard[$name]{
-          require => User::Sftp_only[$real_uid_name],
-        }
+      Apache::Vhost::Php::Standard[$name]{
+        require => User::Sftp_only[$real_uid_name],
       }
     }
   }
