@@ -124,7 +124,7 @@ define webhosting::php::mediawiki(
     domainalias        => $domainalias,
     server_admin       => $server_admin,
     logmode            => $logmode,
-    group              => $group,
+    group              => $real_group,
     manage_docroot     => false,
     allow_override     => $allow_override,
     options            => $options,

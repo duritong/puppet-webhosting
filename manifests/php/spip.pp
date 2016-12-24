@@ -109,7 +109,7 @@ define webhosting::php::spip(
     domainalias        => $domainalias,
     server_admin       => $server_admin,
     logmode            => $logmode,
-    group              => $group,
+    group              => $real_group,
     allow_override     => $allow_override,
     do_includes        => $do_includes,
     options            => $options,
