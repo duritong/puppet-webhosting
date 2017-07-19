@@ -50,7 +50,6 @@ define webhosting::passenger(
   $nagios_check_code    = '200',
   $nagios_use           = 'generic-service',
   $mod_security         = true,
-  $passenger_ree        = false,
   $passenger_app        = 'rails',
   $git_repo             = 'absent',
 ){
@@ -116,7 +115,6 @@ define webhosting::passenger(
     vhost_destination  => $vhost_destination,
     htpasswd_file      => $htpasswd_file,
     mod_security       => $mod_security,
-    passenger_ree      => $passenger_ree,
     passenger_app      => $passenger_app,
   }
 
@@ -126,11 +124,7 @@ define webhosting::passenger(
     } else {
       $rails_options = ''
     }
-    if $passenger_ree {
-      $path_options = "\nexport PATH=~/gems/bin:/opt/ruby-enterprise/bin/:\$PATH"
-    } else {
-      $path_options = "\nexport PATH=~/gems/bin:\$PATH"
-    }
+    $path_options = "\nexport PATH=~/gems/bin:\$PATH"
     file{
       "/var/www/vhosts/${name}/.ccache":
         ensure  => directory,
