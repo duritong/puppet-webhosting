@@ -73,17 +73,25 @@ define webhosting::user_scripts::manage(
               group   => $web_group,
               mode    => '0600';
           }
+          if ($script_name == 'ssh_authorized_keys') {
+            file{"/var/www/ssh_authorized_keys/${sftp_user}":
+              content => template('webhosting/user_scripts/ssh_authorized_keys/ssh_authorized_keys.keys.erb'),
+              owner   => $sftp_user,
+              group   => 0,
+              mode    => '0600',
+              seltype => 'ssh_home_t';
+            }
+            if !$user_scripts_options['enforce_ssh_authorized_keys'] {
+              File["/var/www/ssh_authorized_keys/${sftp_user}","${scripts_path}/${script_name}/${script_name}.${config_ext}"]{
+                replace => false,
+              }
+            }
+          } else {
+            File["${scripts_path}/${script_name}/${script_name}.${config_ext}"]{
+              replace => false,
+            }
+          }
         }
-      }
-    }
-    if ('ssh_authorized_keys' in $scripts) or ($scripts == 'ALL') {
-      file{"/var/www/ssh_authorized_keys/${sftp_user}":
-        content => template('webhosting/user_scripts/ssh_authorized_keys/ssh_authorized_keys.keys.erb'),
-        replace => false,
-        owner   => $sftp_user,
-        group   => 0,
-        mode    => '0600',
-        seltype => 'ssh_home_t';
       }
     }
   }
