@@ -22,16 +22,46 @@ class webhosting::user_scripts {
       group  => 0,
       mode   => '0500';
   }
+  # deploy scripts
+  ['adjust_permissions','update_mode',
+    'update_wordpress','ssh_authorized_keys'].each |String $script_name| {
+    file{
+      "/opt/webhosting_user_scripts/${script_name}":
+        ensure => directory,
+        owner  => root,
+        group  => 0,
+        mode   => '0400';
+      "/opt/webhosting_user_scripts/${script_name}/${script_name}.rb":
+        source => "puppet:///modules/webhosting/user_scripts/${script_name}/${script_name}.rb",
+        owner  => root,
+        group  => 0,
+        mode   => '0500';
+    }
 
-  # script to adjust permission in web directories
-  webhosting::user_scripts::script{'adjust_permissions': }
-
+  }
+  # script dependencies
   # update mode script
   include ::acl::requirements
-  webhosting::user_scripts::script{'update_mode': }
 
   # wordpress updates
   require ::wordpress::base
   require ::tmpwatch
-  webhosting::user_scripts::script{'update_wordpress': }
+
+  # manage ssh keys
+  if $facts['selinux'] {
+    selinux::fcontext{'/var/www/ssh_authorized_keys(/.*)?':
+      setype => 'ssh_home_t',
+      before => File['/var/www/ssh_authorized_keys'],
+    }
+  }
+  file{'/var/www/ssh_authorized_keys':
+    ensure  => directory,
+    owner   => root,
+    group   => 0,
+    mode    => '0444',
+    purge   => true,
+    force   => true,
+    recurse => true,
+    seltype => 'ssh_home_t',
+  }
 }

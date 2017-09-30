@@ -1,0 +1,18 @@
+# add the ssh public keys you want to add to your SFTP login
+#
+# The format is:
+# key-type public_key
+#
+# Example:
+# ssh-rsa AAAAmysuperkey
+# ssh-ed25519 AAAAmyelipticcurvekey
+#
+# Notes:
+# * The script will ignore empty lines, lines starting with a #
+#   and anything that does not match the above format
+# * The script will remove any other key not listed in this file
+<% Array(@user_scripts_options['ssh_authorized_keys']).each do |key|
+    if m = key.match(/^(ssh-rsa|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521|ssh-ed25519) ([A-Za-z0-9=\/\+]+)( )?/) -%>
+<%= "#{m[1]} #{m[2]}" %>
+<% end
+end -%>
