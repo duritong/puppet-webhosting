@@ -68,7 +68,6 @@ define webhosting::user_scripts::manage(
           file{
             "${scripts_path}/${script_name}/${script_name}.${config_ext}":
               content => template("webhosting/user_scripts/${script_name}/${script_name}.${config_ext}.erb"),
-              replace => false,
               owner   => $sftp_user,
               group   => $web_group,
               mode    => '0600';
