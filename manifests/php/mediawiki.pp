@@ -114,10 +114,13 @@ define webhosting::php::mediawiki(
     $sendmail_path = undef
   }
   $mediawiki_php_settings = {
-    open_basedir  => "/var/www/mediawiki:/var/www/vhosts/${name}/www:/var/www/upload_tmp_dir/${name}:/var/www/session.save_path/${name}",
     sendmail_path => $sendmail_path,
   }
   $real_php_settings = merge($mediawiki_php_settings,$php_settings)
+  $mediawiki_php_options = {
+    additional_open_basedir  => "/var/www/mediawiki",
+  }
+  $real_php_options = merge($mediawiki_php_options,$php_options)
 
   apache::vhost::php::mediawiki{$name:
     ensure             => $ensure,
@@ -134,7 +137,7 @@ define webhosting::php::mediawiki(
     run_mode           => $run_mode,
     ssl_mode           => $ssl_mode,
     php_settings       => $real_php_settings,
-    php_options        => $php_options,
+    php_options        => $real_php_options,
     php_installation   => $php_installation,
     vhost_mode         => $vhost_mode,
     vhost_source       => $vhost_source,
