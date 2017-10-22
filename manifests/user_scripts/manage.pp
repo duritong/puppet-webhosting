@@ -26,8 +26,8 @@ define webhosting::user_scripts::manage(
     require ::webhosting::user_scripts
     file{
       "user_scripts_${name}":
-        path    => $scripts_path,
         ensure  => directory,
+        path    => $scripts_path,
         owner   => root,
         group   => $web_group,
         mode    => '0440',
@@ -52,10 +52,10 @@ define webhosting::user_scripts::manage(
       if ($script_name in $scripts) or ($scripts == 'ALL') {
         file{
           "${scripts_path}/${script_name}":
-            ensure  => directory,
-            owner   => $sftp_user,
-            group   => $web_group,
-            mode    => '0600';
+            ensure => directory,
+            owner  => $sftp_user,
+            group  => $web_group,
+            mode   => '0600';
           "incron_${script_name}_${name}":
             path    => "/etc/incron.d/${name}_${script_name}",
             content => "${scripts_path}/${script_name}/ IN_CREATE /opt/webhosting_user_scripts/common/run_incron.sh \$@ \$#\n",
@@ -68,22 +68,29 @@ define webhosting::user_scripts::manage(
           file{
             "${scripts_path}/${script_name}/${script_name}.${config_ext}":
               content => template("webhosting/user_scripts/${script_name}/${script_name}.${config_ext}.erb"),
-              replace => false,
               owner   => $sftp_user,
               group   => $web_group,
               mode    => '0600';
           }
+          if ($script_name == 'ssh_authorized_keys') {
+            file{"/var/www/ssh_authorized_keys/${sftp_user}":
+              content => template('webhosting/user_scripts/ssh_authorized_keys/ssh_authorized_keys.keys.erb'),
+              owner   => $sftp_user,
+              group   => 0,
+              mode    => '0600',
+              seltype => 'ssh_home_t';
+            }
+            if !$user_scripts_options['enforce_ssh_authorized_keys'] {
+              File["/var/www/ssh_authorized_keys/${sftp_user}","${scripts_path}/${script_name}/${script_name}.${config_ext}"]{
+                replace => false,
+              }
+            }
+          } else {
+            File["${scripts_path}/${script_name}/${script_name}.${config_ext}"]{
+              replace => false,
+            }
+          }
         }
-      }
-    }
-    if ('ssh_authorized_keys' in $scripts) or ($scripts == 'ALL') {
-      file{"/var/www/ssh_authorized_keys/${sftp_user}":
-        content => template('webhosting/user_scripts/ssh_authorized_keys/ssh_authorized_keys.keys.erb'),
-        replace => false,
-        owner   => $sftp_user,
-        group   => 0,
-        mode    => '0600',
-        seltype => 'ssh_home_t';
       }
     }
   }

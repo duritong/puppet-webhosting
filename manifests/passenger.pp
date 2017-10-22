@@ -52,6 +52,8 @@ define webhosting::passenger(
   $mod_security         = true,
   $passenger_app        = 'rails',
   $git_repo             = 'absent',
+  $user_scripts         = 'absent',
+  $user_scripts_options = {},
 ){
 
   if ($uid_name == 'absent'){
@@ -74,28 +76,30 @@ define webhosting::passenger(
     }
   }
   webhosting::common{$name:
-    ensure              => $ensure,
-    configuration       => $configuration,
-    uid                 => $uid,
-    uid_name            => $real_uid_name,
-    gid                 => $gid,
-    gid_name            => $real_gid_name,
-    user_access         => $user_access,
-    password            => $password,
-    password_crypted    => $password_crypted,
-    htpasswd_file       => $htpasswd_file,
-    ssl_mode            => $ssl_mode,
-    run_mode            => $run_mode,
-    run_uid             => $run_uid,
-    run_uid_name        => $run_uid_name,
-    run_gid             => $run_gid,
-    wwwmail             => $wwwmail,
-    nagios_check        => $nagios_check,
-    nagios_check_domain => $nagios_check_domain,
-    nagios_check_url    => $nagios_check_url,
-    nagios_check_code   => $nagios_check_code,
-    nagios_use          => $nagios_use,
-    git_repo            => $git_repo,
+    ensure               => $ensure,
+    configuration        => $configuration,
+    uid                  => $uid,
+    uid_name             => $real_uid_name,
+    gid                  => $gid,
+    gid_name             => $real_gid_name,
+    user_access          => $user_access,
+    password             => $password,
+    password_crypted     => $password_crypted,
+    htpasswd_file        => $htpasswd_file,
+    ssl_mode             => $ssl_mode,
+    run_mode             => $run_mode,
+    run_uid              => $run_uid,
+    run_uid_name         => $run_uid_name,
+    run_gid              => $run_gid,
+    wwwmail              => $wwwmail,
+    nagios_check         => $nagios_check,
+    nagios_check_domain  => $nagios_check_domain,
+    nagios_check_url     => $nagios_check_url,
+    nagios_check_code    => $nagios_check_code,
+    nagios_use           => $nagios_use,
+    git_repo             => $git_repo,
+    user_scripts         => $user_scripts,
+    user_scripts_options => $user_scripts_options,
   }
   apache::vhost::passenger{$name:
     ensure             => $ensure,
@@ -127,18 +131,18 @@ define webhosting::passenger(
     $path_options = "\nexport PATH=~/gems/bin:\$PATH"
     file{
       "/var/www/vhosts/${name}/.ccache":
-        ensure  => directory,
-        owner   => $real_uid_name,
-        group   => $real_gid_name,
-        mode    => '0750';
+        ensure => directory,
+        owner  => $real_uid_name,
+        group  => $real_gid_name,
+        mode   => '0750';
       "/var/www/vhosts/${name}/.bashrc":
         content => "export GEM_HOME=~/gems/${path_options}${rails_options}\n",
         owner   => $real_uid_name,
         group   => $real_gid_name,
         mode    => '0640';
       "/var/www/vhosts/${name}/.profile":
-        ensure  => link,
-        target  => "/var/www/vhosts/${name}/.bashrc";
+        ensure => link,
+        target => "/var/www/vhosts/${name}/.bashrc";
       "/var/www/vhosts/${name}/.gemrc":
         content => "gem: --no-ri --no-rdoc\n",
         owner   => $real_uid_name,
