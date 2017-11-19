@@ -55,7 +55,7 @@ function update_smf {
   echo "Updating ${smf}"
   find ${wwwdir} -user ${runuser} -print0 | xargs --no-run-if-empty -0 chmod g+w
   find ${wwwdir} -user ${runuser} -print0 | xargs --no-run-if-empty -0 chown ${ftpuser}
-  run_cmd_as $ftpuser "cd ${wwwdir} && git pull && chmod -R g+w attachments avatars cache Packages Smileys Themes"
+  run_cmd_as $ftpuser "cd ${wwwdir} && git pull --no-edit && chmod -R g+w attachments avatars cache Packages Smileys Themes"
   echo "Updating ${smf} done"
 }
 
