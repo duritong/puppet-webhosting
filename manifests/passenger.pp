@@ -50,7 +50,6 @@ define webhosting::passenger(
   $nagios_check_code    = '200',
   $nagios_use           = 'generic-service',
   $mod_security         = true,
-  $passenger_app        = 'rails',
   $git_repo             = 'absent',
   $user_scripts         = 'absent',
   $user_scripts_options = {},
@@ -119,15 +118,9 @@ define webhosting::passenger(
     vhost_destination  => $vhost_destination,
     htpasswd_file      => $htpasswd_file,
     mod_security       => $mod_security,
-    passenger_app      => $passenger_app,
   }
 
   if $ensure == 'present' {
-    if $passenger_app =~ /^rails/ {
-      $rails_options = "\nexport RAILS_ENV=production"
-    } else {
-      $rails_options = ''
-    }
     $path_options = "\nexport PATH=~/gems/bin:\$PATH"
     file{
       "/var/www/vhosts/${name}/.ccache":
@@ -136,7 +129,7 @@ define webhosting::passenger(
         group  => $real_gid_name,
         mode   => '0750';
       "/var/www/vhosts/${name}/.bashrc":
-        content => "export GEM_HOME=~/gems/${path_options}${rails_options}\n",
+        content => "export GEM_HOME=~/gems/${path_options}\nexport RAILS_ENV=production\n",
         owner   => $real_uid_name,
         group   => $real_gid_name,
         mode    => '0640';
