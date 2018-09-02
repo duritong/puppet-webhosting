@@ -167,6 +167,7 @@ define webhosting::common(
     }
     $real_nagios_check_code = $htpasswd_file ? {
       'absent'  => $nagios_check_code,
+      false     => $nagios_check_code,
       default   => '401'
     }
 
