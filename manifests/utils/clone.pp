@@ -9,7 +9,7 @@ define webhosting::utils::clone(
 ){
   # create webdir
   # for the cloning, $documentroot needs to be absent
-  if $run_mode == 'fcgid' {
+  if $run_mode in ['fpm','fcgid'] {
     $req = [User::Sftp_only[$uid_name], User::Managed[$run_uid_name] ]
   } else {
     $req = User::Sftp_only[$uid_name]

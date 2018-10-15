@@ -80,7 +80,7 @@ define webhosting::common(
     include ::apache::sftponly
   }
 
-  if $run_mode in ['fcgid','static'] {
+  if $run_mode in ['fpm','fcgid','static'] {
     if ($user_access == 'sftp') {
       if ($ensure != 'absent') {
         User::Sftp_only[$real_uid_name]{
@@ -89,11 +89,10 @@ define webhosting::common(
       }
       user::groups::manage_user{
         "apache_in_${real_gid_name}":
-          group => $real_gid_name,
-          user  => 'apache',
-      }
-      User::Groups::Manage_user["apache_in_${real_gid_name}"]{
-        ensure => $ensure,
+          ensure => $ensure,
+          group  => $real_gid_name,
+          user   => 'apache',
+          notify => Service['apache'],
       }
       if $ensure == 'present' {
         User::Groups::Manage_user["apache_in_${real_gid_name}"]{
@@ -102,9 +101,9 @@ define webhosting::common(
       }
     }
   }
-  if $run_mode == 'fcgid' {
+  if $run_mode in ['fpm','fcgid'] {
     if ($run_uid=='absent') and ($ensure != 'absent') {
-      fail("you need to define run_uid for ${name} on ${::fqdn} to use fcgid")
+      fail("you need to define run_uid for ${name} on ${::fqdn} to use fpm or fcgid")
     }
     $real_run_uid = $run_uid ? {
       'iuid'  => iuid($real_run_uid_name,'webhosting'),

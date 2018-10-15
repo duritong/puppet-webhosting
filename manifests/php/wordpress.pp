@@ -134,7 +134,7 @@ define webhosting::php::wordpress(
     manage_directories  => $manage_directories,
     require             => User::Sftp_only[$real_uid_name],
   }
-  if $run_mode == 'fcgid' {
+  if $run_mode in ['fpm','fcgid'] {
     if ($run_uid_name == 'absent'){
       $real_run_uid_name = "${name}_run"
     } else {
@@ -170,7 +170,7 @@ define webhosting::php::wordpress(
         before => File["${documentroot}/wp-content/uploads"],
       }
     }
-    if $run_mode == 'fcgid' {
+    if $run_mode in ['fpm','fcgid'] {
       User::Managed[$real_run_uid_name] -> Wordpress::Instance[$name]
     }
   }

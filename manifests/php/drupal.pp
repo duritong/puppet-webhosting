@@ -136,7 +136,7 @@ define webhosting::php::drupal(
     manage_cron         => $manage_cron,
   }
   case $run_mode {
-    'fcgid': {
+    'fpm','fcgid': {
       if ($run_uid_name == 'absent'){
         $real_run_uid_name = "${name}_run"
       } else {

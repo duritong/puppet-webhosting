@@ -134,7 +134,7 @@ define webhosting::php::typo3(
     manage_directories  => $manage_directories,
   }
   case $run_mode {
-    'fcgid': {
+    'fpm','fcgid': {
       if ($run_uid_name == 'absent'){
         $real_run_uid_name = "${name}_run"
       } else {
