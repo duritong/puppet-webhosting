@@ -27,7 +27,6 @@ define webhosting::wsgi(
   $logmode              = 'default',
   $owner                = root,
   $group                = 'absent',
-  $run_mode             = 'normal',
   $run_uid              = 'absent',
   $run_uid_name         = 'absent',
   $run_gid              = 'absent',
@@ -86,7 +85,6 @@ define webhosting::wsgi(
     password_crypted     => $password_crypted,
     htpasswd_file        => $htpasswd_file,
     ssl_mode             => $ssl_mode,
-    run_mode             => $run_mode,
     run_uid              => $run_uid,
     run_uid_name         => $run_uid_name,
     run_gid              => $run_gid,
@@ -120,55 +118,25 @@ define webhosting::wsgi(
     mod_security       => $mod_security,
   }
 
-  case $run_mode {
-    'fcgid': {
-      if ($run_uid_name == 'absent'){
-        $real_run_uid_name = "${name}_run"
-      } else {
-        $real_run_uid_name = $run_uid_name
-      }
-      if ($run_gid_name == 'absent'){
-        $real_run_gid_name = $gid_name ? {
-          'absent'  => $name,
-          default   => $gid_name
-        }
-      } else {
-        $real_run_gid_name = $run_gid_name
-      }
-      Apache::Vhost::Wsgi[$name]{
-        documentroot_owner  => $real_uid_name,
-        documentroot_group  => $real_gid_name,
-        documentroot_mode   => '0750',
-        run_uid             => $real_run_uid_name,
-        run_gid             => $real_run_gid_name,
-      }
-      Apache::Vhost::Wsgi[$name]{
-        require => [ User::Sftp_only[$real_uid_name],
-          User::Managed[$real_run_uid_name] ],
-      }
+  Apache::Vhost::Wsgi[$name]{
+    require => User::Sftp_only[$real_uid_name],
+  }
+  if ($run_uid_name == 'absent'){
+    $real_run_uid_name = 'apache'
+  } else {
+    $real_run_uid_name = $run_uid_name
+  }
+  if ($run_gid_name == 'absent'){
+    $real_run_gid_name = $gid_name ? {
+      'absent'  => 'apache',
+      default   => $gid_name
     }
-    default: {
-      Apache::Vhost::Wsgi[$name]{
-        require => User::Sftp_only[$real_uid_name],
-      }
-      if ($run_uid_name == 'absent'){
-        $real_run_uid_name = 'apache'
-      } else {
-        $real_run_uid_name = $run_uid_name
-      }
-      if ($run_gid_name == 'absent'){
-        $real_run_gid_name = $gid_name ? {
-          'absent'  => 'apache',
-          default   => $gid_name
-        }
-      } else {
-        $real_run_gid_name = $run_gid_name
-      }
-      Apache::Vhost::Wsgi[$name]{
-        run_uid => $run_uid,
-        run_gid => $run_gid,
-      }
-    }
+  } else {
+    $real_run_gid_name = $run_gid_name
+  }
+  Apache::Vhost::Wsgi[$name]{
+    run_uid => $run_uid,
+    run_gid => $run_gid,
   }
   if $template_partial != 'absent' {
     Apache::Vhost::Wsgi[$name]{
