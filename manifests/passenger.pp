@@ -49,7 +49,7 @@ define webhosting::passenger(
   $nagios_check_url     = '/',
   $nagios_check_code    = '200',
   $nagios_use           = 'generic-service',
-  $mod_security         = true,
+  $mod_security         = false,
   $git_repo             = 'absent',
   $user_scripts         = 'absent',
   $user_scripts_options = {},

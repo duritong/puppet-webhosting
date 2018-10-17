@@ -51,7 +51,7 @@ define webhosting::php::mediawiki(
   $nagios_check_url    = '/',
   $nagios_check_code   = '200',
   $nagios_use          = 'generic-service',
-  $mod_security        = true,
+  $mod_security        = false,
   $image               = 'absent',
   $config              = 'unmanaged',
   $db_server           = 'unmanaged',

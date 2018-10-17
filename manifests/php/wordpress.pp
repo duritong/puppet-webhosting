@@ -57,7 +57,7 @@ define webhosting::php::wordpress(
   $nagios_use             = 'generic-service',
   $autoinstall            = true,
   $blog_options           = {},
-  $mod_security           = true,
+  $mod_security           = false,
   $manage_config          = false,
   $config_webwriteable    = false,
   $manage_directories     = true,

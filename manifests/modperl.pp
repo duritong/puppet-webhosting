@@ -52,7 +52,7 @@ define webhosting::modperl(
   $nagios_check_url      = '/',
   $nagios_check_code     = '200',
   $nagios_use            = 'generic-service',
-  $mod_security          = true,
+  $mod_security          = false,
   $git_repo              = 'absent',
 ){
   if ($uid_name == 'absent'){

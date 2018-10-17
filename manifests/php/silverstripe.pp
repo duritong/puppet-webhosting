@@ -56,7 +56,7 @@ define webhosting::php::silverstripe(
   $nagios_check_code     = '200',
   $nagios_use            = 'generic-service',
   $git_repo              = 'absent',
-  $mod_security          = true,
+  $mod_security          = false,
   $manage_config         = true,
   $config_webwriteable   = false,
   $manage_directories    = true
