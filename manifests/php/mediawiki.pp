@@ -118,7 +118,7 @@ define webhosting::php::mediawiki(
   }
   $real_php_settings = merge($mediawiki_php_settings,$php_settings)
   $mediawiki_php_options = {
-    additional_open_basedir  => "/var/www/mediawiki",
+    additional_open_basedir  => "/var/www/mediawiki:/usr/bin/git",
   }
   $real_php_options = merge($mediawiki_php_options,$php_options)
 
