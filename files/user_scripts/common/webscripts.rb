@@ -4,6 +4,9 @@ require 'fileutils'
 require 'yaml'
 require 'tempfile'
 
+STDOUT.sync = true
+STDERR.sync = true
+
 def usage
   puts "USAGE: #{File.basename(__FILE__)} /path/to/file.run"
   exit 1
