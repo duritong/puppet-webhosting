@@ -24,7 +24,7 @@ define webhosting::user_scripts::manage(
         'default_contact' => true,
       },
     }
-    $user_scripts_options = merge($default_options,$options)
+    $user_scripts_options = deep_merge($default_options,$options)
 
     require ::webhosting::user_scripts
     file{
