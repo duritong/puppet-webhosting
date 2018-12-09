@@ -21,7 +21,7 @@ define webhosting::user_scripts::manage(
         'web_writable'     => [],
       },
       'global'            => {
-        'default_contact' => true,
+        'contact' => true,
       },
     }
     $user_scripts_options = deep_merge($default_options,$options)
@@ -39,10 +39,14 @@ define webhosting::user_scripts::manage(
         force   => true;
     }
 
-    if $user_scripts_options['global']['default_contact'] == true {
-      $hosting_contact = "security@${name}"
-    } elsif $user_scripts_options['global']['default_contact'] {
-      $hosting_contact = $user_scripts_options['global']['default_contact']
+    if $user_scripts_options['global']['contact'] == true {
+      if $webhosting::user_scripts::default_contact_domain {
+        $hosting_contact = "${name}@${webhosting::user_scripts::default_contact_domain}"
+      } else {
+        $hosting_contact = "security@${name}"
+      }
+    } elsif $user_scripts_options['global']['contact'] {
+      $hosting_contact = $user_scripts_options['global']['contact']
     } else {
       $hosting_contact = false
     }

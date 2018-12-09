@@ -1,5 +1,7 @@
 # the basics for the user_scripts
-class webhosting::user_scripts {
+class webhosting::user_scripts(
+  $default_contact_domain = false,
+) {
   require ::incron
 
   # common stuff
