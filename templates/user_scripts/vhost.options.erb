@@ -2,3 +2,9 @@ sftp_user: <%= @sftp_user %>
 run_user: <%= @run_user %>
 group: <%= @web_group %>
 webdir: <%= @base_path %>/www
+<% if @hosting_contact -%>
+hosting_contact: <%= @hosting_contact %>
+<% end -%>
+<% if @user_scripts_options['global']['scl'] -%>
+scl: <%= @user_scripts_options['global']['scl'] %>
+<% end -%>

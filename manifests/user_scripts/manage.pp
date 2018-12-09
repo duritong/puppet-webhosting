@@ -20,6 +20,9 @@ define webhosting::user_scripts::manage(
         'only_webreadable' => [],
         'web_writable'     => [],
       },
+      'global'            => {
+        'default_contact' => true,
+      },
     }
     $user_scripts_options = merge($default_options,$options)
 
@@ -34,6 +37,14 @@ define webhosting::user_scripts::manage(
         recurse => true,
         purge   => true,
         force   => true;
+    }
+
+    if $user_scripts_options['global']['default_contact'] == true {
+      $hosting_contact = "security@${name}"
+    } elsif $user_scripts_options['global']['default_contact'] {
+      $hosting_contact = $user_scripts_options['global']['default_contact']
+    } else {
+      $hosting_contact = false
     }
 
     file{ "${scripts_path}/vhost.options":

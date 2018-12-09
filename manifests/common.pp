@@ -32,6 +32,7 @@ define webhosting::common(
   $nagios_check_code     = '200',
   $nagios_use            = 'generic-service',
   $git_repo              = 'absent',
+  $php_installation      = false,
 ){
   if ($run_gid == 'absent') {
     if ($gid == 'uid') {
@@ -192,13 +193,27 @@ define webhosting::common(
       run_user  => $real_run_uid_name,
   }
   if $ensure != 'absent' {
+    if $php_installation and $php_installation != 'system' {
+      $php_inst = regsubst($php_installation,'^scl','php')
+      require "::php::scl::${php_inst}"
+      $scl_name = getvar("php::scl::${php_inst}::scl_name")
+    } else {
+      $scl_name = false
+    }
+    if $scl_name and !('scl' in $user_scripts_options['global']) {
+      $real_user_scripts_options = deep_merge({
+          'global' => { 'scl' => $scl_name }
+        }, $user_scripts_options)
+    } else {
+      $real_user_scripts_options = $user_scripts_options
+    }
     webhosting::user_scripts::manage{$name:
       base_path => $vhost_path,
       scripts   => $user_scripts,
       sftp_user => $real_uid_name,
       run_user  => $real_run_uid_name,
       web_group => $real_gid_name,
-      options   => $user_scripts_options,
+      options   => $real_user_scripts_options,
     }
   }
   if ($git_repo != 'absent') and ($ensure != 'absent') {

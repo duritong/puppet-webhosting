@@ -106,6 +106,7 @@ define webhosting::php::mediawiki(
     nagios_check_url    => $nagios_check_url,
     nagios_check_code   => $nagios_check_code,
     nagios_use          => $nagios_use,
+    php_installation    => $php_installation,
   }
 
   if $wwwmail and ($contact != 'unmanaged'){

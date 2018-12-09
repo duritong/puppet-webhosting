@@ -32,6 +32,7 @@ define webhosting::php::spip(
   $run_uid_name          = 'absent',
   $run_gid               = 'absent',
   $run_gid_name          = 'absent',
+  $php_installation      = 'system',
   $watch_adjust_webfiles = 'absent',
   $user_scripts          = 'absent',
   $user_scripts_options  = {},
@@ -101,6 +102,7 @@ define webhosting::php::spip(
     nagios_check_code     => $nagios_check_code,
     nagios_use            => $nagios_use,
     git_repo              => $git_repo,
+    php_installation      => $php_installation,
   }
 
   apache::vhost::php::spip{$name:

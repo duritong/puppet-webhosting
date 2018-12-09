@@ -106,6 +106,7 @@ define webhosting::php::drupal(
     nagios_check_code     => $nagios_check_code,
     nagios_use            => $nagios_use,
     git_repo              => $git_repo,
+    php_installation      => $php_installation,
   }
 
   apache::vhost::php::drupal{$name:
