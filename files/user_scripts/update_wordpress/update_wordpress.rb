@@ -72,12 +72,8 @@ def upgrade_wordpress(wd)
 
   # run the upgrade as sftp user
   log "Running the upgrade script in #{wd}"
+  cmd_prefix = options['scl'] ?  "scl enable #{options['scl']} -- " : ''
   sudo(sftp_user_uid,group_gid) do
-    if options['scl']
-      cmd_prefix = "scl enable #{options['scl']} -- "
-    else
-      cmd_prefix = ''
-    end
     cmd("#{cmd_prefix}/usr/local/bin/upgrade_wordpress #{shellescape(wd)}")
   end
   log "Upgrading Wordpress in #{wd} finished."
