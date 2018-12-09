@@ -202,7 +202,7 @@ define webhosting::common(
     }
     if $scl_name and !('scl' in $user_scripts_options['global']) {
       $real_user_scripts_options = deep_merge({
-          'global' => { 'scl' => $scl_name }
+          'global' => { 'scl' => $scl_name },
         }, $user_scripts_options)
     } else {
       $real_user_scripts_options = $user_scripts_options
