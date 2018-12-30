@@ -215,6 +215,13 @@ define webhosting::common(
       web_group => $real_gid_name,
       options   => $real_user_scripts_options,
     }
+
+    if 'mail_ratelimit' in $configuration {
+      exim::ratelimit::localforward::entry{
+        $real_run_uid_name:
+          ratelimit => $configuration['mail_ratelimit'];
+      }
+    }
   }
   if ($git_repo != 'absent') and ($ensure != 'absent') {
     webhosting::utils::clone{
