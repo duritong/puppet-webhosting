@@ -218,7 +218,7 @@ define webhosting::common(
 
     if 'mail_ratelimit' in $configuration {
       exim::ratelimit::localforward::entry{
-        $real_run_uid_name:
+        $real_run_uid:
           ratelimit => $configuration['mail_ratelimit'];
       }
     }
