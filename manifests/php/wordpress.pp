@@ -159,12 +159,13 @@ define webhosting::php::wordpress(
   }
   if $ensure != 'absent' {
     wordpress::instance{$name:
-      path         => $documentroot,
-      autoinstall  => $autoinstall,
-      blog_options => $blog_options,
-      uid_name     => $real_uid_name,
-      gid_name     => $real_gid_name,
-      require      => User::Sftp_only[$real_uid_name],
+      path             => $documentroot,
+      autoinstall      => $autoinstall,
+      blog_options     => $blog_options,
+      uid_name         => $real_uid_name,
+      gid_name         => $real_gid_name,
+      php_installation => $php_installation,
+      require          => User::Sftp_only[$real_uid_name],
     }
     if $manage_directories {
       Wordpress::Instance[$name]{
