@@ -47,6 +47,7 @@ def run_script
   end
   log "Wrote #{keys.size} keys to the authorized_keys file"
   log "Finished managing sshkeys"
+  return true
 end
 
 # this will also trigger the run of the script

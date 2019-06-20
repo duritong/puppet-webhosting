@@ -33,6 +33,7 @@ def run_script
   log "Errors might occur, as files got removed or renamed. You can ignore them in this step."
   reset_update_mode
   log "done."
+  return true
 end
 
 def perm_file

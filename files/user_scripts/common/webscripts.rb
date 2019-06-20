@@ -183,6 +183,7 @@ ensure
   tf.unlink
 end
 
+success = true
 begin
   @run_file = ARGV.shift
   usage if @run_file.nil? || !File.exists?(@run_file = File.expand_path(@run_file))
@@ -210,10 +211,13 @@ begin
   end
 
   File.open(lockfile,'w'){|f| f << $$ }
-  run_script
+  success = run_script
 rescue => e
   log "Error while running script: #{e.message}"
+  success = false
 ensure
   File.delete(@run_file) if File.exists?(@run_file)
   File.delete(lockfile)
 end
+
+exit success ? 0 : 1

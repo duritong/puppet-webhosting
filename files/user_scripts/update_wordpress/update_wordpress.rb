@@ -25,10 +25,11 @@ end
 # the main method
 def run_script
   log "Starting wordpress upgrade"
-  wp_directories.each do |wd|
+  success = wp_directories.all? do |wd|
     upgrade_wordpress(wd)
   end
   log "Finished wordpress upgrade"
+  return success
 end
 
 ## script specific methods
@@ -79,6 +80,7 @@ def upgrade_wordpress(wd)
   log "Upgrading Wordpress in #{wd} finished."
 rescue => e
   log "Error while upgrading wordpress in #{wd}: #{e.message}"
+  return false
 end
 
 # this will also trigger the run of the script

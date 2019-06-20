@@ -31,6 +31,7 @@ def run_script
   directories['only_webreadable'].each { |path| adjust(path, 'u+rwX,g-w,o-rwx' ) }
   directories['web_writable'].each { |path| adjust(path, 'u+rwX,g+rwX,o-rwx' ) }
   log "Finished adjusting permissions"
+  return true
 end
 
 ## script specific methods
