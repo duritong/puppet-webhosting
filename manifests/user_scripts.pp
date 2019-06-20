@@ -49,6 +49,15 @@ class webhosting::user_scripts(
   require ::wordpress::base
   require ::tmpwatch
 
+  logrotate::rule{
+    'webhosting-scripts':
+      path         => '/var/www/vhosts/*/scripts/*/*.log',
+      rotate       => 7,
+      compress     => true,
+      copytruncate => true,
+      dateext      => true,
+      missingok    => true,
+  }
   # manage ssh keys
   if $facts['selinux'] {
     selinux::fcontext{'/var/www/ssh_authorized_keys(/.*)?':
