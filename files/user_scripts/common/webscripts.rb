@@ -195,12 +195,17 @@ begin
   # test script specific security things
   script_security
 
-  if File.exists?(lockfile)
-    pid = File.read(lockfile).chomp
-    if File.directory?("/proc/#{pid}")
-      security_fail "Lockfile #{lockfile} exists with pid #{pid} and this process still seems to be running. Exiting..."
-    else
-      log "Overwrite staled lockfile #{lockfile}. Old pid was #{pid}, but this process seems not to be running anymore."
+  Dir[File.join(@base_dir,'..','*/*.lock')].each do |el|
+    existing_lockfile = File.expand_path(el)
+    if File.exists?(existing_lockfile)
+      pid = File.read(existing_lockfile).chomp.to_i
+      script_name = File.basename(existing_lockfile, '.lock')
+      if File.directory?("/proc/#{pid}")
+        security_fail "Lockfile for #{script_name} exists with pid #{pid} and this process still seems to be running. Exiting..."
+      else
+        log "Removing staled lockfile for #{script_name}. Old pid was #{pid}, but this process seems not to be running anymore."
+        File.unlink(existing_lockfile)
+      end
     end
   end
 
