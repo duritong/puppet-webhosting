@@ -1,6 +1,7 @@
 # the basics for the user_scripts
 class webhosting::user_scripts(
   $default_contact_domain = false,
+  $notifications_sender   = "root@${facts['fqdn']}",
 ) {
   require ::incron
 
@@ -41,6 +42,21 @@ class webhosting::user_scripts(
     }
 
   }
+
+  selinux::fcontext{
+    '/var/www/vhosts/[^/]*/scripts/[^/]*/[^/]*\.log':
+      before => File['/opt/webhosting_user_scripts/common/run_incron.sh'],
+      setype => 'httpd_log_t';
+  } -> logrotate::rule{
+    'webhosting-scripts':
+      path         => '/var/www/vhosts/*/scripts/*/*.log',
+      rotate       => 7,
+      compress     => true,
+      copytruncate => true,
+      dateext      => true,
+      missingok    => true,
+  }
+
   # script dependencies
   # update mode script
   include ::acl::requirements
@@ -48,10 +64,24 @@ class webhosting::user_scripts(
   # wordpress updates
   require ::wordpress::base
   require ::tmpwatch
+  require ::rubygems::mail
 
-  logrotate::rule{
-    'webhosting-scripts':
-      path         => '/var/www/vhosts/*/scripts/*/*.log',
+  file{
+    '/usr/local/sbin/auto_update_wordess':
+      source  => 'puppet:///modules/webhosting/update_scripts/auto_update_wordess.rb',
+      require => File['/opt/webhosting_user_scripts/update_wordpress/update_wordpress.rb'],
+      owner   => root,
+      group   => 0,
+      mode    => '0500';
+  } -> file{
+    '/etc/cron.daily/auto_update_wordess':
+      content => "#!/bin/bash\n/usr/local/sbin/auto_update_wordess ${notifications_sender}> /var/log/auto_update_wordess.log\n",
+      owner   => root,
+      group   => 0,
+      mode    => '0500';
+  } -> logrotate::rule{
+    'auto-update-wordpress':
+      path         => '/var/log/auto_update_wordess.log',
       rotate       => 7,
       compress     => true,
       copytruncate => true,

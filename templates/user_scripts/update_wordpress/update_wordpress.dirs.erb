@@ -8,10 +8,17 @@
 # NOTE: this must be a relative path to your www/
 #       directory!
 # In most of the times you don't need to adjust
-# the only allowed option `wp_directories`.
+# the option `wp_directories`.
 #
 # wp_directories must be an array and it can point
 # to multiple wordpress installations within your
 # webhosting.
+#
+# An additional option is called `auto_update` and
+# is set to true by default. Removing that option
+# or setting it to false disables the automatic
+# updates that run the update_wordpress script
+# on a daily basis.
 ---
+auto_update: true
 wp_directories: ['.']
