@@ -62,12 +62,13 @@ def upgrade_wordpress(wd)
   # to ensure that we can run the upgrade
   log "Starting to upgrade wordpress in #{wd}"
   with_tempfile do |tf|
+    FileUtils.chown(options['run_user'], options['group'], tf)
     sudo(run_user_uid,group_gid) do
-      cmd("find #{shellescape(path)} -user #{options['run_user']} -type d > #{tf}")
-      cmd("find #{shellescape(path)} -user #{options['run_user']} -type f >> #{tf}")
+      cmd("find #{shellescape(wd)} -user #{options['run_user']} -type d > #{tf}")
+      cmd("find #{shellescape(wd)} -user #{options['run_user']} -type f >> #{tf}")
     end
     on_filelist(File.read(tf),run_user_uid) do |p|
-      FileUtils.chown( options['sftp_user'], options['group'], p)
+      FileUtils.chown(options['sftp_user'], options['group'], p)
     end
   end
 
@@ -78,6 +79,7 @@ def upgrade_wordpress(wd)
     cmd("#{cmd_prefix}/usr/local/bin/upgrade_wordpress #{shellescape(wd)}")
   end
   log "Upgrading Wordpress in #{wd} finished."
+  return true
 rescue => e
   log "Error while upgrading wordpress in #{wd}: #{e.message}"
   return false
