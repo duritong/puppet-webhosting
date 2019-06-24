@@ -12,4 +12,4 @@ script_basename=`basename $2 .run`
 script="/opt/webhosting_user_scripts/${script_basename}/${script_basename}.rb"
 [ -x ${script} ] || exit 1
 
-$script $1/$2 >> $1/${script_basename}.log
+$script $1/$2 2>&1 >> $1/${script_basename}.log
