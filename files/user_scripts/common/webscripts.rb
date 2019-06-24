@@ -153,7 +153,8 @@ def sudo(uid,gid,&blk)
     security_fail('could not drop privileges') unless Process::Sys.geteuid == uid
     yield blk
   end
-  Process.wait pid
+  pid, status = Process.wait2(pid)
+  return status
 end
 
 def on_filelist(list,owner)
