@@ -44,7 +44,7 @@ class webhosting::user_scripts(
   }
 
   selinux::fcontext{
-    '/var/www/vhosts/[^/]*/scripts/[^/]*/[^/]*\.log':
+    '/var/www/vhosts/[^/]*/scripts/[^/]*/[^/]*\.log(\-.*)?':
       before => File['/opt/webhosting_user_scripts/common/run_incron.sh'],
       setype => 'httpd_log_t';
   } -> logrotate::rule{
