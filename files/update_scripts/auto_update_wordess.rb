@@ -81,11 +81,11 @@ Dir['/var/www/vhosts/*/scripts/update_wordpress/update_wordpress.dirs'].each do 
       run_file = File.join(dir,'update_wordpress.auto_run')
       uid = Etc.getpwnam(vhost_options['sftp_user']).uid
       gid = Etc.getgrnam(vhost_options['group']).gid
-      sudo(uid, gid) do
-        FileUtils.touch run_file
-      end
+      FileUtils.touch run_file
+      File.chown(uid,gid,run_file)
       result = `/opt/webhosting_user_scripts/update_wordpress/update_wordpress.rb #{run_file} 2>&1`
       exit_code = $?.to_i
+      File.open(File.join(dir,'update_wordpress.log'),'a'){|f| f << result }
       if exit_code > 0
         error_log "Error while running update for #{hosting} - Exitcode: #{exit_code} - #{result}"
         inform_about_error(sender, vhost_options['hosting_contact'], hosting, exit_code, result, uid, gid)
