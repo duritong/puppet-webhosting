@@ -25,11 +25,13 @@ end
 # the main method
 def run_script
   log "Starting wordpress upgrade"
-  success = wp_directories.all? do |wd|
+  # run the upgrade for all, report
+  # overall status at the end
+  success = wp_directories.map do |wd|
     upgrade_wordpress(wd)
   end
   log "Finished wordpress upgrade"
-  return success
+  return success.all?
 end
 
 ## script specific methods
@@ -75,11 +77,16 @@ def upgrade_wordpress(wd)
   # run the upgrade as sftp user
   log "Running the upgrade script in #{wd}"
   cmd_prefix = options['scl'] ?  "scl enable #{options['scl']} -- " : ''
-  sudo(sftp_user_uid,group_gid) do
+  status = sudo(sftp_user_uid,group_gid) do
     cmd("#{cmd_prefix}/usr/local/bin/upgrade_wordpress #{shellescape(wd)}")
   end
-  log "Upgrading Wordpress in #{wd} finished."
-  return true
+  if status.exitstatus > 0
+    log "Error while upgrading Wordpress in #{wd} - Exitcode: #{status.exitstatus}"
+    return false
+  else
+    log "Upgrading Wordpress in #{wd} finished."
+    return true
+  end
 rescue => e
   log "Error while upgrading wordpress in #{wd}: #{e.message}"
   return false
