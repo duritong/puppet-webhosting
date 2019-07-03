@@ -71,6 +71,7 @@ sender = ARGV.shift || "root@#{Socket.gethostname}"
 Dir['/var/www/vhosts/*/scripts/update_wordpress/update_wordpress.dirs'].each do |f|
   vhost_options = YAML.load_file(f)
   dir = File.dirname(f)
+  log_dir = File.expand_path(File.join(File.dirname(f),'../../logs'))
   hosting = File.basename(File.dirname(File.dirname(dir)))
   if vhost_options['auto_update']
     vhost_options = YAML.load_file(File.join(File.dirname(dir),'vhost.options'))
@@ -85,7 +86,7 @@ Dir['/var/www/vhosts/*/scripts/update_wordpress/update_wordpress.dirs'].each do 
       File.chown(uid,gid,run_file)
       result = `/opt/webhosting_user_scripts/update_wordpress/update_wordpress.rb #{run_file} 2>&1`
       exit_code = $?.to_i
-      File.open(File.join(dir,'update_wordpress.log'),'a'){|f| f << result }
+      File.open(File.join(log_dir,'users-script-update_wordpress.log'),'a'){|f| f << result }
       if exit_code > 0
         error_log "Error while running update for #{hosting} - Exitcode: #{exit_code} - #{result}"
         inform_about_error(sender, vhost_options['hosting_contact'], hosting, exit_code, result, uid, gid)
