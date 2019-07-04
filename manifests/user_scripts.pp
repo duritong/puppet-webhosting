@@ -51,6 +51,7 @@ class webhosting::user_scripts(
       copytruncate => true,
       dateext      => true,
       missingok    => true,
+      su           => true,
   }
 
   # script dependencies
