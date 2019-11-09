@@ -56,7 +56,7 @@ class webhosting::user_scripts(
 
   # script dependencies
   # update mode script
-  include ::acl::requirements
+  include ::posix_acl::requirements
 
   # wordpress updates
   require ::wordpress::base
