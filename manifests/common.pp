@@ -61,24 +61,60 @@ define webhosting::common(
 
   $vhost_path = "/var/www/vhosts/${name}"
 
-  if ($user_access == 'sftp') {
+  if ($user_access == 'sftp') or ('containers' in $configuration) {
     $real_uid = $uid ? {
       'iuid'  => iuid($real_uid_name,'webhosting'),
       default => $uid
     }
-    $real_password = $password ? {
-      'trocla' => trocla("webhosting_${real_uid_name}",'sha512crypt'),
-      default  => $password
+    if 'containers' in $configuration {
+      if $ensure == 'present' {
+        # we don't know the users subuid/subgid
+        # Must be set if we might want to do keep-user-id
+        # https://lists.podman.io/archives/list/podman@lists.podman.io/thread/LA2J5LY6SZMNMPLDGE4DKIV2CFLGPOXC/
+        exec{"adjust_path_access_for_keep-user-id_${vhost_path}":
+          command => "bash -c \"setfacl -m user:$(grep -E '^${real_uid_name}:' /etc/subuid | cut -d: -f 2):rx ${vhost_path}\"",
+          unless  => "getfacl -p -n ${vhost_path}  | grep -qE \"^user:$(grep -E '^${real_uid_name}:' /etc/subuid | cut -d: -f 2):r-x\\$\"",
+          require => [File[$vhost_path],User[$real_uid_name]];
+        } -> Podman::Container<| tag == "user_${real_uid_name}" |>
+      }
+
+      $configuration['containers'].each |$con_name,$vals| {
+        $run_flags = pick($vals['run_flags'],{})
+        $con_values = ($vals - 'run_flags') + {
+          ensure      => $ensure,
+          user        => $real_uid_name,
+          uid         => $real_uid,
+          gid         => $gid,
+          homedir     => $vhost_path,
+          manage_user => false,
+          logpath     => "${vhost_path}/logs",
+          run_flags   => $run_flags + {
+            'security-opt-label-type' => 'httpd_container_rw_content',
+          },
+          tag         => "user_${real_uid_name}",
+        }
+        podman::container{
+          "${name}-${con_name}":
+            * => $con_values,
+        }
+      }
     }
-    user::sftp_only{$real_uid_name:
-      ensure           => $ensure,
-      password_crypted => $password_crypted,
-      homedir          => $vhost_path,
-      gid              => $gid,
-      uid              => $real_uid,
-      password         => $real_password,
+
+    if ($user_access == 'sftp') {
+      $real_password = $password ? {
+        'trocla' => trocla("webhosting_${real_uid_name}",'sha512crypt'),
+        default  => $password
+      }
+      user::sftp_only{$real_uid_name:
+        ensure           => $ensure,
+        password_crypted => $password_crypted,
+        homedir          => $vhost_path,
+        gid              => $gid,
+        uid              => $real_uid,
+        password         => $real_password,
+      }
+      include ::apache::sftponly
     }
-    include ::apache::sftponly
   }
 
   if $run_mode in ['fpm','fcgid','static'] {
