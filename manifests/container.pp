@@ -10,6 +10,7 @@
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::container(
   String $image,
+  Integer[1,65535] $port,
   $ensure               = present,
   $configuration        = {},
   $uid                  = 'absent',
@@ -96,7 +97,7 @@ define webhosting::container(
       container_name => 'con',
       manage_user    => false,
       image          => $image,
-      publish        => ["8080:80"],
+      publish        => ["12342:${port}"],
       run_flags      => {
         userns                    => 'keep-id',
         user                      => "${real_uid}:${real_gid}",
@@ -124,7 +125,7 @@ define webhosting::container(
     vhost_source       => $vhost_source,
     vhost_destination  => $vhost_destination,
     htpasswd_file      => $htpasswd_file,
-    options            => "http://127.0.0.1:8080",
+    options            => "http://127.0.0.1:12342",
   }
   if $template_partial != 'absent' {
     Apache::Vhost::Static[$name]{
