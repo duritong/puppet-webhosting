@@ -68,6 +68,23 @@ define webhosting::common(
     }
     if 'containers' in $configuration {
       if $ensure == 'present' {
+        if !defined(File["/var/www/vhosts/${name}/tmp"]) {
+          file{
+            "/var/www/vhosts/${name}/tmp":
+              ensure  => directory,
+              owner   => $real_uid_name,
+              group   => $real_gid_name,
+              mode    => '0750',
+              seltype => 'httpd_sys_rw_content_t';
+          }
+        }
+        file{
+          "/var/www/vhosts/${name}/tmp/run":
+            ensure => directory,
+            owner  => $real_uid_name,
+            group  => $real_gid_name,
+            mode   => '0777'
+        } -> Podman::Container<| tag == "user_${real_uid_name}" |>
         # we don't know the users subuid/subgid
         # Must be set if we might want to do keep-user-id
         # https://lists.podman.io/archives/list/podman@lists.podman.io/thread/LA2J5LY6SZMNMPLDGE4DKIV2CFLGPOXC/
