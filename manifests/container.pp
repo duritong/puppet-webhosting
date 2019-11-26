@@ -9,10 +9,14 @@
 #   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::container(
-  String $image,
-  Integer[1,65535] $port,
-  $ensure               = present,
-  $configuration        = {},
+  String
+    $image,
+  Integer[1,65535]
+    $port,
+  Enum['present','absent']
+    $ensure             = present,
+  Hash
+    $configuration      = {},
   $uid                  = 'absent',
   $uid_name             = $name,
   $gid                  = 'uid',
@@ -68,7 +72,6 @@ define webhosting::container(
   }
   webhosting::common{$name:
     ensure                => $ensure,
-    configuration         => $configuration,
     uid                   => $real_uid,
     uid_name              => $uid_name,
     gid                   => $real_gid,
@@ -87,23 +90,28 @@ define webhosting::container(
     watch_adjust_webfiles => $watch_adjust_webfiles,
     user_scripts          => $user_scripts,
     user_scripts_options  => $user_scripts_options,
-  } -> podman::container{
-    $name:
-      ensure         => $ensure,
-      user           => $uid_name,
-      uid            => $real_uid,
-      gid            => $real_gid,
-      homedir        => "/var/www/vhosts/${name}",
-      container_name => 'con',
-      manage_user    => false,
-      image          => $image,
-      publish        => ["12342:${port}"],
-      run_flags      => {
-        userns                    => 'keep-id',
-        user                      => "${real_uid}:${real_gid}",
-        'security-opt-label-type' => 'httpd_container_rw_content',
-      },
-      volumes        => {},
+    configuration         => $configuration + {
+      containers          => {
+        $name => pick($configuration['container_config'],{}) + {
+          ensure         => $ensure,
+          user           => $uid_name,
+          uid            => $real_uid,
+          gid            => $real_gid,
+          homedir        => "/var/www/vhosts/${name}",
+          manage_user    => false,
+          image          => $image,
+          publish_socket => {
+            $port => {
+              'dir'                     => "/var/www/vhosts/${name}/tmp/run",
+              'security-opt-label-type' => 'socat_httpd_sidecar',
+            },
+          },
+          run_flags      => {
+            'security-opt-label-type' => 'httpd_container_rw_content',
+          },
+        }
+      }
+    }
   } -> Service['apache']
 
   apache::vhost::container{$name:
@@ -125,20 +133,11 @@ define webhosting::container(
     vhost_source       => $vhost_source,
     vhost_destination  => $vhost_destination,
     htpasswd_file      => $htpasswd_file,
-    options            => "http://127.0.0.1:12342",
+    options            => "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${name}"
   }
   if $template_partial != 'absent' {
     Apache::Vhost::Static[$name]{
       template_partial => $template_partial
     }
   }
-
-  if $ensure == 'present' {
-    exec{"adjust_path_access_for_keep-user-id_/var/www/vhosts/${name}":
-      command => "bash -c \"setfacl -m user:$(grep -E '^${uid_name}:' /etc/subuid | cut -d: -f 2):rx /var/www/vhosts/${name}\"",
-      unless  => "getfacl -p -n /var/www/vhosts/${name}  | grep -qE \"^user:$(grep -E '^${uid_name}:' /etc/subuid | cut -d: -f 2):r-x\\$\"",
-      require => [File["/var/www/vhosts/${name}"],User[$uid_name]];
-    } -> Podman::Container[$name]
-  }
 }
-

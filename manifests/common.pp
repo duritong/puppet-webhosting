@@ -68,9 +68,9 @@ define webhosting::common(
     }
     if 'containers' in $configuration {
       if $ensure == 'present' {
-        if !defined(File["/var/www/vhosts/${name}/tmp"]) {
+        if !defined(File["${vhost_path}/tmp"]) {
           file{
-            "/var/www/vhosts/${name}/tmp":
+            "${vhost_path}/tmp":
               ensure  => directory,
               owner   => $real_uid_name,
               group   => $real_gid_name,
@@ -79,11 +79,12 @@ define webhosting::common(
           }
         }
         file{
-          "/var/www/vhosts/${name}/tmp/run":
-            ensure => directory,
-            owner  => $real_uid_name,
-            group  => $real_gid_name,
-            mode   => '0777'
+          "${vhost_path}/tmp/run":
+            ensure  => directory,
+            owner   => $real_uid_name,
+            group   => $real_gid_name,
+            mode    => '0777',
+            seltype => 'httpd_var_run_t',
         } -> Podman::Container<| tag == "user_${real_uid_name}" |>
         # we don't know the users subuid/subgid
         # Must be set if we might want to do keep-user-id
@@ -98,17 +99,18 @@ define webhosting::common(
       $configuration['containers'].each |$con_name,$vals| {
         $run_flags = pick($vals['run_flags'],{})
         $con_values = ($vals - 'run_flags') + {
-          ensure      => $ensure,
-          user        => $real_uid_name,
-          uid         => $real_uid,
-          gid         => $gid,
-          homedir     => $vhost_path,
-          manage_user => false,
-          logpath     => "${vhost_path}/logs",
-          run_flags   => $run_flags + {
+          ensure         => $ensure,
+          user           => $real_uid_name,
+          uid            => $real_uid,
+          container_name => $con_name,
+          gid            => $gid,
+          homedir        => $vhost_path,
+          manage_user    => false,
+          logpath        => "${vhost_path}/logs",
+          run_flags      => $run_flags + {
             'security-opt-label-type' => 'httpd_container_rw_content',
           },
-          tag         => "user_${real_uid_name}",
+          tag            => "user_${real_uid_name}",
         }
         podman::container{
           "${name}-${con_name}":
