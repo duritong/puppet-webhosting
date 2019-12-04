@@ -20,7 +20,10 @@ define webhosting::user_scripts::manage(
         'only_webreadable' => [],
         'web_writable'     => [],
       },
-      'global'            => {
+      'update_wordpress' => {
+        'auto_update' => false,
+      },
+      'global' => {
         'contact' => true,
       },
     }

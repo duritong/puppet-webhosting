@@ -83,7 +83,7 @@ define webhosting::php::wordpress(
 
   webhosting::common{$name:
     ensure                => $ensure,
-    configuration         => { wordpress_autoupdate  => true } + $configuration,
+    configuration         => $configuration,
     uid                   => $uid,
     uid_name              => $real_uid_name,
     gid                   => $gid,
@@ -97,7 +97,7 @@ define webhosting::php::wordpress(
     run_uid_name          => $run_uid_name,
     run_gid               => $run_gid,
     user_scripts          => $user_scripts,
-    user_scripts_options  => $user_scripts_options,
+    user_scripts_options  => deep_merge({'update_wordpress' => { 'auto_update' => true }}, $user_scripts_options),
     watch_adjust_webfiles => $watch_adjust_webfiles,
     wwwmail               => $wwwmail,
     nagios_check          => $nagios_check,
