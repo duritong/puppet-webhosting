@@ -83,7 +83,7 @@ define webhosting::php::wordpress(
 
   webhosting::common{$name:
     ensure                => $ensure,
-    configuration         => $configuration,
+    configuration         => { wordpress_autoupdate  => true } + $configuration,
     uid                   => $uid,
     uid_name              => $real_uid_name,
     gid                   => $gid,

@@ -20,5 +20,5 @@
 # updates that run the update_wordpress script
 # on a daily basis.
 ---
-auto_update: true
+auto_update: <%= (@configuration['wordpress_autoupdate'] || false).to_s %>
 wp_directories: ['.']
