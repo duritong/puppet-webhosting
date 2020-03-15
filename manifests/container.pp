@@ -86,7 +86,6 @@ define webhosting::container(
     nagios_check_url      => $nagios_check_url,
     nagios_check_code     => $nagios_check_code,
     nagios_use            => $nagios_use,
-    git_repo              => $git_repo,
     watch_adjust_webfiles => $watch_adjust_webfiles,
     user_scripts          => $user_scripts,
     user_scripts_options  => $user_scripts_options,
@@ -114,6 +113,12 @@ define webhosting::container(
     }
   } -> Service['apache']
 
+  if ('no_socket_forward' in $configuration) and $configuration['no_socket_forward'] {
+    $options = "http://127.0.0.1:${port}"
+  } else {
+    $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${name}"
+  }
+
   apache::vhost::container{$name:
     ensure             => $ensure,
     configuration      => $configuration,
@@ -133,7 +138,7 @@ define webhosting::container(
     vhost_source       => $vhost_source,
     vhost_destination  => $vhost_destination,
     htpasswd_file      => $htpasswd_file,
-    options            => "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${name}"
+    options            => $options,
   }
   if $template_partial != 'absent' {
     Apache::Vhost::Static[$name]{
