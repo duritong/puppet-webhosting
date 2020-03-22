@@ -51,7 +51,7 @@ function update_smf {
   fi
 
   ftpuser=$(stat -c%U $wwwdir)
-  if [ -f $fpmfile ]; then
+  if [ -S $fpmfile ]; then
     runuser=$(stat -c%U $fpmfile)
   else
     runuser=$(stat -c%U $starterfile)
