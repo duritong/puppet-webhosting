@@ -41,7 +41,7 @@ function update_smf {
   smf=$1
   basesmfdir=$basedir/$smf
   starterfile="/var/www/mod_fcgid-starters/${smf}/${smf}-starter"
-  fpmfile="/etc/php-fpm.d/${smf}.conf"
+  fpmfile="/run/fpm-${smf}-socket/0.socket"
   wwwdir=$basesmfdir/www
   if [ ! -f "${wwwdir}/SSI.php" ]; then
     abort "SMF ${smf} does not really seem to be an smf!"
@@ -51,7 +51,11 @@ function update_smf {
   fi
 
   ftpuser=$(stat -c%U $wwwdir)
-  runuser=$(stat -c%U $starterfile)
+  if [ -f $fpmfile ]; then
+    runuser=$(stat -c%U $fpmfile)
+  else
+    runuser=$(stat -c%U $starterfile)
+  fi
 
   echo "Updating ${smf}"
   find ${wwwdir} -user ${runuser} -print0 | xargs --no-run-if-empty -0 chmod g+w
