@@ -46,7 +46,7 @@ function update_smf {
   if [ ! -f "${wwwdir}/SSI.php" ]; then
     abort "SMF ${smf} does not really seem to be an smf!"
   fi
-  if [ ! -f $starterfile ] && [ ! -f $fpmfile ]; then
+  if [ ! -f $starterfile ] && [ ! -S $fpmfile ]; then
     abort "SMF ${smf} does not have a fpm nor a starter file"
   fi
 
