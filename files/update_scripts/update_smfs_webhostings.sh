@@ -41,12 +41,13 @@ function update_smf {
   smf=$1
   basesmfdir=$basedir/$smf
   starterfile="/var/www/mod_fcgid-starters/${smf}/${smf}-starter"
+  fpmfile="/etc/php-fpm.d/${smf}.conf"
   wwwdir=$basesmfdir/www
   if [ ! -f "${wwwdir}/SSI.php" ]; then
     abort "SMF ${smf} does not really seem to be an smf!"
   fi
-  if [ ! -f $starterfile ]; then
-    abort "SMF ${smf} does not have a starter file"
+  if [ ! -f $starterfile ] && [ ! -f $fpmfile ]; then
+    abort "SMF ${smf} does not have a fpm nor a starter file"
   fi
 
   ftpuser=$(stat -c%U $wwwdir)
