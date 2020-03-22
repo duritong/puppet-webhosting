@@ -11,7 +11,7 @@ if [ $1 = 'all' ]; then
   for i in $(ls $basedir/*/www/SSI.php); do
     wwwdir=$(dirname $i)
     if [ -d "${wwwdir}/.git" ]; then
-      git --git-dir=${wwwdir}/.git remote -v | grep '(fetch)' | awk '{ print $2 }' | grep -q 'ismf.git'
+      git --git-dir=${wwwdir}/.git remote -v | grep '(fetch)' | awk '{ print $2 }' | grep -q '/smf.git$'
       if [ $? -eq 0 ]; then
         name=$(basename $(dirname $wwwdir))
         smfs="${smfs}${name} "
