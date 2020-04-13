@@ -27,7 +27,8 @@ define webhosting::common(
   $user_scripts          = 'absent',
   $user_scripts_options  = {},
   $nagios_check          = 'ensure',
-  $nagios_check_domain   = 'absent',
+  Variant[String,Array[String]]
+    $nagios_check_domain   = 'absent',
   $nagios_check_url      = '/',
   $nagios_check_code     = '200',
   $nagios_use            = 'generic-service',
@@ -233,6 +234,14 @@ define webhosting::common(
       check_url    => $nagios_check_url,
       use          => $nagios_use,
       check_code   => $real_nagios_check_code,
+    }
+    if 'additional_nagios_checks' in $configuration {
+      $configuration['additional_nagios_checks'].each |$n,$values| {
+        nagios::service::http{
+          "${name}-${n}":
+            * => $values,
+        }
+      }
     }
   }
 
