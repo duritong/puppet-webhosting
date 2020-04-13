@@ -227,7 +227,7 @@ define webhosting::common(
       default   => '401'
     }
 
-    nagios::service::http{$name:
+    $default_nagios_vals = {
       ensure       => $nagios_ensure,
       check_domain => $nagios_check_domain,
       ssl_mode     => $ssl_mode,
@@ -235,11 +235,15 @@ define webhosting::common(
       use          => $nagios_use,
       check_code   => $real_nagios_check_code,
     }
+    nagios::service::http{
+      $name:
+        * => $default_nagios_vals,
+    }
     if 'additional_nagios_checks' in $configuration {
       $configuration['additional_nagios_checks'].each |$n,$values| {
         nagios::service::http{
           "${name}-${n}":
-            * => $values,
+            * => $default_nagios_vals + $values,
         }
       }
     }
