@@ -133,7 +133,7 @@ define webhosting::common(
         uid              => $real_uid,
         password         => $real_password,
       }
-      include ::apache::sftponly
+      include apache::sftponly
     }
   }
 
@@ -198,7 +198,7 @@ define webhosting::common(
           user   => $real_run_uid_name,
       }
       if ($ensure == 'present') {
-        require ::webhosting::wwwmailers
+        require webhosting::wwwmailers
         User::Groups::Manage_user["${real_run_uid_name}_in_wwwmailers"]{
           require => User::Managed[$real_run_uid_name],
         }
