@@ -72,7 +72,7 @@ define webhosting::container(
   }
   # we can't yet use keep-id on EL7 as we need cgroupv2 for
   # that
-  if versioncmp($facts['os.release.major'],'8') < 0 {
+  if versioncmp($facts['os']['release']['major'],'8') < 0 {
     $run_flags = {
       'user'                    => '1000:0',
     }
