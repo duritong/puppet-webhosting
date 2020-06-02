@@ -70,6 +70,19 @@ define webhosting::container(
       default => $gid,
     }
   }
+  # we can't yet use keep-id on EL7 as we need cgroupv2 for
+  # that
+  if versioncmp($facts['os.release.major'],'8') < 0 {
+    $run_flags = {
+      'user'                    => '1000:0',
+    }
+  } else {
+    fail('validate to have cgroupv2')
+    $run_flags = {
+      'userns'                  => 'keep-id',
+      'user'                    => '1000:GID',
+    }
+  }
   webhosting::common{$name:
     ensure                => $ensure,
     uid                   => $real_uid,
@@ -105,9 +118,7 @@ define webhosting::container(
               'security-opt-label-type' => 'socat_httpd_sidecar',
             },
           },
-          run_flags      => {
-            'userns'                  => 'keep-id',
-            'user'                    => '1000:GID',
+          run_flags      => $run_flags + {
             'security-opt-label-type' => 'httpd_container_rw_content',
           },
         },
