@@ -110,9 +110,9 @@ define webhosting::container(
             'user'                    => '1000:GID',
             'security-opt-label-type' => 'httpd_container_rw_content',
           },
-        }
-      }
-    }
+        },
+      },
+    },
   } -> Service['apache']
 
   if ('no_socket_forward' in $configuration) and $configuration['no_socket_forward'] {
