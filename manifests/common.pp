@@ -79,13 +79,41 @@ define webhosting::common(
               seltype => 'httpd_sys_rw_content_t';
           }
         }
+        # Setup folder structure for general app hosting
+        # Idea:
+        #   - /app has readonly mounted any kind of app files
+        #   - /data is a writeable webfolder in ~/www that can exposed directly
+        #   - /private is a writeable (therefore in ~/data due to SELinux) but
+        #              private to the webserver (therefore in ~/data/private
+        #              with 0700 on ~/data)
+        # '/var/www/vhosts/HOSTING/private/app': '/app:ro'
+        # '/var/www/vhosts/HOSTING/data/private/data': '/private'
+        # '/var/www/vhosts/HOSTING/www/data': '/data'
         file{
+          "${vhost_path}/data/private":
+            ensure  => directory,
+            owner   => $real_uid_name,
+            group   => $real_gid_name,
+            mode    => '0700',
+            seltype => 'httpd_sys_rw_content_t';
+          "${vhost_path}/data/private/data":
+            ensure  => directory,
+            owner   => $real_uid_name,
+            group   => $real_gid_name,
+            mode    => '0770',
+            seltype => 'httpd_sys_rw_content_t';
+          "${vhost_path}/private/app":
+            ensure  => directory,
+            owner   => $real_uid_name,
+            group   => $real_gid_name,
+            mode    => '0755',
+            seltype => 'httpd_sys_content_t';
           "${vhost_path}/tmp/run":
             ensure  => directory,
             owner   => $real_uid_name,
             group   => $real_gid_name,
             mode    => '0777',
-            seltype => 'httpd_var_run_t',
+            seltype => 'httpd_var_run_t';
         } -> Podman::Container<| tag == "user_${real_uid_name}" |>
         # we don't know the users subuid/subgid
         # Must be set if we might want to do keep-user-id
