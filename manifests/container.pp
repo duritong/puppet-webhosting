@@ -106,6 +106,8 @@ define webhosting::container(
             },
           },
           run_flags      => {
+            'userns'                  => 'keep-id',
+            'user'                    => '1000:GID',
             'security-opt-label-type' => 'httpd_container_rw_content',
           },
         }
