@@ -125,8 +125,27 @@ define webhosting::common(
         } -> Podman::Container<| tag == "user_${real_uid_name}" |>
       }
 
+      # we can't yet use keep-id on EL7 as we need cgroupv2 for
+      # that
+      if versioncmp($facts['os']['release']['major'],'8') < 0 {
+        $default_user_run_flags = {
+          'user'                    => '1000:0',
+        }
+      } else {
+        fail('validate to have cgroupv2')
+        $default_user_run_flags = {
+          'userns'                  => 'keep-id',
+          'user'                    => '1000:GID',
+        }
+      }
+      $default_run_flags = $default_user_run_flags + {
+        'security-opt-label-type' => 'httpd_container_rw_content',
+        'read-only'               => true,
+      }
+
+
       $configuration['containers'].each |$con_name,$vals| {
-        $run_flags = pick($vals['run_flags'],{})
+        $hosting_run_flags = pick($vals['run_flags'],{})
         $con_values = ($vals - 'run_flags') + {
           ensure         => $ensure,
           user           => $real_uid_name,
@@ -136,9 +155,7 @@ define webhosting::common(
           homedir        => $vhost_path,
           manage_user    => false,
           logpath        => "${vhost_path}/logs",
-          run_flags      => $run_flags + {
-            'security-opt-label-type' => 'httpd_container_rw_content',
-          },
+          run_flags      => $hosting_run_flags + $default_run_flags,
           tag            => "user_${real_uid_name}",
         }
         podman::container{
