@@ -155,7 +155,7 @@ define webhosting::common(
           homedir        => $vhost_path,
           manage_user    => false,
           logpath        => "${vhost_path}/logs",
-          run_flags      => $hosting_run_flags + $default_run_flags,
+          run_flags      => $default_run_flags + $hosting_run_flags,
           tag            => "user_${real_uid_name}",
         }
         podman::container{

@@ -92,7 +92,7 @@ define webhosting::container(
     user_scripts_options  => $user_scripts_options,
     configuration         => $configuration + {
       containers          => {
-        $name => {
+        $name => $user_container_config + {
           ensure         => $ensure,
           user           => $uid_name,
           uid            => $real_uid,
@@ -106,7 +106,7 @@ define webhosting::container(
               'security-opt-label-type' => 'socat_httpd_sidecar',
             },
           },
-        } + $user_container_config,
+        },
       },
     },
   } -> Service['apache']
