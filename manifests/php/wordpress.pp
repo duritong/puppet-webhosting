@@ -143,8 +143,8 @@ define webhosting::php::wordpress(
     }
     if ($run_gid_name == 'absent'){
       $real_run_gid_name = $gid_name ? {
-        'absent'  => $real_gid_name,
-        default   => $gid_name
+        'absent' => $real_gid_name,
+        default  => $gid_name
       }
     } else {
       $real_run_gid_name = $run_gid_name
@@ -155,7 +155,9 @@ define webhosting::php::wordpress(
       run_uid            => $real_run_uid_name,
       run_gid            => $real_run_gid_name,
     }
-    User::Managed[$real_run_uid_name] -> Apache::Vhost::Php::Wordpress[$name]
+    if $ensure != 'absent' {
+      User::Managed[$real_run_uid_name] -> Apache::Vhost::Php::Wordpress[$name]
+    }
   }
   if $ensure != 'absent' {
     wordpress::instance{$name:
@@ -172,7 +174,7 @@ define webhosting::php::wordpress(
         before => File["${documentroot}/wp-content/uploads"],
       }
     }
-    if $run_mode in ['fpm','fcgid'] {
+    if ($run_mode in ['fpm','fcgid']) and ($ensure != 'absent') {
       User::Managed[$real_run_uid_name] -> Wordpress::Instance[$name]
     }
   }
