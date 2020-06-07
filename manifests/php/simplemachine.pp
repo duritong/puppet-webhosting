@@ -135,7 +135,7 @@ define webhosting::php::simplemachine(
   }
   if ($git_repo != 'absent') and ($ensure != 'absent') {
     # include an update script if we deploy it the git way
-    include ::webhosting::php::simplemachine::base
+    include webhosting::php::simplemachine::base
   }
   case $run_mode {
     'fpm','fcgid': {
@@ -157,13 +157,19 @@ define webhosting::php::simplemachine(
         documentroot_group => $real_gid_name,
         run_uid            => $real_run_uid_name,
         run_gid            => $real_run_gid_name,
-        require            => [User::Sftp_only[$real_uid_name],
-                                User::Managed[$real_run_uid_name] ],
+      }
+      if $ensure != 'absent' {
+        Apache::Vhost::Php::Simplemachine[$name]{
+          require => [User::Sftp_only[$real_uid_name],
+                      User::Managed[$real_run_uid_name] ],
+        }
       }
     }
     default: {
-      Apache::Vhost::Php::Simplemachine[$name]{
-        require => User::Sftp_only[$real_uid_name],
+      if $ensure != 'absent' {
+        Apache::Vhost::Php::Simplemachine[$name]{
+          require => User::Sftp_only[$real_uid_name],
+        }
       }
     }
   }

@@ -190,23 +190,31 @@ define webhosting::php::mediawiki(
         documentroot_group => $real_gid_name,
         run_uid            => $real_run_uid_name,
         run_gid            => $real_run_gid_name,
-        require            => [ User::Sftp_only[$real_uid_name],
-                                User::Managed[$real_run_uid_name] ],
       }
       Mediawiki::Instance[$name]{
         documentroot_owner => $real_uid_name,
         documentroot_group => $real_gid_name,
         documentroot_mode  => '0640',
-        require            => [ User::Sftp_only[$real_uid_name],
-                                User::Managed[$real_run_uid_name] ],
+      }
+      if $ensure != 'absent' {
+        Apache::Vhost::Php::Mediawiki[$name]{
+          require => [User::Sftp_only[$real_uid_name],
+                      User::Managed[$real_run_uid_name] ],
+        }
+        Mediawiki::Instance[$name]{
+          require => [User::Sftp_only[$real_uid_name],
+                      User::Managed[$real_run_uid_name] ],
+        }
       }
     }
     default: {
-      Apache::Vhost::Php::Mediawiki[$name]{
-        require => User::Sftp_only[$real_uid_name],
-      }
-      Mediawiki::Instance[$name]{
-        require => User::Sftp_only[$real_uid_name],
+      if $ensure != 'absent' {
+        Apache::Vhost::Php::Mediawiki[$name]{
+          require => User::Sftp_only[$real_uid_name],
+        }
+        Mediawiki::Instance[$name]{
+          require => User::Sftp_only[$real_uid_name],
+        }
       }
     }
   }

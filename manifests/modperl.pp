@@ -138,14 +138,18 @@ define webhosting::modperl(
         run_uid            => $real_run_uid_name,
         run_gid            => $real_run_gid_name,
       }
-      Apache::Vhost::Modperl[$name]{
-        require => [ User::Sftp_only[$real_uid_name],
-                      User::Managed[$real_run_uid_name] ],
+      if $ensure != 'absent' {
+        Apache::Vhost::Modperl[$name]{
+          require => [ User::Sftp_only[$real_uid_name],
+                        User::Managed[$real_run_uid_name] ],
+        }
       }
     }
     default: {
-      Apache::Vhost::Modperl[$name]{
-        require => User::Sftp_only[$real_uid_name],
+      if $ensure != 'absent' {
+        Apache::Vhost::Modperl[$name]{
+          require => User::Sftp_only[$real_uid_name],
+        }
       }
     }
   }
