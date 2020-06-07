@@ -133,7 +133,11 @@ define webhosting::php::wordpress(
     manage_config       => $manage_config,
     config_webwriteable => $config_webwriteable,
     manage_directories  => $manage_directories,
-    require             => User::Sftp_only[$real_uid_name],
+  }
+  if $ensure != 'absent' {
+    Apache::Vhost::Php::Wordpress[$name]{
+      require => User::Sftp_only[$real_uid_name],
+    }
   }
   if $run_mode in ['fpm','fcgid'] {
     if ($run_uid_name == 'absent'){
@@ -174,7 +178,7 @@ define webhosting::php::wordpress(
         before => File["${documentroot}/wp-content/uploads"],
       }
     }
-    if ($run_mode in ['fpm','fcgid']) and ($ensure != 'absent') {
+    if ($run_mode in ['fpm','fcgid']) {
       User::Managed[$real_run_uid_name] -> Wordpress::Instance[$name]
     }
   }
