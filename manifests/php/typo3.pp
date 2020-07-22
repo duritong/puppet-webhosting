@@ -149,12 +149,14 @@ define webhosting::php::typo3(
       } else {
         $real_run_gid_name = $run_gid_name
       }
+      Apache::Vhost::Php::Typo3[$name]{
+        run_uid => $real_run_uid_name,
+        run_gid => $real_run_gid_name,
+      }
       if $ensure != 'absent' {
         Apache::Vhost::Php::Typo3[$name]{
           documentroot_owner => $real_uid_name,
           documentroot_group => $real_gid_name,
-          run_uid            => $real_run_uid_name,
-          run_gid            => $real_run_gid_name,
           require            => [User::Sftp_only[$real_uid_name],
                                   User::Managed[$real_run_uid_name] ],
         }
