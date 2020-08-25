@@ -61,7 +61,6 @@ define webhosting::php::mediawiki(
   $contact             = 'unmanaged',
   $sitename            = 'unmanaged',
   $secret_key          = 'unmanaged',
-  $spam_protection     = false,
   $wiki_options        = {},
   $autoinstall         = true,
   $squid_servers       = 'absent',
