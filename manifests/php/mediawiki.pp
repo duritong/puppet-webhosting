@@ -159,7 +159,6 @@ define webhosting::php::mediawiki(
     secret_key              => $secret_key,
     file_extensions         => $file_extensions,
     extensions              => $extensions,
-    spam_protection         => $spam_protection,
     wiki_options            => $wiki_options,
     php_installation        => $php_installation,
     autoinstall             => $autoinstall,
