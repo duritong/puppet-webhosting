@@ -146,14 +146,14 @@ define webhosting::common(
 
       $configuration['containers'].each |$con_name,$vals| {
         $hosting_run_flags = pick($vals['run_flags'],{})
-        $publish = pick($vals['publish'],{})
+        $route = pick($vals['route'],{})
         $publish_socket = pick($vals['publish_socket'],{})
         $publish_options = {
           'dir'                     => "/var/www/vhosts/${name}/tmp/run",
           'security-opt-label-type' => 'socat_httpd_sidecar',
         }
-        $publis_socket_2 = Hash($publish.map |$e| { [$e[1], $publish_options] })
-        $con_values = ($vals - ['run_flags', 'publish', 'publish_socket']) + {
+        $publis_socket_2 = Hash($route.map |$e| { [$e[1], $publish_options] })
+        $con_values = ($vals - ['run_flags', 'route', 'publish_socket']) + {
           ensure         => $ensure,
           user           => $real_uid_name,
           uid            => $real_uid,
