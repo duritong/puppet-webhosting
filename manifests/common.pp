@@ -153,7 +153,7 @@ define webhosting::common(
           'security-opt-label-type' => 'socat_httpd_sidecar',
         }
         $publis_socket_2 = Hash($route.map |$e| { [$e[1], $publish_options] })
-        $con_values = ($vals - ['run_flags', 'route', 'publish_socket']) + {
+        $con_values = ($vals - ['run_flags', 'route', 'publish', 'publish_socket']) + {
           ensure         => $ensure,
           user           => $real_uid_name,
           uid            => $real_uid,
