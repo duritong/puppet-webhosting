@@ -114,7 +114,11 @@ define webhosting::container(
   if ('no_socket_forward' in $configuration) and $configuration['no_socket_forward'] {
     $options = "http://127.0.0.1:${port}"
   } else {
-    $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${name}"
+    if $domain == 'absent' {
+      $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${name}"
+    } else {
+      $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${domain}"
+    }
   }
 
   apache::vhost::container{$name:
