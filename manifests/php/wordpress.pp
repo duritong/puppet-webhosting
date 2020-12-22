@@ -13,7 +13,7 @@
 #   - nologs: Send every logging to /dev/null
 #   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
-define webhosting::php::wordpress(
+define webhosting::php::wordpress (
   $ensure                 = present,
   $configuration          = {},
   $uid                    = 'absent',
@@ -61,18 +61,18 @@ define webhosting::php::wordpress(
   $manage_config          = false,
   $config_webwriteable    = false,
   $manage_directories     = true,
-){
-  if ($uid_name == 'absent'){
+) {
+  if $uid_name == 'absent' {
     $real_uid_name = $name
   } else {
     $real_uid_name = $uid_name
   }
-  if ($gid_name == 'absent'){
+  if $gid_name == 'absent' {
     $real_gid_name = $real_uid_name
   } else {
     $real_gid_name = $gid_name
   }
-  if ($group == 'absent') {
+  if $group == 'absent' {
     $real_group = $real_gid_name
   } else {
     $real_group = 'apache'
@@ -81,7 +81,10 @@ define webhosting::php::wordpress(
   $path = "/var/www/vhosts/${name}"
   $documentroot = "${path}/www"
 
-  webhosting::common{$name:
+  $_user_scripts_options = deep_merge( {
+    'update_wordpress' => { 'auto_update' => true, },
+  }, $user_scripts_options)
+  webhosting::common { $name:
     ensure                => $ensure,
     configuration         => $configuration,
     uid                   => $uid,
@@ -97,7 +100,7 @@ define webhosting::php::wordpress(
     run_uid_name          => $run_uid_name,
     run_gid               => $run_gid,
     user_scripts          => $user_scripts,
-    user_scripts_options  => deep_merge({'update_wordpress' => { 'auto_update' => true }}, $user_scripts_options),
+    user_scripts_options  => $_user_scripts_options,
     watch_adjust_webfiles => $watch_adjust_webfiles,
     wwwmail               => $wwwmail,
     nagios_check          => $nagios_check,
@@ -108,7 +111,7 @@ define webhosting::php::wordpress(
     php_installation      => $php_installation,
   }
 
-  apache::vhost::php::wordpress{$name:
+  apache::vhost::php::wordpress { $name:
     ensure              => $ensure,
     configuration       => $configuration,
     domainalias         => $domainalias,
@@ -135,25 +138,25 @@ define webhosting::php::wordpress(
     manage_directories  => $manage_directories,
   }
   if $ensure != 'absent' {
-    Apache::Vhost::Php::Wordpress[$name]{
+    Apache::Vhost::Php::Wordpress[$name] {
       require => User::Sftp_only[$real_uid_name],
     }
   }
   if $run_mode in ['fpm','fcgid'] {
-    if ($run_uid_name == 'absent'){
+    if  $run_uid_name == 'absent' {
       $real_run_uid_name = "${name}_run"
     } else {
       $real_run_uid_name = $run_uid_name
     }
-    if ($run_gid_name == 'absent'){
+    if  $run_gid_name == 'absent' {
       $real_run_gid_name = $gid_name ? {
         'absent' => $real_gid_name,
-        default  => $gid_name
+        default  => $gid_name,
       }
     } else {
       $real_run_gid_name = $run_gid_name
     }
-    Apache::Vhost::Php::Wordpress[$name]{
+    Apache::Vhost::Php::Wordpress[$name] {
       documentroot_owner => $real_uid_name,
       documentroot_group => $real_gid_name,
       run_uid            => $real_run_uid_name,
@@ -164,7 +167,7 @@ define webhosting::php::wordpress(
     }
   }
   if $ensure != 'absent' {
-    wordpress::instance{$name:
+    wordpress::instance { $name:
       path             => $documentroot,
       autoinstall      => $autoinstall,
       blog_options     => $blog_options,
@@ -174,18 +177,17 @@ define webhosting::php::wordpress(
       require          => User::Sftp_only[$real_uid_name],
     }
     if $manage_directories {
-      Wordpress::Instance[$name]{
+      Wordpress::Instance[$name] {
         before => File["${documentroot}/wp-content/uploads"],
       }
     }
-    if ($run_mode in ['fpm','fcgid']) {
+    if $run_mode in ['fpm','fcgid'] {
       User::Managed[$real_run_uid_name] -> Wordpress::Instance[$name]
     }
   }
   if $template_partial != 'absent' {
-    Apache::Vhost::Php::Wordpress[$name]{
+    Apache::Vhost::Php::Wordpress[$name] {
       template_partial => $template_partial,
     }
   }
 }
-
