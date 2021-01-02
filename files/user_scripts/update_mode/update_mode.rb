@@ -46,6 +46,7 @@ def update_mode
   cmd("getfacl --absolute-names -R #{shellescape(options['webdir'])} > #{perm_file}")
   FileUtils.chmod 0400, "#{perm_file}"
 
+  cmd("setfacl -R -m u:#{options['sftp_user']}:rwX #{shellescape(options['webdir'])}")
   chown_R(sftp_user_uid,options['run_user'])
 end
 
@@ -53,6 +54,7 @@ def reset_update_mode
   File.read(perm_file).each_line do |line|
     if line.start_with?('# file:') && ! line.start_with?("# file: #{options['webdir']}")
       chown_R(run_user_uid,options['sftp_user'])
+      cmd("setfacl -R -m m::rwx #{shellescape(options['webdir'])}")
       security_fail "Cannot correctly restore permissions, since permissions file is corrupt"
     end
   end
