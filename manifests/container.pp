@@ -8,52 +8,48 @@
 #   - nologs: Send every logging to /dev/null
 #   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
-define webhosting::container(
-  String
-    $image,
-  Integer[1,65535]
-    $port,
-  Enum['present','absent']
-    $ensure             = present,
-  Hash
-    $configuration      = {},
-  $uid                  = 'absent',
-  $uid_name             = $name,
-  $gid                  = 'uid',
-  $gid_name             = 'absent',
-  $password             = 'absent',
-  $password_crypted     = true,
-  $domain               = 'absent',
-  $domainalias          = 'www',
-  $server_admin         = 'absent',
-  $logmode              = 'default',
-  $owner                = root,
-  $group                = 'absent',
-  $allow_override       = 'None',
-  $do_includes          = false,
-  $additional_options   = 'absent',
-  $default_charset      = 'absent',
-  $ssl_mode             = false,
-  $vhost_mode           = 'template',
-  $template_partial     = 'absent',
-  $vhost_source         = 'absent',
-  $vhost_destination    = 'absent',
-  $htpasswd_file        = 'absent',
-  $nagios_check         = 'ensure',
-  $nagios_check_domain  = 'absent',
-  $nagios_check_url     = '/',
-  $nagios_check_code    = '200',
-  $nagios_use           = 'generic-service',
-  $watch_adjust_webfiles  = 'absent',
-  $user_scripts         = 'absent',
+define webhosting::container (
+  Integer[1,65535] $port,
+  Optiona[String] $image = undef,
+  Enum['present','absent'] $ensure = present,
+  Hash $configuration = {},
+  $uid = 'absent',
+  $uid_name = $name,
+  $gid = 'uid',
+  $gid_name = 'absent',
+  $password = 'absent',
+  $password_crypted = true,
+  $domain = 'absent',
+  $domainalias = 'www',
+  $server_admin = 'absent',
+  $logmode = 'default',
+  $owner = root,
+  $group = 'absent',
+  $allow_override = 'None',
+  $do_includes = false,
+  $additional_options = 'absent',
+  $default_charset = 'absent',
+  $ssl_mode = false,
+  $vhost_mode = 'template',
+  $template_partial = 'absent',
+  $vhost_source = 'absent',
+  $vhost_destination = 'absent',
+  $htpasswd_file = 'absent',
+  $nagios_check = 'ensure',
+  $nagios_check_domain = 'absent',
+  $nagios_check_url = '/',
+  $nagios_check_code = '200',
+  $nagios_use = 'generic-service',
+  $watch_adjust_webfiles = 'absent',
+  $user_scripts = 'absent',
   $user_scripts_options = {},
-){
-  if ($gid_name == 'absent'){
+) {
+  if $gid_name == 'absent' {
     $real_gid_name = $uid_name
   } else {
     $real_gid_name = $gid_name
   }
-  if ($group == 'absent') {
+  if $group == 'absent' {
     $real_group = $real_gid_name
   } else {
     $real_group = 'apache'
@@ -71,7 +67,7 @@ define webhosting::container(
     }
   }
   $user_container_config = pick($configuration['container_config'],{})
-  webhosting::common{$name:
+  webhosting::common { $name:
     ensure                => $ensure,
     uid                   => $real_uid,
     uid_name              => $uid_name,
@@ -121,7 +117,7 @@ define webhosting::container(
     }
   }
 
-  apache::vhost::container{$name:
+  apache::vhost::container { $name:
     ensure             => $ensure,
     configuration      => $configuration,
     domain             => $domain,
@@ -143,7 +139,7 @@ define webhosting::container(
     options            => $options,
   }
   if $template_partial != 'absent' {
-    Apache::Vhost::Static[$name]{
+    Apache::Vhost::Static[$name] {
       template_partial => $template_partial
     }
   }
