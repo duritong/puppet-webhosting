@@ -66,29 +66,7 @@ define webhosting::container (
       default => $gid,
     }
   }
-  $container_config_directory = "/var/www/vhosts/${name}/private/container-config"
-  file {
-    $container_config_directory:
-      ensure => directory,
-      owner  => $real_uid,
-      group  => $real_gid,
-  }
   $user_container_config = pick($configuration['container_config'],{})
-  $con_config = { 'config_directory' => $container_config_directory } + pick($user_container_config['configuration'], {})
-
-  $auth = pick($user_container_config['auth'],{})
-  podman::container::auth {
-    "user-${name}":
-      auth    => $auth,
-      path    => "${container_config_directory}/container-config/registry-auth.yaml",
-      replace => false,
-      user    => $uid_name,
-      group   => $real_group,
-      owner   => $uid_name,
-      mode    => '0600',
-      order   => '040',
-  }
-
   webhosting::common { $name:
     ensure                => $ensure,
     uid                   => $real_uid,
@@ -118,7 +96,6 @@ define webhosting::container (
           homedir        => "/var/www/vhosts/${name}",
           manage_user    => false,
           image          => $image,
-          configuration  => $con_config,
           publish_socket => {
             $port => {
               'dir'                     => "/var/www/vhosts/${name}/tmp/run",

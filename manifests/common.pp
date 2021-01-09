@@ -122,6 +122,14 @@ define webhosting::common (
           unless  => "getfacl -p -n ${vhost_path}  | grep -qE \"^user:$(grep -E '^${real_uid_name}:' /etc/subuid | cut -d: -f 2 | head -n 1):r-x\\$\"",
           require => [File[$vhost_path],User[$real_uid_name]];
         } -> Podman::Container<| tag == "user_${real_uid_name}" |>
+
+        $container_config_directory = "/var/www/vhosts/${name}/private/container-config"
+        file {
+          $container_config_directory:
+            ensure => directory,
+            owner  => $real_uid_name,
+            group  => $real_gid_name,
+        }
       }
 
       # we can't yet use keep-id on EL7 as we need cgroupv2 for
@@ -151,7 +159,24 @@ define webhosting::common (
           'security-opt-label-type' => 'socat_httpd_sidecar',
         }
         $publis_socket_2 = Hash($route.map |$e| { [$e[1], $publish_options] })
-        $con_values = ($vals - ['run_flags', 'route', 'publish_socket']) + {
+
+        $con_config = { 'config_directory' => $container_config_directory } + pick($vals['configuration'], {})
+        if $ensure == 'present' {
+          $auth = pick($vals['auth'],{})
+          podman::container::auth {
+            "user-${name}-${con_name}":
+              auth    => $auth,
+              path    => "${container_config_directory}/${con_name}-registry-auth.yaml",
+              replace => false,
+              user    => $real_uid_name,
+              group   => $real_gid_name,
+              owner   => $real_uid_name,
+              mode    => '0600',
+              order   => '040',
+          }
+        }
+
+        $con_values = $vals + {
           ensure         => $ensure,
           user           => $real_uid_name,
           uid            => $real_uid,
@@ -163,6 +188,7 @@ define webhosting::common (
           run_flags      => $default_run_flags + $hosting_run_flags,
           tag            => "user_${real_uid_name}",
           publish_socket => $publis_socket_2 + $publish_socket,
+          configuration  => $con_config,
         }
         podman::container {
           "${name}-${con_name}":
