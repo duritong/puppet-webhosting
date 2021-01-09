@@ -6,7 +6,7 @@
 #   This makes it easier to enable special rights on a webserver's mailserver to
 #   this group.
 #   - default: false
-define webhosting::common(
+define webhosting::common (
   $ensure                = present,
   $configuration         = {},
   $uid                   = 'absent',
@@ -27,15 +27,14 @@ define webhosting::common(
   $user_scripts          = 'absent',
   $user_scripts_options  = {},
   $nagios_check          = 'ensure',
-  Variant[String,Array[String]]
-    $nagios_check_domain   = 'absent',
+  Variant[String,Array[String]] $nagios_check_domain   = 'absent',
   $nagios_check_url      = '/',
   $nagios_check_code     = '200',
   $nagios_use            = 'generic-service',
   $git_repo              = 'absent',
   $php_installation      = false,
-){
-  if ($run_gid == 'absent') {
+) {
+  if $run_gid == 'absent' {
     if ($gid == 'uid') {
       $real_run_gid = $uid
     } else {
@@ -44,17 +43,17 @@ define webhosting::common(
   } else {
     $real_run_gid = $run_gid
   }
-  if ($uid_name == 'absent'){
+  if $uid_name == 'absent' {
     $real_uid_name = $name
   } else {
     $real_uid_name = $uid_name
   }
-  if ($gid_name == 'absent'){
+  if $gid_name == 'absent' {
     $real_gid_name = $real_uid_name
   } else {
     $real_gid_name = $gid_name
   }
-  if ($run_uid_name == 'absent'){
+  if $run_uid_name == 'absent' {
     $real_run_uid_name = "${name}_run"
   } else {
     $real_run_uid_name = $run_uid_name
@@ -70,7 +69,7 @@ define webhosting::common(
     if 'containers' in $configuration {
       if $ensure == 'present' {
         if !defined(File["${vhost_path}/tmp"]) {
-          file{
+          file {
             "${vhost_path}/tmp":
               ensure  => directory,
               owner   => $real_uid_name,
@@ -89,7 +88,7 @@ define webhosting::common(
         # '/var/www/vhosts/HOSTING/private/app': '/app:ro'
         # '/var/www/vhosts/HOSTING/data/private/data': '/private'
         # '/var/www/vhosts/HOSTING/www/data': '/data'
-        file{
+        file {
           "${vhost_path}/data/private":
             ensure  => directory,
             owner   => $real_uid_name,
@@ -118,7 +117,7 @@ define webhosting::common(
         # we don't know the users subuid/subgid
         # Must be set if we might want to do keep-user-id
         # https://lists.podman.io/archives/list/podman@lists.podman.io/thread/LA2J5LY6SZMNMPLDGE4DKIV2CFLGPOXC/
-        exec{"adjust_path_access_for_keep-user-id_${vhost_path}":
+        exec { "adjust_path_access_for_keep-user-id_${vhost_path}":
           command => "bash -c \"setfacl -m user:$(grep -E '^${real_uid_name}:' /etc/subuid | cut -d: -f 2):rx ${vhost_path}\"",
           unless  => "getfacl -p -n ${vhost_path}  | grep -qE \"^user:$(grep -E '^${real_uid_name}:' /etc/subuid | cut -d: -f 2 | head -n 1):r-x\\$\"",
           require => [File[$vhost_path],User[$real_uid_name]];
@@ -143,7 +142,6 @@ define webhosting::common(
         'read-only'               => true,
       }
 
-
       $configuration['containers'].each |$con_name,$vals| {
         $hosting_run_flags = pick($vals['run_flags'],{})
         $route = pick($vals['route'],{})
@@ -166,19 +164,19 @@ define webhosting::common(
           tag            => "user_${real_uid_name}",
           publish_socket => $publis_socket_2 + $publish_socket,
         }
-        podman::container{
+        podman::container {
           "${name}-${con_name}":
             * => $con_values,
         }
       }
     }
 
-    if ($user_access == 'sftp') {
+    if $user_access == 'sftp' {
       $real_password = $password ? {
         'trocla' => trocla("webhosting_${real_uid_name}",'sha512crypt'),
         default  => $password
       }
-      user::sftp_only{$real_uid_name:
+      user::sftp_only { $real_uid_name:
         ensure           => $ensure,
         password_crypted => $password_crypted,
         homedir          => $vhost_path,
@@ -191,13 +189,13 @@ define webhosting::common(
   }
 
   if $run_mode in ['fpm','fcgid','static'] {
-    if ($user_access == 'sftp') {
-      if ($ensure != 'absent') {
-        User::Sftp_only[$real_uid_name]{
+    if $user_access == 'sftp' {
+      if $ensure != 'absent' {
+        User::Sftp_only[$real_uid_name] {
           homedir_mode => '0750',
         }
       }
-      user::groups::manage_user{
+      user::groups::manage_user {
         "apache_in_${real_gid_name}":
           ensure => $ensure,
           group  => $real_gid_name,
@@ -205,7 +203,7 @@ define webhosting::common(
           notify => Service['apache'],
       }
       if $ensure == 'present' {
-        User::Groups::Manage_user["apache_in_${real_gid_name}"]{
+        User::Groups::Manage_user["apache_in_${real_gid_name}"] {
           require => User::Sftp_only[$real_uid_name],
         }
       }
@@ -223,7 +221,7 @@ define webhosting::common(
       /^(Debian|Ubuntu)$/ => '/usr/sbin/nologin',
       default             => '/sbin/nologin',
     }
-    user::managed{$real_run_uid_name:
+    user::managed { $real_run_uid_name:
       ensure       => $ensure,
       manage_group => false,
       managehome   => false,
@@ -231,38 +229,38 @@ define webhosting::common(
       uid          => $real_run_uid,
       shell        => $shell,
     }
-    if ($user_access == 'sftp') {
-      if ($ensure == 'absent') {
-        User::Managed[$real_run_uid_name]{
+    if $user_access == 'sftp' {
+      if $ensure == 'absent' {
+        User::Managed[$real_run_uid_name] {
           before => User::Sftp_only[$real_uid_name],
         }
       } else {
-        User::Managed[$real_run_uid_name]{
+        User::Managed[$real_run_uid_name] {
           require => User::Sftp_only[$real_uid_name],
         }
       }
     }
 
     if $wwwmail {
-      user::groups::manage_user{
+      user::groups::manage_user {
         "${real_run_uid_name}_in_wwwmailers":
           ensure => $ensure,
           group  => 'wwwmailers',
           user   => $real_run_uid_name,
       }
-      if ($ensure == 'present') {
+      if $ensure == 'present' {
         require webhosting::wwwmailers
-        User::Groups::Manage_user["${real_run_uid_name}_in_wwwmailers"]{
+        User::Groups::Manage_user["${real_run_uid_name}_in_wwwmailers"] {
           require => User::Managed[$real_run_uid_name],
         }
       }
     }
-    if ($ensure == 'present') {
+    if $ensure == 'present' {
       $rreal_run_gid = $real_run_gid ? {
         'iuid'  => iuid($real_uid_name,'webhosting'),
         default => $real_run_gid,
       }
-      User::Managed[$real_run_uid_name]{
+      User::Managed[$real_run_uid_name] {
         gid => $rreal_run_gid,
       }
     }
@@ -288,13 +286,13 @@ define webhosting::common(
       use          => $nagios_use,
       check_code   => $real_nagios_check_code,
     }
-    nagios::service::http{
+    nagios::service::http {
       $name:
         * => $default_nagios_vals,
     }
     if 'additional_nagios_checks' in $configuration {
       $configuration['additional_nagios_checks'].each |$n,$values| {
-        nagios::service::http{
+        nagios::service::http {
           "${name}-${n}":
             * => $default_nagios_vals + $values,
         }
@@ -306,7 +304,7 @@ define webhosting::common(
     'absent'  => 'absent',
     default   => $watch_adjust_webfiles,
   }
-  webhosting::watch_adjust_webfiles{
+  webhosting::watch_adjust_webfiles {
     $name:
       ensure    => $watch_webfiles_ensure,
       path      => "${vhost_path}/www/",
@@ -322,13 +320,13 @@ define webhosting::common(
       $scl_name = false
     }
     if $scl_name and !('scl' in $user_scripts_options['global']) {
-      $real_user_scripts_options = deep_merge({
+      $real_user_scripts_options = deep_merge( {
           'global' => { 'scl' => $scl_name },
         }, $user_scripts_options)
     } else {
       $real_user_scripts_options = $user_scripts_options
     }
-    webhosting::user_scripts::manage{$name:
+    webhosting::user_scripts::manage { $name:
       base_path => $vhost_path,
       scripts   => $user_scripts,
       sftp_user => $real_uid_name,
@@ -338,7 +336,7 @@ define webhosting::common(
     }
 
     if 'mail_ratelimit' in $configuration {
-      exim::ratelimit::localforward::entry{
+      exim::ratelimit::localforward::entry {
         $real_run_uid_name:
           key       => $real_run_uid,
           ratelimit => $configuration['mail_ratelimit'];
@@ -346,7 +344,7 @@ define webhosting::common(
     }
   }
   if ($git_repo != 'absent') and ($ensure != 'absent') {
-    webhosting::utils::clone{
+    webhosting::utils::clone {
       $name:
         git_repo     => $git_repo,
         documentroot => "${vhost_path}/www",
