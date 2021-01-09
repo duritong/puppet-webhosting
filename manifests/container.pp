@@ -10,7 +10,7 @@
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
 define webhosting::container (
   Integer[1,65535] $port,
-  Optiona[String] $image = undef,
+  Optional[String] $image = undef,
   Enum['present','absent'] $ensure = present,
   Hash $configuration = {},
   $uid = 'absent',
