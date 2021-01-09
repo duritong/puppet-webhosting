@@ -165,14 +165,15 @@ define webhosting::common (
           $auth = pick($vals['auth'],{})
           podman::container::auth {
             "user-${name}-${con_name}":
-              auth    => $auth,
-              path    => "${container_config_directory}/${con_name}-registry-auth.yaml",
-              replace => false,
-              user    => $real_uid_name,
-              group   => $real_gid_name,
-              owner   => $real_uid_name,
-              mode    => '0600',
-              order   => '040',
+              auth     => $auth,
+              path     => "${container_config_directory}/${con_name}-registry-auth.yaml",
+              replace  => false,
+              user     => $real_uid_name,
+              group    => $real_gid_name,
+              owner    => $real_uid_name,
+              con_name => "${name}-${con_name}",
+              mode     => '0600',
+              order    => '040',
           }
         }
 
