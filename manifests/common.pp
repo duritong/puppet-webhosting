@@ -161,6 +161,7 @@ define webhosting::common (
         $publis_socket_2 = Hash($route.map |$e| { [$e[1], $publish_options] })
 
         $con_config = { 'config_directory' => $container_config_directory } + pick($vals['configuration'], {})
+        $pod_system_config = { 'volumes_containers_gid_share' => true } + pick($vals['pod_system_config'], {})
         if $ensure == 'present' {
           $auth = pick($vals['auth'],{})
           podman::container::auth {
@@ -178,18 +179,19 @@ define webhosting::common (
         }
 
         $con_values = $vals + {
-          ensure         => $ensure,
-          user           => $real_uid_name,
-          uid            => $real_uid,
-          container_name => $con_name,
-          gid            => $gid,
-          homedir        => $vhost_path,
-          manage_user    => false,
-          logpath        => "${vhost_path}/logs",
-          run_flags      => $default_run_flags + $hosting_run_flags,
-          tag            => "user_${real_uid_name}",
-          publish_socket => $publis_socket_2 + $publish_socket,
-          configuration  => $con_config,
+          ensure            => $ensure,
+          user              => $real_uid_name,
+          uid               => $real_uid,
+          container_name    => $con_name,
+          gid               => $gid,
+          homedir           => $vhost_path,
+          manage_user       => false,
+          logpath           => "${vhost_path}/logs",
+          run_flags         => $default_run_flags + $hosting_run_flags,
+          tag               => "user_${real_uid_name}",
+          publish_socket    => $publis_socket_2 + $publish_socket,
+          pod_system_config => $pod_system_config,
+          configuration     => $con_config,
         }
         podman::container {
           "${name}-${con_name}":
