@@ -211,15 +211,11 @@ define webhosting::common (
   }
   if $run_mode in ['fpm','fcgid'] {
     if ($run_uid=='absent') and ($ensure != 'absent') {
-      fail("you need to define run_uid for ${name} on ${::fqdn} to use fpm or fcgid")
+      fail("you need to define run_uid for ${name} on ${facts['networking']['fqdn']} to use fpm or fcgid")
     }
     $real_run_uid = $run_uid ? {
       'iuid'  => iuid($real_run_uid_name,'webhosting'),
       default => $run_uid,
-    }
-    $shell = $::operatingsystem ? {
-      /^(Debian|Ubuntu)$/ => '/usr/sbin/nologin',
-      default             => '/sbin/nologin',
     }
     user::managed { $real_run_uid_name:
       ensure       => $ensure,
@@ -227,7 +223,7 @@ define webhosting::common (
       managehome   => false,
       homedir      => $vhost_path,
       uid          => $real_run_uid,
-      shell        => $shell,
+      shell        => '/sbin/nologin',
     }
     if $user_access == 'sftp' {
       if $ensure == 'absent' {
