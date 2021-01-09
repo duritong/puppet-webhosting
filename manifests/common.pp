@@ -120,7 +120,7 @@ define webhosting::common(
         # https://lists.podman.io/archives/list/podman@lists.podman.io/thread/LA2J5LY6SZMNMPLDGE4DKIV2CFLGPOXC/
         exec{"adjust_path_access_for_keep-user-id_${vhost_path}":
           command => "bash -c \"setfacl -m user:$(grep -E '^${real_uid_name}:' /etc/subuid | cut -d: -f 2):rx ${vhost_path}\"",
-          unless  => "getfacl -p -n ${vhost_path}  | grep -qE \"^user:$(grep -E '^${real_uid_name}:' /etc/subuid | cut -d: -f 2):r-x\\$\"",
+          unless  => "getfacl -p -n ${vhost_path}  | grep -qE \"^user:$(grep -E '^${real_uid_name}:' /etc/subuid | cut -d: -f 2 | head -n 1):r-x\\$\"",
           require => [File[$vhost_path],User[$real_uid_name]];
         } -> Podman::Container<| tag == "user_${real_uid_name}" |>
       }
