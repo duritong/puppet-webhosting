@@ -68,9 +68,10 @@ define webhosting::common (
     }
     if 'containers' in $configuration {
       if $ensure == 'present' {
-        if !defined(File["${vhost_path}/tmp"]) {
+        $vhost_tmp_dir = "${vhost_path}/tmp"
+        if !defined(File[$vhost_tmp_dir]) {
           file {
-            "${vhost_path}/tmp":
+            $vhost_tmp_dir:
               ensure  => directory,
               owner   => $real_uid_name,
               group   => $real_gid_name,
@@ -107,7 +108,7 @@ define webhosting::common (
             group   => $real_gid_name,
             mode    => '0755',
             seltype => 'httpd_sys_content_t';
-          "${vhost_path}/tmp/run":
+          "${vhost_tmp_dir}/run":
             ensure  => directory,
             owner   => $real_uid_name,
             group   => $real_gid_name,
@@ -161,7 +162,10 @@ define webhosting::common (
         $publis_socket_2 = Hash($route.map |$e| { [$e[1], $publish_options] })
 
         $con_config = { 'config_directory' => $container_config_directory } + pick($vals['configuration'], {})
-        $pod_system_config = { 'volumes_containers_gid_share' => true } + pick($vals['pod_system_config'], {})
+        $pod_system_config = {
+          'volumes_containers_gid_share' => true,
+          'tmp_dir'                      => $vhost_tmp_dir,
+        } + pick($vals['pod_system_config'], {})
         if $ensure == 'present' {
           $auth = pick($vals['auth'],{})
           podman::container::auth {
