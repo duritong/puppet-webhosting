@@ -171,7 +171,7 @@ define webhosting::common (
           podman::container::auth {
             "user-${name}-${con_name}":
               auth     => $auth,
-              path     => "${container_config_directory}/${con_name}-registry-auth.yaml",
+              path     => "${container_config_directory}/auth-${con_name}-registry.yaml",
               replace  => false,
               user     => $real_uid_name,
               group    => $real_gid_name,
