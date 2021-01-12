@@ -1,5 +1,5 @@
 # manage webhosting scripts for a certain webhosting
-define webhosting::user_scripts::manage(
+define webhosting::user_scripts::manage (
   $sftp_user,
   $run_user,
   $web_group,
@@ -8,7 +8,7 @@ define webhosting::user_scripts::manage(
   $options                    = {},
   $user_scripts_help          = 'https://wiki.immerda.ch/index.php/WebhostingUserScripts',
   $user_scripts_admin_address = 'admin@immerda.ch'
-){
+) {
   if $scripts != 'absent' {
     $scripts_path = $base_path ? {
       'absent' => "/var/www/vhosts/${name}/scripts",
@@ -29,8 +29,8 @@ define webhosting::user_scripts::manage(
     }
     $user_scripts_options = deep_merge($default_options,$options)
 
-    require ::webhosting::user_scripts
-    file{
+    require webhosting::user_scripts
+    file {
       "user_scripts_${name}":
         ensure  => directory,
         path    => $scripts_path,
@@ -54,11 +54,12 @@ define webhosting::user_scripts::manage(
       $hosting_contact = false
     }
 
-    file{ "${scripts_path}/vhost.options":
-      content => template('webhosting/user_scripts/vhost.options.erb'),
-      owner   => root,
-      group   => $web_group,
-      mode    => '0440';
+    file {
+      "${scripts_path}/vhost.options":
+        content => template('webhosting/user_scripts/vhost.options.erb'),
+        owner   => root,
+        group   => $web_group,
+        mode    => '0440';
     }
 
     $scripts_to_deploy = { 'adjust_permissions'  => 'dirs',
@@ -68,7 +69,7 @@ define webhosting::user_scripts::manage(
     }
     $scripts_to_deploy.each |String $script_name, Variant[String, Boolean] $config_ext| {
       if ($script_name in $scripts) or ($scripts == 'ALL') {
-        file{
+        file {
           "${scripts_path}/${script_name}":
             ensure => directory,
             owner  => $sftp_user,
@@ -83,7 +84,7 @@ define webhosting::user_scripts::manage(
             require => File["${scripts_path}/${script_name}"];
         }
         if $config_ext {
-          file{
+          file {
             "${scripts_path}/${script_name}/${script_name}.${config_ext}":
               content => template("webhosting/user_scripts/${script_name}/${script_name}.${config_ext}.erb"),
               owner   => $sftp_user,
@@ -91,7 +92,7 @@ define webhosting::user_scripts::manage(
               mode    => '0600';
           }
           if ($script_name == 'ssh_authorized_keys') {
-            file{"/var/www/ssh_authorized_keys/${sftp_user}":
+            file { "/var/www/ssh_authorized_keys/${sftp_user}":
               content => template('webhosting/user_scripts/ssh_authorized_keys/ssh_authorized_keys.keys.erb'),
               owner   => $sftp_user,
               group   => 0,
@@ -99,12 +100,12 @@ define webhosting::user_scripts::manage(
               seltype => 'ssh_home_t';
             }
             if !$user_scripts_options['enforce_ssh_authorized_keys'] {
-              File["/var/www/ssh_authorized_keys/${sftp_user}","${scripts_path}/${script_name}/${script_name}.${config_ext}"]{
+              File["/var/www/ssh_authorized_keys/${sftp_user}","${scripts_path}/${script_name}/${script_name}.${config_ext}"] {
                 replace => false,
               }
             }
           } else {
-            File["${scripts_path}/${script_name}/${script_name}.${config_ext}"]{
+            File["${scripts_path}/${script_name}/${script_name}.${config_ext}"] {
               replace => false,
             }
           }
