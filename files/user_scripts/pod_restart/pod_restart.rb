@@ -23,6 +23,7 @@ end
 
 # verify security related things to that script
 def script_security
+  security_fail("Webdir #{options['webdir']} does not exist. Please fix!") unless File.directory?(options['webdir'])
 end
 
 # the main method
@@ -64,7 +65,7 @@ def stop(what, name)
   # chmod runs as sftp user, which should own all the relevant files now
   log "Stopping #{what} '#{name}'"
   sudo(sftp_user_uid,group_gid) do
-    cmd("XDG_RUNTIME_DIR=/run/pods/#{sftp_user_uid} podman #{what} stop '#{name}'")
+    cmd("HOME=#{File.dirname(options['webdir'])} XDG_RUNTIME_DIR=/run/pods/#{sftp_user_uid} podman #{what.gsub(/s$/,'')} stop '#{name}'")
   end
   log "Stopped #{what} '#{name}' - Restart will be triggered soon..."
 rescue => e
