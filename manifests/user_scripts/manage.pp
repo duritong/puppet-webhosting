@@ -62,7 +62,7 @@ define webhosting::user_scripts::manage (
         mode    => '0440';
     }
 
-    intersction($webhosting::user_scripts::scripts_to_deploy.keys, $scripts).each |String[1] $script_name| {
+    intersection($webhosting::user_scripts::scripts_to_deploy.keys, $scripts).each |String[1] $script_name| {
       $config_ext = $webhosting::user_scripts::scripts_to_deploy[$script_name]
       file {
         "${scripts_path}/${script_name}":
