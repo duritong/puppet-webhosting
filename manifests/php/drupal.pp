@@ -14,7 +14,7 @@
 #   - nologs: Send every logging to /dev/null
 #   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
-define webhosting::php::drupal(
+define webhosting::php::drupal (
   $ensure                = present,
   $configuration         = {},
   $uid                   = 'absent',
@@ -34,7 +34,7 @@ define webhosting::php::drupal(
   $run_gid               = 'absent',
   $run_gid_name          = 'absent',
   $watch_adjust_webfiles = 'absent',
-  $user_scripts          = 'absent',
+  $user_scripts          = 'auto',
   $user_scripts_options  = {},
   $wwwmail               = false,
   $allow_override        = 'None',
@@ -62,13 +62,13 @@ define webhosting::php::drupal(
   $config_webwriteable   = false,
   $manage_directories    = true,
   $manage_cron           = true,
-){
-  if ($uid_name == 'absent'){
+) {
+  if ($uid_name == 'absent') {
     $real_uid_name = $name
   } else {
     $real_uid_name = $uid_name
   }
-  if ($gid_name == 'absent'){
+  if ($gid_name == 'absent') {
     $real_gid_name = $real_uid_name
   } else {
     $real_gid_name = $gid_name
@@ -81,7 +81,13 @@ define webhosting::php::drupal(
   $path = "/var/www/vhosts/${name}"
   $documentroot = "${path}/www"
 
-  webhosting::common{$name:
+  if $user_scripts == 'auto' {
+    include webhosting::user_scripts
+    $_user_scripts = $webhosting::user_scripts::php_scripts
+  } else {
+    $_user_scripts = $user_scripts
+  }
+  webhosting::common { $name:
     ensure                => $ensure,
     configuration         => $configuration,
     uid                   => $uid,
@@ -96,7 +102,7 @@ define webhosting::php::drupal(
     run_uid               => $run_uid,
     run_uid_name          => $run_uid_name,
     run_gid               => $run_gid,
-    user_scripts          => $user_scripts,
+    user_scripts          => $_user_scripts,
     user_scripts_options  => $user_scripts_options,
     watch_adjust_webfiles => $watch_adjust_webfiles,
     wwwmail               => $wwwmail,
@@ -109,7 +115,7 @@ define webhosting::php::drupal(
     php_installation      => $php_installation,
   }
 
-  apache::vhost::php::drupal{$name:
+  apache::vhost::php::drupal { $name:
     ensure              => $ensure,
     configuration       => $configuration,
     domainalias         => $domainalias,
@@ -138,12 +144,12 @@ define webhosting::php::drupal(
   }
   case $run_mode {
     'fpm','fcgid': {
-      if ($run_uid_name == 'absent'){
+      if ($run_uid_name == 'absent') {
         $real_run_uid_name = "${name}_run"
       } else {
         $real_run_uid_name = $run_uid_name
       }
-      if ($run_gid_name == 'absent'){
+      if ($run_gid_name == 'absent') {
         $real_run_gid_name = $gid_name ? {
           'absent'  => $name,
           default   => $gid_name
@@ -151,29 +157,29 @@ define webhosting::php::drupal(
       } else {
         $real_run_gid_name = $run_gid_name
       }
-      Apache::Vhost::Php::Drupal[$name]{
+      Apache::Vhost::Php::Drupal[$name] {
         documentroot_owner  => $real_uid_name,
         documentroot_group  => $real_gid_name,
         run_uid             => $real_run_uid_name,
         run_gid             => $real_run_gid_name,
       }
       if $ensure != 'absent' {
-        Apache::Vhost::Php::Drupal[$name]{
+        Apache::Vhost::Php::Drupal[$name] {
           require => [User::Sftp_only[$real_uid_name],
-                      User::Managed[$real_run_uid_name] ],
+                      User::Managed[$real_run_uid_name]],
         }
       }
     }
     default: {
       if $ensure != 'absent' {
-        Apache::Vhost::Php::Drupal[$name]{
+        Apache::Vhost::Php::Drupal[$name] {
           require => User::Sftp_only[$real_uid_name],
         }
       }
     }
   }
   if $template_partial != 'absent' {
-    Apache::Vhost::Php::Drupal[$name]{
+    Apache::Vhost::Php::Drupal[$name] {
       template_partial => $template_partial,
     }
   }

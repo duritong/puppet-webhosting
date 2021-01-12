@@ -8,7 +8,7 @@
 #   - nologs: Send every logging to /dev/null
 #   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
-define webhosting::static(
+define webhosting::static (
   $ensure               = present,
   $configuration        = {},
   $uid                  = 'absent',
@@ -43,13 +43,13 @@ define webhosting::static(
   $git_repo             = 'absent',
   $user_scripts         = 'absent',
   $user_scripts_options = {},
-){
-  if ($uid_name == 'absent'){
+) {
+  if ($uid_name == 'absent') {
     $real_uid_name = $name
   } else {
     $real_uid_name = $uid_name
   }
-  if ($gid_name == 'absent'){
+  if ($gid_name == 'absent') {
     $real_gid_name = $real_uid_name
   } else {
     $real_gid_name = $gid_name
@@ -59,7 +59,13 @@ define webhosting::static(
   } else {
     $real_group = 'apache'
   }
-  webhosting::common{$name:
+  if $user_scripts == 'auto' {
+    include webhosting::user_scripts
+    $_user_scripts = $webhosting::user_scripts::static_scripts
+  } else {
+    $_user_scripts = $user_scripts
+  }
+  webhosting::common { $name:
     ensure               => $ensure,
     configuration        => $configuration,
     uid                  => $uid,
@@ -77,10 +83,10 @@ define webhosting::static(
     nagios_check_code    => $nagios_check_code,
     nagios_use           => $nagios_use,
     git_repo             => $git_repo,
-    user_scripts         => $user_scripts,
+    user_scripts         => $_user_scripts,
     user_scripts_options => $user_scripts_options,
   }
-  apache::vhost::static{$name:
+  apache::vhost::static { $name:
     ensure             => $ensure,
     configuration      => $configuration,
     domain             => $domain,
@@ -103,9 +109,8 @@ define webhosting::static(
     mod_security       => $mod_security,
   }
   if $template_partial != 'absent' {
-    Apache::Vhost::Static[$name]{
+    Apache::Vhost::Static[$name] {
       template_partial => $template_partial
     }
   }
 }
-

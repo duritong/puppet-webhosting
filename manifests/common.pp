@@ -24,7 +24,7 @@ define webhosting::common (
   $run_gid               = 'absent',
   $wwwmail               = false,
   $watch_adjust_webfiles = 'absent',
-  $user_scripts          = 'absent',
+  Variant[Enum['absent'], Array[String[1]]] $user_scripts = 'absent',
   $user_scripts_options  = {},
   $nagios_check          = 'ensure',
   Variant[String,Array[String]] $nagios_check_domain   = 'absent',
@@ -351,17 +351,50 @@ define webhosting::common (
     if $scl_name and !('scl' in $user_scripts_options['global']) {
       $real_user_scripts_options = deep_merge( {
           'global' => { 'scl' => $scl_name },
-        }, $user_scripts_options)
+      }, $user_scripts_options)
     } else {
       $real_user_scripts_options = $user_scripts_options
     }
+
+    if 'containers' in $configuration {
+      $_user_scripts = unique($user_scripts + $webhosting::user_scripts::container_scripts)
+      $pods = $configuration['containers'].keys.map |$con_name| {
+        $vals = $configuration['containers'][$con_name]
+        if 'deployment_mode' in $vals and $vals['deployment_mode'] =~ /pod$/ {
+          $con_name
+        } elsif 'publish_socket' in $vals and !empty($vals['publish_socket']) {
+          "pod-${con_name}"
+        } else {
+          undef
+        }
+      }.filter |$val| { $val =~ NotUndef }
+      $containers = $configuration['containers'].keys.map |$con_name| {
+        $vals = $configuration['containers'][$con_name]
+        if 'deployment_mode' in $vals and $vals['deployment_mode'] !~ /pod$/ {
+          $con_name
+        } elsif !('deployment_mode' in $vals) and (!('publish_socket' in $vals) or empty($vals['publish_socket'])) {
+          $con_name
+        } else {
+          undef
+        }
+      }.filter |$val| { $val =~ NotUndef }
+      $_real_user_scripts_options = $real_user_scripts_options + {
+        pod_restart => {
+          pods       => $pods,
+          containers => $containers,
+        } + pick($real_user_scripts_options[pod_restart],{}),
+      }
+    } else {
+      $_user_scripts = $user_scripts
+      $_real_user_scripts_options = $real_user_scripts_options
+    }
     webhosting::user_scripts::manage { $name:
       base_path => $vhost_path,
-      scripts   => $user_scripts,
+      scripts   => $_user_scripts,
       sftp_user => $real_uid_name,
       run_user  => $real_run_uid_name,
       web_group => $real_gid_name,
-      options   => $real_user_scripts_options,
+      options   => $_real_user_scripts_options,
     }
 
     if 'mail_ratelimit' in $configuration {

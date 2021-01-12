@@ -12,7 +12,7 @@
 #   - nologs: Send every logging to /dev/null
 #   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
-define webhosting::passenger(
+define webhosting::passenger (
   $ensure               = present,
   $configuration        = {},
   $uid                  = 'absent',
@@ -51,16 +51,15 @@ define webhosting::passenger(
   $nagios_use           = 'generic-service',
   $mod_security         = false,
   $git_repo             = 'absent',
-  $user_scripts         = 'absent',
+  $user_scripts         = 'auto',
   $user_scripts_options = {},
-){
-
-  if ($uid_name == 'absent'){
+) {
+  if ($uid_name == 'absent') {
     $real_uid_name = $name
   } else {
     $real_uid_name = $uid_name
   }
-  if ($gid_name == 'absent'){
+  if ($gid_name == 'absent') {
     $real_gid_name = $real_uid_name
   } else {
     $real_gid_name = $gid_name
@@ -74,7 +73,13 @@ define webhosting::passenger(
       $real_group = $group
     }
   }
-  webhosting::common{$name:
+  if $user_scripts == 'auto' {
+    include webhosting::user_scripts
+    $_user_scripts = $webhosting::user_scripts::static_scripts
+  } else {
+    $_user_scripts = $user_scripts
+  }
+  webhosting::common { $name:
     ensure               => $ensure,
     configuration        => $configuration,
     uid                  => $uid,
@@ -97,10 +102,10 @@ define webhosting::passenger(
     nagios_check_code    => $nagios_check_code,
     nagios_use           => $nagios_use,
     git_repo             => $git_repo,
-    user_scripts         => $user_scripts,
+    user_scripts         => $_user_scripts,
     user_scripts_options => $user_scripts_options,
   }
-  apache::vhost::passenger{$name:
+  apache::vhost::passenger { $name:
     ensure             => $ensure,
     configuration      => $configuration,
     domainalias        => $domainalias,
@@ -122,7 +127,7 @@ define webhosting::passenger(
 
   if $ensure == 'present' {
     $path_options = "\nexport PATH=~/gems/bin:\$PATH"
-    file{
+    file {
       "/var/www/vhosts/${name}/.ccache":
         ensure => directory,
         owner  => $real_uid_name,
@@ -146,12 +151,12 @@ define webhosting::passenger(
 
   case $run_mode {
     'fcgid': {
-      if ($run_uid_name == 'absent'){
+      if ($run_uid_name == 'absent') {
         $real_run_uid_name = "${name}_run"
       } else {
         $real_run_uid_name = $run_uid_name
       }
-      if ($run_gid_name == 'absent'){
+      if ($run_gid_name == 'absent') {
         $real_run_gid_name = $gid_name ? {
           'absent'  => $name,
           default   => $gid_name
@@ -159,7 +164,7 @@ define webhosting::passenger(
       } else {
         $real_run_gid_name = $run_gid_name
       }
-      Apache::Vhost::Passenger[$name]{
+      Apache::Vhost::Passenger[$name] {
         documentroot_owner  => $real_uid_name,
         documentroot_group  => $real_gid_name,
         documentroot_mode   => '0750',
@@ -167,22 +172,22 @@ define webhosting::passenger(
         run_gid             => $real_run_gid_name,
       }
       if $ensure != 'absent' {
-        Apache::Vhost::Passenger[$name]{
-          require => [ User::Sftp_only[$real_uid_name],
-            User::Managed[$real_run_uid_name] ],
+        Apache::Vhost::Passenger[$name] {
+          require => [User::Sftp_only[$real_uid_name],
+          User::Managed[$real_run_uid_name]],
         }
       }
     }
     default: {
-      Apache::Vhost::Passenger[$name]{
+      Apache::Vhost::Passenger[$name] {
         require => User::Sftp_only[$real_uid_name],
       }
-      if ($run_uid_name == 'absent'){
+      if ($run_uid_name == 'absent') {
         $real_run_uid_name = 'apache'
       } else {
         $real_run_uid_name = $run_uid_name
       }
-      if ($run_gid_name == 'absent'){
+      if ($run_gid_name == 'absent') {
         $real_run_gid_name = $gid_name ? {
           'absent'  => 'apache',
           default   => $gid_name
@@ -190,16 +195,15 @@ define webhosting::passenger(
       } else {
         $real_run_gid_name = $run_gid_name
       }
-      Apache::Vhost::Passenger[$name]{
+      Apache::Vhost::Passenger[$name] {
         run_uid => $run_uid,
         run_gid => $run_gid,
       }
     }
   }
   if $template_partial != 'absent' {
-    Apache::Vhost::Passenger[$name]{
+    Apache::Vhost::Passenger[$name] {
       template_partial => $template_partial,
     }
   }
 }
-

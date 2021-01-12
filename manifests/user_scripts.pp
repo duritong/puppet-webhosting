@@ -7,7 +7,11 @@ class webhosting::user_scripts (
     'update_mode'         => false,
     'update_wordpress'    => 'dirs',
     'ssh_authorized_keys' => 'keys',
+    'pod_restart'         => 'pods',
   },
+  Array[String[1]] $static_scripts = ['ssh_authorized_keys'],
+  Array[String[1]] $container_scripts = ['ssh_authorized_keys','pod_restart'],
+  Array[String[1]] $php_scripts = ['ssh_authorized_keys', 'adjust_permissions', 'update_mode', 'update_wordpress'],
 ) {
   require incron
 
@@ -32,7 +36,8 @@ class webhosting::user_scripts (
       mode   => '0500';
   }
   # deploy scripts
-  $scripts_to_deploy.keys.each |String $script_name| {
+  $all_scripts = $scripts_to_deploy.keys
+  $all_scripts.each |String $script_name| {
     file {
       "/opt/webhosting_user_scripts/${script_name}":
         ensure => directory,

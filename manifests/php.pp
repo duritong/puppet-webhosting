@@ -14,7 +14,7 @@
 #   - nologs: Send every logging to /dev/null
 #   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
-define webhosting::php(
+define webhosting::php (
   $ensure                 = present,
   $configuration          = {},
   $uid                    = 'absent',
@@ -61,13 +61,13 @@ define webhosting::php(
   $nagios_use             = 'generic-service',
   $mod_security           = false,
   $git_repo               = 'absent',
-){
-  if ($uid_name == 'absent'){
+) {
+  if ($uid_name == 'absent') {
     $real_uid_name = $name
   } else {
     $real_uid_name = $uid_name
   }
-  if ($gid_name == 'absent'){
+  if ($gid_name == 'absent') {
     $real_gid_name = $real_uid_name
   } else {
     $real_gid_name = $gid_name
@@ -81,7 +81,13 @@ define webhosting::php(
       $real_group = $group
     }
   }
-  webhosting::common{$name:
+  if $user_scripts == 'auto' {
+    include webhosting::user_scripts
+    $_user_scripts = $webhosting::user_scripts::php_scripts
+  } else {
+    $_user_scripts = $user_scripts
+  }
+  webhosting::common { $name:
     ensure                => $ensure,
     configuration         => $configuration,
     uid                   => $uid,
@@ -98,7 +104,7 @@ define webhosting::php(
     run_uid_name          => $run_uid_name,
     run_gid               => $run_gid,
     watch_adjust_webfiles => $watch_adjust_webfiles,
-    user_scripts          => $user_scripts,
+    user_scripts          => $_user_scripts,
     user_scripts_options  => $user_scripts_options,
     wwwmail               => $wwwmail,
     nagios_check          => $nagios_check,
@@ -109,7 +115,7 @@ define webhosting::php(
     git_repo              => $git_repo,
     php_installation      => $php_installation,
   }
-  apache::vhost::php::standard{$name:
+  apache::vhost::php::standard { $name:
     ensure             => $ensure,
     configuration      => $configuration,
     domain             => $domain,
@@ -136,17 +142,17 @@ define webhosting::php(
   }
   case $run_mode {
     'fpm','fcgid': {
-      if ($run_uid_name == 'absent'){
+      if ($run_uid_name == 'absent') {
         $real_run_uid_name = "${name}_run"
       } else {
         $real_run_uid_name = $run_uid_name
       }
-      if ($run_gid_name == 'absent'){
+      if ($run_gid_name == 'absent') {
         $real_run_gid_name = $real_gid_name
       } else {
         $real_run_gid_name = $run_gid_name
       }
-      Apache::Vhost::Php::Standard[$name]{
+      Apache::Vhost::Php::Standard[$name] {
         documentroot_owner  => $real_uid_name,
         documentroot_group  => $real_gid_name,
         documentroot_mode   => '0750',
@@ -154,24 +160,23 @@ define webhosting::php(
         run_gid             => $real_run_gid_name,
       }
       if $ensure != 'absent' {
-        Apache::Vhost::Php::Standard[$name]{
+        Apache::Vhost::Php::Standard[$name] {
           require => [User::Sftp_only[$real_uid_name],
-                      User::Managed[$real_run_uid_name] ],
+          User::Managed[$real_run_uid_name]],
         }
       }
     }
     default: {
       if $ensure != 'absent' {
-        Apache::Vhost::Php::Standard[$name]{
+        Apache::Vhost::Php::Standard[$name] {
           require => User::Sftp_only[$real_uid_name],
         }
       }
     }
   }
   if $template_partial != 'absent' {
-    Apache::Vhost::Php::Standard[$name]{
+    Apache::Vhost::Php::Standard[$name] {
       template_partial => $template_partial
     }
   }
 }
-

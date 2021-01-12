@@ -33,7 +33,7 @@ define webhosting::php::wordpress (
   $run_gid                = 'absent',
   $run_gid_name           = 'absent',
   $watch_adjust_webfiles  = 'absent',
-  $user_scripts           = 'absent',
+  $user_scripts           = 'auto',
   $user_scripts_options   = {},
   $wwwmail                = false,
   $allow_override         = 'All',
@@ -81,8 +81,14 @@ define webhosting::php::wordpress (
   $path = "/var/www/vhosts/${name}"
   $documentroot = "${path}/www"
 
+  if $user_scripts == 'auto' {
+    include webhosting::user_scripts
+    $_user_scripts = $webhosting::user_scripts::php_scripts
+  } else {
+    $_user_scripts = $user_scripts
+  }
   $_user_scripts_options = deep_merge( {
-    'update_wordpress' => { 'auto_update' => true, },
+      'update_wordpress' => { 'auto_update' => true, },
   }, $user_scripts_options)
   webhosting::common { $name:
     ensure                => $ensure,
@@ -99,7 +105,7 @@ define webhosting::php::wordpress (
     run_uid               => $run_uid,
     run_uid_name          => $run_uid_name,
     run_gid               => $run_gid,
-    user_scripts          => $user_scripts,
+    user_scripts          => $_user_scripts,
     user_scripts_options  => $_user_scripts_options,
     watch_adjust_webfiles => $watch_adjust_webfiles,
     wwwmail               => $wwwmail,

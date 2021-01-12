@@ -1,18 +1,18 @@
 # manage webhosting scripts for a certain webhosting
 define webhosting::user_scripts::manage (
-  $sftp_user,
-  $run_user,
-  $web_group,
-  $base_path                  = 'absent',
-  $scripts                    = 'ALL',
-  $options                    = {},
-  $user_scripts_help          = 'https://wiki.immerda.ch/index.php/WebhostingUserScripts',
-  $user_scripts_admin_address = 'admin@immerda.ch'
+  String[1] $sftp_user,
+  String[1] $run_user,
+  String[1] $web_group,
+  Variant[Enum['absent'], Stdlib::Unixpath] $base_path = 'absent',
+  Variant[Enum['absent'],Array[String[1]]] $scripts = [],
+  Hash $options = {},
+  $user_scripts_help = 'https://docs.immerda.ch/de/services/webhosting/',
+  $user_scripts_admin_address = 'admin@immerda.ch',
 ) {
   if $scripts != 'absent' {
     $scripts_path = $base_path ? {
       'absent' => "/var/www/vhosts/${name}/scripts",
-      default => "${base_path}/scripts"
+      default => "${base_path}/scripts",
     }
 
     $default_options = {
@@ -62,47 +62,46 @@ define webhosting::user_scripts::manage (
         mode    => '0440';
     }
 
-    $webhosting::user_scripts::scripts_to_deploy.each |String $script_name, Variant[String, Boolean] $config_ext| {
-      if ($script_name in $scripts) or ($scripts == 'ALL') {
+    intersction($webhosting::user_scripts::scripts_to_deploy.keys, $scripts).each |String[1] $script_name| {
+      $config_ext = $webhosting::user_scripts::scripts_to_deploy[$script_name]
+      file {
+        "${scripts_path}/${script_name}":
+          ensure => directory,
+          owner  => $sftp_user,
+          group  => $web_group,
+          mode   => '0600';
+        "incron_${script_name}_${name}":
+          path    => "/etc/incron.d/${name}_${script_name}",
+          content => "${scripts_path}/${script_name}/ IN_CREATE /opt/webhosting_user_scripts/common/run_incron.sh \$@ \$#\n",
+          owner   => root,
+          group   => 0,
+          mode    => '0400',
+          require => File["${scripts_path}/${script_name}"];
+      }
+      if $config_ext {
         file {
-          "${scripts_path}/${script_name}":
-            ensure => directory,
-            owner  => $sftp_user,
-            group  => $web_group,
-            mode   => '0600';
-          "incron_${script_name}_${name}":
-            path    => "/etc/incron.d/${name}_${script_name}",
-            content => "${scripts_path}/${script_name}/ IN_CREATE /opt/webhosting_user_scripts/common/run_incron.sh \$@ \$#\n",
-            owner   => root,
-            group   => 0,
-            mode    => '0400',
-            require => File["${scripts_path}/${script_name}"];
+          "${scripts_path}/${script_name}/${script_name}.${config_ext}":
+            content => template("webhosting/user_scripts/${script_name}/${script_name}.${config_ext}.erb"),
+            owner   => $sftp_user,
+            group   => $web_group,
+            mode    => '0600';
         }
-        if $config_ext {
-          file {
-            "${scripts_path}/${script_name}/${script_name}.${config_ext}":
-              content => template("webhosting/user_scripts/${script_name}/${script_name}.${config_ext}.erb"),
-              owner   => $sftp_user,
-              group   => $web_group,
-              mode    => '0600';
+        if ($script_name == 'ssh_authorized_keys') {
+          file { "/var/www/ssh_authorized_keys/${sftp_user}":
+            content => template('webhosting/user_scripts/ssh_authorized_keys/ssh_authorized_keys.keys.erb'),
+            owner   => $sftp_user,
+            group   => 0,
+            mode    => '0600',
+            seltype => 'ssh_home_t';
           }
-          if ($script_name == 'ssh_authorized_keys') {
-            file { "/var/www/ssh_authorized_keys/${sftp_user}":
-              content => template('webhosting/user_scripts/ssh_authorized_keys/ssh_authorized_keys.keys.erb'),
-              owner   => $sftp_user,
-              group   => 0,
-              mode    => '0600',
-              seltype => 'ssh_home_t';
-            }
-            if !$user_scripts_options['enforce_ssh_authorized_keys'] {
-              File["/var/www/ssh_authorized_keys/${sftp_user}","${scripts_path}/${script_name}/${script_name}.${config_ext}"] {
-                replace => false,
-              }
-            }
-          } else {
-            File["${scripts_path}/${script_name}/${script_name}.${config_ext}"] {
+          if !$user_scripts_options['enforce_ssh_authorized_keys'] {
+            File["/var/www/ssh_authorized_keys/${sftp_user}","${scripts_path}/${script_name}/${script_name}.${config_ext}"] {
               replace => false,
             }
+          }
+        } else {
+          File["${scripts_path}/${script_name}/${script_name}.${config_ext}"] {
+            replace => false,
           }
         }
       }

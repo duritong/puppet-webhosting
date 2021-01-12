@@ -11,7 +11,6 @@ define webhosting::watch_adjust_webfiles (
   $run_user,
   $ensure = 'present',
 ) {
-
   $file_ensure = $ensure ? {
     'absent'  => 'absent',
     'inotify' => 'absent',
@@ -24,7 +23,7 @@ define webhosting::watch_adjust_webfiles (
     default   => 'absent'
   }
 
-  file{"/etc/cron.daily/fix_webperms_${name}":
+  file { "/etc/cron.daily/fix_webperms_${name}":
     ensure => $file_ensure,
   }
 
@@ -37,7 +36,7 @@ define webhosting::watch_adjust_webfiles (
   if $job_ensure == 'present' {
     $watch_cmd = "${chown_script} ${run_user} ${sftp_user} ${path} \$filename"
 
-    dirwatcher::job {$name :
+    dirwatcher::job { $name :
       watch_directory => $path,
       watch_events    => 'create,move_to',
       watch_command   => $watch_cmd,
@@ -49,7 +48,7 @@ define webhosting::watch_adjust_webfiles (
 find ${path} -ignore_readdir_race -user ${run_user} -exec ${chown_script} \\
      ${run_user} ${sftp_user} ${path} '{}' \\;"
 
-    File["/etc/cron.daily/fix_webperms_${name}"]{
+    File["/etc/cron.daily/fix_webperms_${name}"] {
       content => $cron_cmd,
       owner   => root,
       group   => 0,
@@ -57,4 +56,3 @@ find ${path} -ignore_readdir_race -user ${run_user} -exec ${chown_script} \\
     }
   }
 }
-

@@ -13,7 +13,7 @@
 #   - nologs: Send every logging to /dev/null
 #   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
-define webhosting::php::mediawiki(
+define webhosting::php::mediawiki (
   $ensure              = present,
   $configuration       = {},
   $uid                 = 'absent',
@@ -69,13 +69,13 @@ define webhosting::php::mediawiki(
   $extensions          = 'absent',
   $language            = 'de',
   $hashed_upload_dir   = true
-){
-  if ($uid_name == 'absent'){
+) {
+  if ($uid_name == 'absent') {
     $real_uid_name = $name
   } else {
     $real_uid_name = $uid_name
   }
-  if ($gid_name == 'absent'){
+  if ($gid_name == 'absent') {
     $real_gid_name = $real_uid_name
   } else {
     $real_gid_name = $gid_name
@@ -85,7 +85,7 @@ define webhosting::php::mediawiki(
   } else {
     $real_group = 'apache'
   }
-  webhosting::common{$name:
+  webhosting::common { $name:
     ensure              => $ensure,
     configuration       => $configuration,
     uid                 => $uid,
@@ -109,7 +109,7 @@ define webhosting::php::mediawiki(
     php_installation    => $php_installation,
   }
 
-  if $wwwmail and ($contact != 'unmanaged'){
+  if $wwwmail and ($contact != 'unmanaged') {
     $sendmail_path = "/usr/sbin/sendmail -t -f${contact} -i"
   } else {
     $sendmail_path = undef
@@ -123,7 +123,7 @@ define webhosting::php::mediawiki(
   }
   $real_php_options = merge($mediawiki_php_options,$php_options)
 
-  apache::vhost::php::mediawiki{$name:
+  apache::vhost::php::mediawiki { $name:
     ensure             => $ensure,
     configuration      => $configuration,
     domainalias        => $domainalias,
@@ -146,7 +146,7 @@ define webhosting::php::mediawiki(
     htpasswd_file      => $htpasswd_file,
     mod_security       => $mod_security,
   }
-  mediawiki::instance{$name:
+  mediawiki::instance { $name:
     ensure                  => $ensure,
     image                   => $image,
     config                  => $config,
@@ -172,12 +172,12 @@ define webhosting::php::mediawiki(
 
   case $run_mode {
     'fpm','fcgid': {
-      if ($run_uid_name == 'absent'){
+      if ($run_uid_name == 'absent') {
         $real_run_uid_name = "${name}_run"
       } else {
         $real_run_uid_name = $run_uid_name
       }
-      if ($run_gid_name == 'absent'){
+      if ($run_gid_name == 'absent') {
         $real_run_gid_name = $gid_name ? {
           'absent' => $name,
           default  => $gid_name
@@ -185,43 +185,42 @@ define webhosting::php::mediawiki(
       } else {
         $real_run_gid_name = $run_gid_name
       }
-      Apache::Vhost::Php::Mediawiki[$name]{
+      Apache::Vhost::Php::Mediawiki[$name] {
         documentroot_owner => $real_uid_name,
         documentroot_group => $real_gid_name,
         run_uid            => $real_run_uid_name,
         run_gid            => $real_run_gid_name,
       }
-      Mediawiki::Instance[$name]{
+      Mediawiki::Instance[$name] {
         documentroot_owner => $real_uid_name,
         documentroot_group => $real_gid_name,
         documentroot_mode  => '0640',
       }
       if $ensure != 'absent' {
-        Apache::Vhost::Php::Mediawiki[$name]{
+        Apache::Vhost::Php::Mediawiki[$name] {
           require => [User::Sftp_only[$real_uid_name],
-                      User::Managed[$real_run_uid_name] ],
+                      User::Managed[$real_run_uid_name]],
         }
-        Mediawiki::Instance[$name]{
+        Mediawiki::Instance[$name] {
           require => [User::Sftp_only[$real_uid_name],
-                      User::Managed[$real_run_uid_name] ],
+                      User::Managed[$real_run_uid_name]],
         }
       }
     }
     default: {
       if $ensure != 'absent' {
-        Apache::Vhost::Php::Mediawiki[$name]{
+        Apache::Vhost::Php::Mediawiki[$name] {
           require => User::Sftp_only[$real_uid_name],
         }
-        Mediawiki::Instance[$name]{
+        Mediawiki::Instance[$name] {
           require => User::Sftp_only[$real_uid_name],
         }
       }
     }
   }
   if $template_partial != 'absent' {
-    Apache::Vhost::Php::Mediawiki[$name]{
+    Apache::Vhost::Php::Mediawiki[$name] {
       template_partial => $template_partial
     }
   }
 }
-

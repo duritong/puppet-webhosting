@@ -12,7 +12,7 @@
 #   - nologs: Send every logging to /dev/null
 #   - anonym: Don't log ips for CustomLog, send ErrorLog to /dev/null
 #   - semianonym: Don't log ips for CustomLog, log normal ErrorLog
-define webhosting::wsgi(
+define webhosting::wsgi (
   $ensure               = present,
   $configuration        = {},
   $uid                  = 'absent',
@@ -50,16 +50,15 @@ define webhosting::wsgi(
   $nagios_use           = 'generic-service',
   $mod_security         = false,
   $git_repo             = 'absent',
-  $user_scripts         = 'absent',
+  $user_scripts         = 'auto',
   $user_scripts_options = {},
-){
-
-  if ($uid_name == 'absent'){
+) {
+  if ($uid_name == 'absent') {
     $real_uid_name = $name
   } else {
     $real_uid_name = $uid_name
   }
-  if ($gid_name == 'absent'){
+  if ($gid_name == 'absent') {
     $real_gid_name = $real_uid_name
   } else {
     $real_gid_name = $gid_name
@@ -73,7 +72,13 @@ define webhosting::wsgi(
       $real_group = $group
     }
   }
-  webhosting::common{$name:
+  if $user_scripts == 'auto' {
+    include webhosting::user_scripts
+    $_user_scripts = $webhosting::user_scripts::static_scripts
+  } else {
+    $_user_scripts = $user_scripts
+  }
+  webhosting::common { $name:
     ensure               => $ensure,
     configuration        => $configuration,
     uid                  => $uid,
@@ -95,10 +100,10 @@ define webhosting::wsgi(
     nagios_check_code    => $nagios_check_code,
     nagios_use           => $nagios_use,
     git_repo             => $git_repo,
-    user_scripts         => $user_scripts,
+    user_scripts         => $_user_scripts,
     user_scripts_options => $user_scripts_options,
   }
-  apache::vhost::wsgi{$name:
+  apache::vhost::wsgi { $name:
     ensure             => $ensure,
     configuration      => $configuration,
     domainalias        => $domainalias,
@@ -118,15 +123,15 @@ define webhosting::wsgi(
     mod_security       => $mod_security,
   }
 
-  Apache::Vhost::Wsgi[$name]{
+  Apache::Vhost::Wsgi[$name] {
     require => User::Sftp_only[$real_uid_name],
   }
-  if ($run_uid_name == 'absent'){
+  if ($run_uid_name == 'absent') {
     $real_run_uid_name = 'apache'
   } else {
     $real_run_uid_name = $run_uid_name
   }
-  if ($run_gid_name == 'absent'){
+  if ($run_gid_name == 'absent') {
     $real_run_gid_name = $gid_name ? {
       'absent'  => 'apache',
       default   => $gid_name
@@ -134,14 +139,13 @@ define webhosting::wsgi(
   } else {
     $real_run_gid_name = $run_gid_name
   }
-  Apache::Vhost::Wsgi[$name]{
+  Apache::Vhost::Wsgi[$name] {
     run_uid => $run_uid,
     run_gid => $run_gid,
   }
   if $template_partial != 'absent' {
-    Apache::Vhost::Wsgi[$name]{
+    Apache::Vhost::Wsgi[$name] {
       template_partial => $template_partial,
     }
   }
 }
-

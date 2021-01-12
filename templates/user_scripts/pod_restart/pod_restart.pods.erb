@@ -1,0 +1,28 @@
+# This is the configuration file to define which pods or containers
+# shall be restarted.
+#
+# The script will first iterate through all pods, then through containers
+# and restart them one by one. This will be done by stopping them. Systemd
+# will then ensure they are getting started again.
+# Usually on starting, also all images are checked for updates.
+#
+# Do not try to restart individual containers of a pod, they won't get
+# restarted. You will likely have only one pod, named like your hosting
+# and thus is the only thing to restart.
+#
+# --- start example ---
+# pods:
+#   - myhost.net
+# containers: []
+# --- end example ---
+#
+<% ['pods','containers' ].each do |option|
+   if Array(@user_scripts_options['pod_restart'][option]).empty? -%>
+<%= option %>: []
+<% else -%>
+<%= option %>:
+<%   Array(@user_scripts_options['pod_restart'][option]).each do |path| -%>
+  - <%= path %>
+<%   end
+   end
+end -%>

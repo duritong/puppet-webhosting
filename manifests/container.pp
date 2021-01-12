@@ -41,7 +41,7 @@ define webhosting::container (
   $nagios_check_code = '200',
   $nagios_use = 'generic-service',
   $watch_adjust_webfiles = 'absent',
-  $user_scripts = 'absent',
+  $user_scripts = 'auto',
   $user_scripts_options = {},
 ) {
   if $gid_name == 'absent' {
@@ -66,6 +66,12 @@ define webhosting::container (
       default => $gid,
     }
   }
+  if $user_scripts == 'auto' {
+    include webhosting::user_scripts
+    $_user_scripts = $webhosting::user_scripts::container_scripts
+  } else {
+    $_user_scripts = $user_scripts
+  }
   $user_container_config = pick($configuration['container_config'],{})
   webhosting::common { $name:
     ensure                => $ensure,
@@ -84,7 +90,7 @@ define webhosting::container (
     nagios_check_code     => $nagios_check_code,
     nagios_use            => $nagios_use,
     watch_adjust_webfiles => $watch_adjust_webfiles,
-    user_scripts          => $user_scripts,
+    user_scripts          => $_user_scripts,
     user_scripts_options  => $user_scripts_options,
     configuration         => $configuration + {
       containers          => {
