@@ -2,6 +2,12 @@
 class webhosting::user_scripts (
   $default_contact_domain = false,
   $notifications_sender   = "root@${facts['networking']['fqdn']}",
+  Hash[String[1], Variant[String[1],Boolean]] $scripts_to_deploy = {
+    'adjust_permissions'  => 'dirs',
+    'update_mode'         => false,
+    'update_wordpress'    => 'dirs',
+    'ssh_authorized_keys' => 'keys',
+  },
 ) {
   require incron
 
@@ -26,8 +32,7 @@ class webhosting::user_scripts (
       mode   => '0500';
   }
   # deploy scripts
-  ['adjust_permissions','update_mode',
-  'update_wordpress','ssh_authorized_keys'].each |String $script_name| {
+  $scripts_to_deploy.keys.each |String $script_name| {
     file {
       "/opt/webhosting_user_scripts/${script_name}":
         ensure => directory,

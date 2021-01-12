@@ -62,12 +62,7 @@ define webhosting::user_scripts::manage (
         mode    => '0440';
     }
 
-    $scripts_to_deploy = { 'adjust_permissions'  => 'dirs',
-      'update_mode'         => false,
-      'update_wordpress'    => 'dirs',
-      'ssh_authorized_keys' => 'keys',
-    }
-    $scripts_to_deploy.each |String $script_name, Variant[String, Boolean] $config_ext| {
+    $webhosting::user_scripts::scripts_to_deploy.each |String $script_name, Variant[String, Boolean] $config_ext| {
       if ($script_name in $scripts) or ($scripts == 'ALL') {
         file {
           "${scripts_path}/${script_name}":
