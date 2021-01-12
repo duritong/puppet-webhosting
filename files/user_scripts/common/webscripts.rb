@@ -3,6 +3,7 @@
 require 'fileutils'
 require 'yaml'
 require 'tempfile'
+require 'etc'
 
 STDOUT.sync = true
 STDERR.sync = true

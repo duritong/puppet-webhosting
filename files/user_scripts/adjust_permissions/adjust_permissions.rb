@@ -1,7 +1,5 @@
 #!/bin/env ruby
 
-require 'etc'
-
 ## methods required by commons
 
 # which option entries beside sftp_user does
