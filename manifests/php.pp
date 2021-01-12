@@ -37,7 +37,7 @@ define webhosting::php (
   $run_gid_name           = 'absent',
   $wwwmail                = false,
   $watch_adjust_webfiles  = 'absent',
-  $user_scripts           = 'absent',
+  $user_scripts           = 'auto',
   $user_scripts_options   = {},
   $allow_override         = 'None',
   $do_includes            = false,

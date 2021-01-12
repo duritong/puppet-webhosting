@@ -41,7 +41,7 @@ define webhosting::static (
   $nagios_use           = 'generic-service',
   $mod_security         = false,
   $git_repo             = 'absent',
-  $user_scripts         = 'absent',
+  $user_scripts         = 'auto',
   $user_scripts_options = {},
 ) {
   if ($uid_name == 'absent') {
