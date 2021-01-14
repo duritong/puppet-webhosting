@@ -356,7 +356,7 @@ define webhosting::common (
       $real_user_scripts_options = $user_scripts_options
     }
 
-    if 'containers' in $configuration {
+    if 'containers' in $configuration and $user_scripts != 'absent' {
       $_user_scripts = unique($user_scripts + $webhosting::user_scripts::container_scripts)
       $pods = $configuration['containers'].keys.map |$con_name| {
         $vals = $configuration['containers'][$con_name]
