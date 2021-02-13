@@ -23,9 +23,9 @@ end
 def run_script
   log "Starting managing sshkeys"
   file_path = settings_files['ssh_authorized_keys.keys']
-  keys = []
-  ignored_keys = []
   sudo(sftp_user_uid,group_gid) do
+    keys = []
+    ignored_keys = []
     IO.foreach(file_path) do |line|
       line.chomp!
       # only allow a certain set of keys
@@ -41,11 +41,11 @@ def run_script
       f << keys.join("\n")
       f << "\n"
     end
+    ignored_keys.each do |k|
+      log "Ignored the following keyline as not matching the allowed pattern: #{k}"
+    end
+    log "Wrote #{keys.size} keys to the authorized_keys file"
   end
-  ignored_keys.each do |k|
-    log "Ignored the following keyline as not matching the allowed pattern: #{k}"
-  end
-  log "Wrote #{keys.size} keys to the authorized_keys file"
   log "Finished managing sshkeys"
   return true
 end
