@@ -45,7 +45,7 @@ define webhosting::php::joomla (
   $ssl_mode               = false,
   $php_settings           = {},
   $php_options            = {},
-  $php_installation       = 'system',
+  $php_installation       = 'scl74',
   $vhost_mode             = 'template',
   $vhost_source           = 'absent',
   $vhost_destination      = 'absent',

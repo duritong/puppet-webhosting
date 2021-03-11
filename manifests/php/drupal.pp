@@ -45,7 +45,7 @@ define webhosting::php::drupal (
   $ssl_mode              = false,
   $php_options           = {},
   $php_settings          = {},
-  $php_installation      = 'system',
+  $php_installation      = 'scl74',
   $vhost_mode            = 'template',
   $template_partial      = 'absent',
   $vhost_source          = 'absent',
