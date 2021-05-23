@@ -130,6 +130,7 @@ define webhosting::php::simplemachine (
     ssl_mode            => $ssl_mode,
     php_settings        => $php_settings,
     php_options         => $php_options,
+    php_installation    => $php_installation,
     vhost_mode          => $vhost_mode,
     vhost_source        => $vhost_source,
     vhost_destination   => $vhost_destination,
