@@ -431,7 +431,7 @@ define webhosting::common (
       }
       if 'content' in $v {
         if $v['content'] =~ /\AERB:/ {
-          $_v = template($v['content'].regsubst(/\AERB:/,''))
+          $_v = $v.merge( { content => Sensitive(template($v['content'].regsubst(/\AERB:/,''))) })
         } elsif $v['content'] =~ /%%TROCLA_/ {
           $_v = $v.merge( { content => Sensitive(trocla::gsub($v['content'], { prefix => "webhosting_${name}_", })) })
         } else {
