@@ -417,13 +417,13 @@ define webhosting::common (
     }
   }
   if ($ensure != 'absent') and ('user_files' in $configuration) {
+    $user_files = assert_type(Webhosting::Userfiles,$configuration['user_files'])
     $user_files_defaults = {
       owner                   => $uid_name,
       group                   => $gid_name,
       mode                    => '0640',
     }
-    $configuration['user_files'].each |$k,$raw_v| {
-      $v = assert_type(Webhosting::Userfiles,$raw_v)
+    $user_files.each |$k,$v| {
       if $k =~ Stdlib::Unixpath {
         $_k = $k
       } else {
