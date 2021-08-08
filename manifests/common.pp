@@ -416,4 +416,34 @@ define webhosting::common (
         run_mode     => $run_mode,
     }
   }
+  if ($ensure != 'absent') and ('user_files' in $configuration) {
+    $user_files_defaults = {
+      owner                   => $uid_name,
+      group                   => $gid_name,
+      mode                    => '0640',
+    }
+    $configuration['user_files'].each |$k,$raw_v| {
+      $v = assert_type(Webhosting::Userfiles,$raw_v)
+      if $k =~ Stdlib::Unixpath {
+        $_k = $k
+      } else {
+        $_k = "${vhost_path}/${k}"
+      }
+      if 'content' in $v {
+        if $v['content'] =~ /\AERB:/ {
+          $_v = template($v.regsubst(/\AERB:/,''))
+        } elsif $v['content'] =~ /%%TROCLA_/ {
+          $_v = $v.merge( { content => Sensitive(trocla::gsub($v['content'], { prefix => "webhosting_${name}_", })) })
+        } else {
+          $_v = $v
+        }
+      } else {
+        $_v = $v
+      }
+      file {
+        $_k:
+          * => $user_files_defaults + $_v,
+      }
+    }
+  }
 }
