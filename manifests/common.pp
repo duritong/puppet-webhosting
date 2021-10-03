@@ -199,7 +199,7 @@ define webhosting::common (
         }
         podman::container {
           "${name}-${con_name}":
-            * => $con_values,
+            * => $con_values - ['route'],
         }
       }
     }
