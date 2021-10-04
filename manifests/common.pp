@@ -452,4 +452,7 @@ define webhosting::common (
       }
     }
   }
+  if ($ensure != 'absent') and ('puppet_classes' in $configuration) and !($configuration['puppet_classes'].empty) {
+    include $configuration['puppet_classes']
+  }
 }
