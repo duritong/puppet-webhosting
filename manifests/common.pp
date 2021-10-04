@@ -159,7 +159,14 @@ define webhosting::common (
           'dir'                     => "/var/www/vhosts/${name}/tmp/run",
           'security-opt-label-type' => 'socat_httpd_sidecar',
         }
-        $publis_socket_2 = Hash($route.map |$e| { [$e[1], $publish_options] })
+        $publis_socket_2 = Hash($route.map |$e| {
+          if $e[1] =~ Hash {
+            $port = $e[1]['port']
+          } else {
+            $port = $e[1]
+          }
+          [$port, $publish_options]
+        })
 
         $con_config = { 'config_directory' => $container_config_directory } + pick($vals['configuration'], {})
         $pod_system_config = {
