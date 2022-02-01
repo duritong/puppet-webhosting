@@ -162,8 +162,10 @@ define webhosting::common (
         $publis_socket_2 = Hash($route.map |$e| {
           if $e[1] =~ Hash {
             $port = $e[1]['port']
-          } else {
+          } elsif $e[1] =~ Stdlib::Port {
             $port = $e[1]
+          } else {
+            $port = $e[1].split(/\//)[0]
           }
           [$port, $publish_options]
         })
