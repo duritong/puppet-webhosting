@@ -165,7 +165,7 @@ define webhosting::common (
           } elsif $e[1] =~ Stdlib::Port {
             $port = $e[1]
           } else {
-            $port = $e[1].split(/\//)[0]
+            $port = Integer($e[1].split(/\//)[0])
           }
           [$port, $publish_options]
         })
