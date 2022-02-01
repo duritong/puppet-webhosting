@@ -73,6 +73,25 @@ define webhosting::container (
     $_user_scripts = $user_scripts
   }
   $user_container_config = pick($configuration['container_config'],{})
+  $_configuration = ($configuration - ['container_config']) + {
+    containers          => {
+      $name => $user_container_config + {
+        ensure         => $ensure,
+        user           => $uid_name,
+        uid            => $real_uid,
+        gid            => $real_gid,
+        homedir        => "/var/www/vhosts/${name}",
+        manage_user    => false,
+        image          => $image,
+        publish_socket => {
+          $port => {
+            'dir'                     => "/var/www/vhosts/${name}/tmp/run",
+            'security-opt-label-type' => 'socat_httpd_sidecar',
+          },
+        },
+      },
+    },
+  }
   webhosting::common { $name:
     ensure                => $ensure,
     uid                   => $real_uid,
@@ -92,25 +111,7 @@ define webhosting::container (
     watch_adjust_webfiles => $watch_adjust_webfiles,
     user_scripts          => $_user_scripts,
     user_scripts_options  => $user_scripts_options,
-    configuration         => $configuration + {
-      containers          => {
-        $name => $user_container_config + {
-          ensure         => $ensure,
-          user           => $uid_name,
-          uid            => $real_uid,
-          gid            => $real_gid,
-          homedir        => "/var/www/vhosts/${name}",
-          manage_user    => false,
-          image          => $image,
-          publish_socket => {
-            $port => {
-              'dir'                     => "/var/www/vhosts/${name}/tmp/run",
-              'security-opt-label-type' => 'socat_httpd_sidecar',
-            },
-          },
-        },
-      },
-    },
+    configuration         => $_configuration,
   } -> Service['apache']
 
   if ('no_socket_forward' in $configuration) and $configuration['no_socket_forward'] {
@@ -125,7 +126,7 @@ define webhosting::container (
 
   apache::vhost::container { $name:
     ensure             => $ensure,
-    configuration      => $configuration,
+    configuration      => $_configuration,
     domain             => $domain,
     domainalias        => $domainalias,
     server_admin       => $server_admin,
