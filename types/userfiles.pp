@@ -9,5 +9,6 @@ type Webhosting::Userfiles = Hash[
       mode                    => Optional[Stdlib::Filemode],
       selinux_ignore_defaults => Optional[Boolean],
       ensure_acl              => Optional[Boolean],
+      notify                  => Optional[String],
   }]
 ]
