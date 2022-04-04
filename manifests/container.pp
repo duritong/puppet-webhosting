@@ -43,7 +43,6 @@ define webhosting::container (
   $watch_adjust_webfiles = 'absent',
   $user_scripts = 'auto',
   $user_scripts_options = {},
-  $additional_firewall_rules = {},
 ) {
 
   if $gid_name == 'absent' {
@@ -152,20 +151,6 @@ define webhosting::container (
   if $template_partial != 'absent' {
     Apache::Vhost::Static[$name] {
       template_partial => $template_partial
-    }
-  }
-
-  $additional_firewall_rules.each |$n,$rule| {
-    shorewall::rule{
-      "${::name}-${n}":
-        source          => '-',
-        destination     => $rule['destination'],
-        proto           => 'tcp',
-        destinationport => $rule['destinationport'],
-        user            => $::uid_name,
-        order           => 240,
-        action          => 'ACCEPT',
-        shorewall6      => false;
     }
   }
 }

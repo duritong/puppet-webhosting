@@ -464,4 +464,21 @@ define webhosting::common (
   if ($ensure != 'absent') and ('puppet_classes' in $configuration) and !($configuration['puppet_classes'].empty) {
     include $configuration['puppet_classes']
   }
+
+  if 'additional_firewall_rules' in $configuration {
+    $default_fw_rules = {
+      source     => '-',
+      proto      => 'tcp',
+      order      => 240,
+      action     => 'ACCEPT',
+      shorewall6 => false,
+    }
+
+    $configuration['additional_firewall_rules'].each |$n,$rule| {
+      shorewall::rule{
+        "${name}-${n}":
+          * => $default_fw_rules + rule;
+      }
+    }
+  }
 }
