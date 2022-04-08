@@ -467,7 +467,7 @@ define webhosting::common (
 
   if 'additional_firewall_rules' in $configuration {
     $default_fw_rules = {
-      source     => '-',
+      source     => '$FW',
       proto      => 'tcp',
       order      => 240,
       action     => 'ACCEPT',
