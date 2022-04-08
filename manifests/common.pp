@@ -477,7 +477,7 @@ define webhosting::common (
     $configuration['additional_firewall_rules'].each |$n,$rule| {
       shorewall::rule{
         "${name}-${n}":
-          * => $default_fw_rules + rule;
+          * => $default_fw_rules + $rule;
       }
     }
   }
