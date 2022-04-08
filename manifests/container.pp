@@ -44,6 +44,7 @@ define webhosting::container (
   $user_scripts = 'auto',
   $user_scripts_options = {},
 ) {
+
   if $gid_name == 'absent' {
     $real_gid_name = $uid_name
   } else {
@@ -66,6 +67,7 @@ define webhosting::container (
       default => $gid,
     }
   }
+
   if $user_scripts == 'auto' {
     include webhosting::user_scripts
     $_user_scripts = $webhosting::user_scripts::container_scripts
@@ -92,6 +94,7 @@ define webhosting::container (
       },
     },
   }
+
   webhosting::common { $name:
     ensure                => $ensure,
     uid                   => $real_uid,
