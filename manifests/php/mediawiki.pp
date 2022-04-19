@@ -119,7 +119,8 @@ define webhosting::php::mediawiki (
   }
   $real_php_settings = merge($mediawiki_php_settings,$php_settings)
   $mediawiki_php_options = {
-    additional_open_basedir  => '/var/www/mediawiki:/usr/bin/git',
+    snuffleupagus_ignore_rules => (['010-mail-add-params'] + pick($php_options['snuffleupagus_ignore_rules'],[])).unique,
+    additional_open_basedir    => '/var/www/mediawiki:/usr/bin/git',
   }
   $real_php_options = merge($mediawiki_php_options,$php_options)
 
