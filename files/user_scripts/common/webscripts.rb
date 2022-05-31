@@ -188,9 +188,14 @@ end
 success = true
 begin
   @run_file = ARGV.shift
-  usage if @run_file.nil? || !File.exists?(@run_file = File.expand_path(@run_file))
+  usage if @run_file.nil?
 
   @base_dir = File.dirname(@run_file)
+  @run_file = File.expand_path(@run_file)
+  unless File.exists?(@run_file)
+    puts "Run file #{@run_file} does not exist"
+    usage
+  end
 
   # Verify various security related things
   security_fail("The run file is not owned by the sftp user. This is a security violation! Exiting...") unless File.stat(@run_file).uid == sftp_user_uid
@@ -218,8 +223,10 @@ rescue => e
   log "Error while running script: #{e.message}"
   success = false
 ensure
-  File.delete(@run_file) if File.exists?(@run_file)
-  File.delete(lockfile)
+  if @run_file
+    File.delete(@run_file) if File.exists?(@run_file)
+    File.delete(lockfile) if File.exists?(lockfile)
+  end
 end
 
 exit success ? 0 : 1

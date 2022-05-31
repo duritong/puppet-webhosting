@@ -1,0 +1,12 @@
+<%- | String $webhosting_name,
+      Stdlib::Unixpath $scripts_path,
+      String $script_name,
+| -%>
+[Unit]
+Description=Monitor execution trigger for webhosting <%= $webhosting_name %> for script <%= $script_name %>
+
+[Path]
+PathExists=<%= $scripts_path %>/<%= $script_name %>/<%= $script_name %>.run
+
+[Install]
+WantedBy=multi-user.target

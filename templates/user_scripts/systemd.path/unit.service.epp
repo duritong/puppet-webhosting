@@ -1,0 +1,28 @@
+<%- | String $webhosting_name,
+      Stdlib::Unixpath $webhosting_dir,
+      Stdlib::Unixpath $scripts_path,
+      String $script_name,
+      Array[Stdlib::Unixpath] $rw_dirs,
+| -%>
+[Unit]
+Description=Executes user_script <%= $script_name %> for webhosting <%= $webhosting_name %>
+
+[Service]
+Type=oneshot
+
+SyslogIdentifier=webhosting-<%= webhosting_name %>-<%= $script_name %>
+
+ExecStart=/opt/webhosting_user_scripts/<%= $script_name %>/<%= $script_name %>.rb <%= $scripts_path %>/<%= $script_name %>/<%= $script_name %>.run
+
+# security settings
+PrivateTmp=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=yes
+
+ReadOnlyDirectories=/
+ReadWriteDirectories=<%= $webhosting_dir %>/scripts/<%= $script_name %>
+<%- $rw_dirs.each |$rw_dir| { %>
+ReadWriteDirectories=<%= $rw_dir %>/
+<%- } %>

@@ -13,7 +13,10 @@ class webhosting::user_scripts (
   Array[String[1]] $container_scripts = ['ssh_authorized_keys','pod_restart'],
   Array[String[1]] $php_scripts = ['ssh_authorized_keys', 'adjust_permissions', 'update_mode', 'update_wordpress'],
 ) {
-  require incron
+  # on later platforms we use systemd.path
+  if versioncmp($facts['os']['release']['major'],'8') < 0 {
+    require incron
+  }
 
   # common stuff
   file {

@@ -140,7 +140,6 @@ define webhosting::common (
           'user'                    => '1000:0',
         }
       } else {
-        fail('validate to have cgroupv2')
         $default_user_run_flags = {
           'userns'                  => 'keep-id',
           'user'                    => '1000:GID',
