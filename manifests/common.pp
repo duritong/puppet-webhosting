@@ -27,7 +27,7 @@ define webhosting::common (
   Variant[Enum['absent'], Array[String[1]]] $user_scripts = 'absent',
   $user_scripts_options  = {},
   $nagios_check          = 'ensure',
-  Variant[String,Array[String]] $nagios_check_domain   = 'absent',
+  Optional[Variant[String,Array[String]]] $nagios_check_domain = undef,
   $nagios_check_url      = '/',
   $nagios_check_code     = '200',
   $nagios_use            = 'generic-service',
