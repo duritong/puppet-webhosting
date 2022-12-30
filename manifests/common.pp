@@ -458,7 +458,7 @@ define webhosting::common (
         name      => $name,
         user      => $uid_name,
         group     => $gid_name,
-      }.merge($cron_vals.filter |$i| { $i[0] in ['cmd'] })
+      }.merge($cron_vals.filter |$i| { $i[0] in ['cmd','read_write_directories'] })
       Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {
         timer_content   => epp('webhosting/cron/cron.timer.epp', $timer_params),
         service_content => epp('webhosting/cron/cron.service.epp', $service_params),
