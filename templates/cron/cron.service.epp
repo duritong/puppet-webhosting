@@ -3,7 +3,7 @@
       String $cmd,
       String $user,
       String $group,
-      Array[Stdlib::Unixpath] $read_write_directories,
+      Array[Stdlib::Unixpath] $read_write_directories = [],
 | -%>
 [Unit]
 Description=Cron <%= $cron_name %> for Webhosting <%= $name %>
