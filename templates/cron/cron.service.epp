@@ -22,15 +22,15 @@ ExecStart=<%= $cmd %>
 # security settings
 PrivateTmp=true
 
-<% if @facts['os']['release']['major'].to_i >= 8 -%>
+<% if versioncmp($facts['os']['release']['major'],'8') >= 0 { -%>
 ProtectSystem=strict
 PrivateUsers=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=yes
-<% else -%>
+<% } else { -%>
 ProtectSystem=full
-<% end -%>
+<% } -%>
 
 ReadOnlyDirectories=/
 <% $read_write_directories.each |$d| { -%>
