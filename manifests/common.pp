@@ -33,7 +33,6 @@ define webhosting::common (
   $nagios_use            = 'generic-service',
   $git_repo              = 'absent',
   $php_installation      = false,
-  Webhosting::Cronjobs $cron_jobs = {},
 ) {
   if $run_gid == 'absent' {
     if ($gid == 'uid') {
@@ -351,6 +350,7 @@ define webhosting::common (
   }
 
   logrotate::rule { "cron-${name}": }
+  $cron_jobs = assert_type(Webhosting::Cronjobs,pick($configuration['cron_jobs'],{}))
   if !empty($cron_jobs) {
     Logrotate::Rule["cron-${name}"]{
       ensure       => $ensure,
