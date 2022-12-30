@@ -1,5 +1,5 @@
 <%- | String $on_calendar = 'daily',
-      String $randomize_delay_sec = '1d',
+      Optional[String] $randomize_delay_sec = undef,
 | -%>
 [Timer]
 OnCalendar=<%= $on_calendar %>
