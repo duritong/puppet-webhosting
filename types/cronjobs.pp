@@ -1,4 +1,4 @@
-type Webhostings::Cronjobs = Hash[
+type Webhosting::Cronjobs = Hash[
   Pattern[/^[a-zA-Z0-9_\-]+$/],
   Struct[{
       ensure              => Optional[Enum['present','absent']],
