@@ -1,0 +1,11 @@
+<%- | String $on_calendar = 'daily',
+      String $randomize_delay_sec = '1d',
+| -%>
+[Timer]
+OnCalendar=<%= $on_calendar %>
+<% if $randomize_delay_sec { -%>
+RandomizedDelaySec=<%= $randomize_delay_sec %>
+<% } -%>
+
+[Install]
+WantedBy=timers.target

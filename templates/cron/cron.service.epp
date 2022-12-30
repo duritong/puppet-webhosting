@@ -1,0 +1,38 @@
+<%- | String $cron_name,
+      String $name,
+      String $cmd,
+      String $user,
+      String $group,
+      Array[Stdlib::Unixpath] $read_write_directories,
+| -%>
+[Unit]
+Description=Cron <%= $cron_name %> for Webhosting <%= $name %>
+
+OnFailure=status_email_root@%n.service
+
+[Service]
+Type=oneshot
+User=<%= $user %>
+Group=<%= $group %>
+
+SyslogIdentifier=webhosting-<%= $name %>-<%= $cron_name %>
+
+ExecStart=<%= $cmd %>
+
+# security settings
+PrivateTmp=true
+
+<% if @facts['os']['release']['major'].to_i >= 8 -%>
+ProtectSystem=strict
+PrivateUsers=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=yes
+<% else -%>
+ProtectSystem=full
+<% end -%>
+
+ReadOnlyDirectories=/
+<% $read_write_directories.each |$d| { -%>
+ReadWriteDirectories=<%= $d %>
+<% } -%>

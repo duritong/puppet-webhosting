@@ -33,6 +33,7 @@ define webhosting::common (
   $nagios_use            = 'generic-service',
   $git_repo              = 'absent',
   $php_installation      = false,
+  Webhosting::Cronjobs $cron_jobs = {},
 ) {
   if $run_gid == 'absent' {
     if ($gid == 'uid') {
@@ -348,6 +349,41 @@ define webhosting::common (
       sftp_user => $real_uid_name,
       run_user  => $real_run_uid_name,
   }
+
+  logrotate::rule { "cron-${name}": }
+  if !empty($cron_jobs) {
+    Logrotate::Rule["cron-${name}"]{
+      ensure       => $ensure,
+      path         => "${vhost_path}/logs/${name}-cron-*.log",
+      compress     => true,
+      copytruncate => true,
+      dateext      => true,
+      create       => true,
+      create_mode  => '0640',
+      create_owner => 'root',
+      create_group => $gid_name,
+      su           => true,
+      su_user      => 'root',
+      su_group     => $gid_name,
+    }
+  } else {
+    Logrotate::Rule["cron-${name}"]{
+      ensure => 'absent',
+    }
+  }
+  # actual content parsing comes more below
+  $cron_jobs.each |$cron_name,$cron_vals| {
+    if $ensure == 'absent' {
+      $_ensure = 'absent'
+    } else {
+      $_ensure = pick($cron_vals['ensure'],$ensure)
+    }
+    systemd::timer {
+      "webhosting-${name}-${cron_name}.timer":
+        ensure => $_ensure,
+    }
+  }
+
   if $ensure != 'absent' {
     if $php_installation and $php_installation != 'system' {
       $php_inst = regsubst($php_installation,'^scl','php')
@@ -410,6 +446,44 @@ define webhosting::common (
         $real_run_uid_name:
           key       => $real_run_uid,
           ratelimit => $configuration['mail_ratelimit'];
+      }
+    }
+    if !empty($cron_jobs) {
+      require systemd::mail_on_failure
+    }
+    $cron_jobs.each |$cron_name,$cron_vals| {
+      $timer_params = $webhosting::cron_timer_defaults.merge($cron_vals.filter |$i| { $i[0] in ['on_calendar', 'randomize_delay_sec'] })
+      $service_params = {
+        cron_name => $cron_name,
+        name      => $name,
+        user      => $uid_name,
+        group     => $gid_name,
+      }.merge($cron_vals.filter |$i| { $i[0] in ['cmd'] })
+      Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {
+        timer_content   => epp('webhosting/cron/cron.timer.epp', $timer_params),
+        service_content => epp('webhosting/cron/cron.service.epp', $service_params),
+        active          => true,
+        enable          => true,
+      }
+      rsyslog::confd {
+        "${name}-cron-${cron_name}":
+          ensure  => $ensure,
+          content => epp('podman/rsyslog-confd.epp',{
+            programname  => "webhosting-${name}-${cron_name}",
+            service_name => "webhosting-${name}-${cron_name}",
+            logpath      => "${vhost_path}/logs",
+            logfile_name => "${name}-cron-${cron_name}",
+            group        => $gid_name,
+          }),
+      } -> file {
+        # manage file to workaround
+        # https://access.redhat.com/solutions/3967061
+        # logrotate is handled by the general wildcard
+        "${vhost_path}/logs/${name}-cron-${cron_name}.log":
+          ensure => file,
+          mode   => '0640',
+          owner  => 'root',
+          group  => $gid_name,
       }
     }
   }
