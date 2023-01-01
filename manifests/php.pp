@@ -46,7 +46,7 @@ define webhosting::php (
   $default_charset        = 'absent',
   $php_settings           = {},
   $php_options            = {},
-  $php_installation       = 'system',
+  $php_installation       = 'scl81',
   $ssl_mode               = false,
   $vhost_mode             = 'template',
   $template_partial       = 'absent',

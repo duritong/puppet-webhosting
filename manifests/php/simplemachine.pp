@@ -45,7 +45,7 @@ define webhosting::php::simplemachine (
   $ssl_mode              = false,
   $php_settings          = {},
   $php_options           = {},
-  $php_installation      = 'scl74',
+  $php_installation      = 'scl81',
   $vhost_mode            = 'template',
   $template_partial      = 'absent',
   $vhost_source          = 'absent',
