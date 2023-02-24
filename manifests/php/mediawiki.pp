@@ -164,6 +164,7 @@ define webhosting::php::mediawiki (
     db_server               => $db_server,
     db_name                 => $db_name,
     db_user                 => $db_user,
+    db_pwd                  => 'trocla',
     contact                 => $contact,
     sitename                => $sitename,
     ssl_mode                => $ssl_mode,
