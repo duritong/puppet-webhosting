@@ -57,7 +57,6 @@ define webhosting::php::mediawiki (
   $db_server           = 'unmanaged',
   $db_name             = 'unmanaged',
   $db_user             = 'db_name',
-  $db_pwd              = 'unmanaged',
   $contact             = 'unmanaged',
   $sitename            = 'unmanaged',
   $secret_key          = 'unmanaged',
@@ -85,9 +84,20 @@ define webhosting::php::mediawiki (
   } else {
     $real_group = 'apache'
   }
+
+  $mysql_dbs = pick($configuration['mysql_dbs'],{})
+  $_c_with_mysql_dbs = {
+    mysql_dbs => $mysql_dbs + {
+      $db_name => {
+        username => $db_user,
+      } + pick($mysql_dbs[$db_name],{})
+    }
+  }
+  $_configuration = $configuration + $_c_with_mysql_dbs
+
   webhosting::common { $name:
     ensure              => $ensure,
-    configuration       => $configuration,
+    configuration       => $_configuration,
     uid                 => $uid,
     uid_name            => $real_uid_name,
     gid                 => $gid,
@@ -154,7 +164,6 @@ define webhosting::php::mediawiki (
     db_server               => $db_server,
     db_name                 => $db_name,
     db_user                 => $db_user,
-    db_pwd                  => $db_pwd,
     contact                 => $contact,
     sitename                => $sitename,
     ssl_mode                => $ssl_mode,
