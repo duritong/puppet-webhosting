@@ -558,7 +558,7 @@ define webhosting::common (
 
   if (versioncmp($facts['os']['release']['major'],'8') > 0) and ('mysql_dbs' in $configuration) {
     $configuration['mysql_dbs'].each |$db,$options| {
-      assert_type(String[64], $db)
+      assert_type(String[1,64], $db)
       $db_ensure  = $ensure ? {
         'absent' => 'absent',
         default  => pick($options['ensure'],$ensure),
@@ -570,7 +570,7 @@ define webhosting::common (
         require => File['/root/.my.cnf'],
       }
       $db_username = pick($options['username'],$db)
-      assert_type(String[80],$db_username)
+      assert_type(String[1,80],$db_username)
       mysql_user{"${db_username}@127.0.0.1":
         ensure        => $db_ensure,
         password_hash => trocla("mysql_${db_username}",'mysql'),
