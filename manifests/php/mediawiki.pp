@@ -89,7 +89,10 @@ define webhosting::php::mediawiki (
   $_c_with_mysql_dbs = {
     mysql_dbs => $mysql_dbs + {
       $db_name => {
-        username => $db_user,
+        username => $db_user ? {
+          'db_name' => $db_name,
+          default   => $db_user,
+        }
       } + pick($mysql_dbs[$db_name],{})
     }
   }
