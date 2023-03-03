@@ -600,6 +600,7 @@ define webhosting::common (
         php_inst_class  => undef,
         workdir         => $pma_path,
         logdir          => "${vhost_path}/logs",
+        logfile_name    => "pma-fpm-error.log",
         tmpdir          => "${pma_path}/tmp",
         run_user        => $real_run_uid_name,
         run_group       => $gid_name,
