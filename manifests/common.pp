@@ -586,4 +586,65 @@ define webhosting::common (
       }
     }
   }
+
+  if (versioncmp($facts['os']['release']['major'],'8') > 0) {
+    $pma_path = "${vhost_path}/etc/pma"
+    phpmyadmin::instance {
+      $name:
+        base_dir => $pma_path,
+        dbs      => $configuration['mysql_dbs'],
+        run_user => $real_run_uid_name,
+        group    => $gid_name,
+    } -> php::fpm {
+      "${name}-pma":
+        php_inst_class  => undef,
+        workdir         => $pma_path,
+        logdir          => "${vhost_path}/logs",
+        tmpdir          => "${pma_path}/tmp",
+        run_user        => $real_run_uid_name,
+        run_group       => $gid_name,
+        additional_envs => { PHPMYADMIN_CONFIG => "${pma_path}/config.php" },
+        php_settings    => {
+          engine                => 'On',
+          'upload_max_filesize' => '80M',
+          'post_max_size'       => '90M',
+          upload_tmp_dir        => "${pma_path}/php_uploads",
+          'session.save_path'   => "${pma_path}/php_sessions",
+          error_log             => "${vhost_path}/logs/pma-php_error_log",
+          open_basedir          => "/usr/share/phpMyAdmin/:/usr/share/doc/phpMyAdmin/html/:${pma_path}/:/etc/phpMyAdmin/"
+        },
+    } -> logrotate::rule { "pma-${name}": }
+    if ('mysql_dbs' in $configuration) and ($configuration['activate_pma'] == true) {
+      Phpmyadmin::Instance[$name] {
+        ensure => $ensure,
+      }
+      Php::Fpm["${name}-pma"] {
+        ensure => $ensure,
+      }
+      Logrotate::Rule["pma-${name}"]{
+        ensure       => $ensure,
+        path         => "${vhost_path}/logs/pma-php_error_log",
+        compress     => true,
+        copytruncate => true,
+        dateext      => true,
+        create       => true,
+        create_mode  => '0640',
+        create_owner => $real_run_uid_name,
+        create_group => $gid_name,
+        su           => true,
+        su_user      => $real_run_uid_name,
+        su_group     => $gid_name,
+      }
+    } else {
+      Phpmyadmin::Instance[$name] {
+        ensure   => 'absent',
+      }
+      Php::Fpm["${name}-pma"] {
+        ensure   => 'absent',
+      }
+      Logrotate::Rule["pma-${name}"]{
+        ensure => 'absent',
+      }
+    }
+  }
 }
