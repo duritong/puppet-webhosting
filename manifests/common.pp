@@ -613,7 +613,7 @@ define webhosting::common (
           upload_tmp_dir        => "${pma_path}/php_uploads",
           'session.save_path'   => "${pma_path}/php_sessions",
           error_log             => "${vhost_path}/logs/pma-php_error_log",
-          open_basedir          => "/usr/share/phpMyAdmin/:/usr/share/doc/phpMyAdmin/html/:${pma_path}/:/etc/phpMyAdmin/"
+          open_basedir          => "/usr/share/phpMyAdmin/:/usr/share/doc/phpMyAdmin/html/:/var/lib/phpMyAdmin/:${pma_path}/:/etc/phpMyAdmin/"
         },
     } -> logrotate::rule { "pma-${name}": }
     if ('mysql_dbs' in $configuration) and ($configuration['activate_pma'] == true) {
