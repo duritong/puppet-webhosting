@@ -595,7 +595,8 @@ define webhosting::common (
         dbs      => $configuration['mysql_dbs'],
         run_user => $real_run_uid_name,
         group    => $gid_name,
-    } -> php::fpm {
+    }
+    php::fpm {
       "${name}-pma":
         php_inst_class  => undef,
         workdir         => $pma_path,
