@@ -588,13 +588,15 @@ define webhosting::common (
   }
 
   if (versioncmp($facts['os']['release']['major'],'8') > 0) {
-    $pma_path = "${vhost_path}/etc/pma"
+    $pma_path = "${vhost_path}/data/pma"
+    $pma_config_path = "${vhost_path}/etc/pma"
     phpmyadmin::instance {
       $name:
-        base_dir => $pma_path,
-        dbs      => $configuration['mysql_dbs'],
-        run_user => $real_run_uid_name,
-        group    => $gid_name,
+        config_dir => $pma_config_path,
+        base_dir   => $pma_path,
+        dbs        => $configuration['mysql_dbs'],
+        run_user   => $real_run_uid_name,
+        group      => $gid_name,
     }
     php::fpm {
       "${name}-pma":
@@ -605,7 +607,7 @@ define webhosting::common (
         tmpdir          => "${pma_path}/tmp",
         run_user        => $real_run_uid_name,
         run_group       => $gid_name,
-        additional_envs => { "PHPMYADMIN_CONFIG" => "${pma_path}/config.php" },
+        additional_envs => { "PHPMYADMIN_CONFIG" => "${pma_config_path}/config.php" },
         php_settings    => {
           engine                => 'On',
           'upload_max_filesize' => '80M',
@@ -613,7 +615,7 @@ define webhosting::common (
           upload_tmp_dir        => "${pma_path}/php_uploads",
           'session.save_path'   => "${pma_path}/php_sessions",
           error_log             => "${vhost_path}/logs/pma-php_error_log",
-          open_basedir          => "/usr/share/phpMyAdmin/:/usr/share/doc/phpMyAdmin/html/:/var/lib/phpMyAdmin/:${pma_path}/:/etc/phpMyAdmin/"
+          open_basedir          => "/usr/share/phpMyAdmin/:/usr/share/doc/phpMyAdmin/html/:/var/lib/phpMyAdmin/:${pma_path}/:/etc/phpMyAdmin/:/etc/pki/tls/certs/ca-bundle.crt"
         },
     } -> logrotate::rule { "pma-${name}": }
     if ('mysql_dbs' in $configuration) and ($configuration['activate_pma'] == true) {
