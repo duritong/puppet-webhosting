@@ -604,7 +604,7 @@ define webhosting::common (
         tmpdir          => "${pma_path}/tmp",
         run_user        => $real_run_uid_name,
         run_group       => $gid_name,
-        additional_envs => { PHPMYADMIN_CONFIG => "${pma_path}/config.php" },
+        additional_envs => { "PHPMYADMIN_CONFIG" => "${pma_path}/config.php" },
         php_settings    => {
           engine                => 'On',
           'upload_max_filesize' => '80M',
