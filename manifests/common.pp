@@ -590,7 +590,6 @@ define webhosting::common (
   if (versioncmp($facts['os']['release']['major'],'8') > 0) {
     $pma_path = "${vhost_path}/data/pma"
     $pma_config_path = "${vhost_path}/etc/pma"
-    apache::module::authz_pam::allow_user { $uid_name: }
     phpmyadmin::instance {
       $name:
         config_dir => $pma_config_path,
@@ -620,6 +619,7 @@ define webhosting::common (
         },
     } -> logrotate::rule { "pma-${name}": }
     if ('mysql_dbs' in $configuration) and ($configuration['activate_pma'] == true) {
+      apache::module::authz_pam::allow_user { $uid_name: }
       Phpmyadmin::Instance[$name] {
         ensure => $ensure,
       }
