@@ -141,8 +141,10 @@ define webhosting::common (
         }
       } else {
         $default_user_run_flags = {
-          'userns'                  => 'keep-id',
-          'user'                    => '1000:GID',
+          # this does not yet work with pods
+          #'userns'                  => 'keep-id',
+          #'user'                    => '1000:GID',
+          'user'                    => '1000:0',
         }
       }
       $default_run_flags = $default_user_run_flags + {
