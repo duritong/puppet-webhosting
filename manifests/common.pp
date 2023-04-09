@@ -590,6 +590,12 @@ define webhosting::common (
   if (versioncmp($facts['os']['release']['major'],'8') > 0) {
     $pma_path = "${vhost_path}/data/pma"
     $pma_config_path = "${vhost_path}/etc/pma"
+    file {
+      "/var/www/htpasswds/${name}-pma":
+        owner => root,
+        group => apache,
+        mode  => '0640';
+    }
     phpmyadmin::instance {
       $name:
         config_dir => $pma_config_path,
@@ -619,7 +625,11 @@ define webhosting::common (
         },
     } -> logrotate::rule { "pma-${name}": }
     if ('mysql_dbs' in $configuration) and ($configuration['activate_pma'] == true) {
-      apache::module::authz_pam::allow_user { $uid_name: }
+      $bcrypt_password = trocla("webhosting_${real_uid_name}",'bcrypt')
+      File["/var/www/htpasswds/${name}-pma"]{
+        ensure  => file,
+        content => "${real_uid_name}:${bcrypt_password}\n",
+      }
       Phpmyadmin::Instance[$name] {
         ensure => $ensure,
       }
@@ -641,6 +651,9 @@ define webhosting::common (
         su_group     => $gid_name,
       }
     } else {
+      File["/var/www/htpasswds/${name}-pma"]{
+        ensure => absent,
+      }
       Phpmyadmin::Instance[$name] {
         ensure   => 'absent',
       }
