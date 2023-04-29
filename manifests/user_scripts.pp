@@ -16,6 +16,18 @@ class webhosting::user_scripts (
   # on later platforms we use systemd.path
   if versioncmp($facts['os']['release']['major'],'8') < 0 {
     require incron
+    Exec['/usr/local/sbin/tune_inotify_watches.sh tune'] ~> Service<| title == 'incrond' |>
+  }
+
+  # tune inotify limits based on amount of hostings
+  file { '/usr/local/sbin/tune_inotify_watches.sh':
+    source => 'puppet:///modules/webhosting/scripts/tune_inotify_watches.sh',
+    owner  => 'root',
+    group  => 0,
+    mode   => '0700',
+  } -> exec { '/usr/local/sbin/tune_inotify_watches.sh tune':
+    unless  => '/usr/local/sbin/tune_inotify_watches.sh',
+    require => Service['apache'],
   }
 
   # common stuff

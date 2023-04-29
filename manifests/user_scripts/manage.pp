@@ -147,6 +147,7 @@ define webhosting::user_scripts::manage (
             script_name     => $script_name,
             rw_dirs         => $rw_dirs,
           }),
+          require => Exec['/usr/local/sbin/tune_inotify_watches.sh tune'],
         } -> Systemd::Unit_file["webhosting-${name}-userscript-${script_name}.path"]{
           content => epp('webhosting/user_scripts/systemd.path/unit.path.epp', {
             webhosting_name => $name,
