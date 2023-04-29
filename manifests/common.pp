@@ -624,7 +624,7 @@ define webhosting::common (
       $name:
         config_dir => $pma_config_path,
         base_dir   => $pma_path,
-        dbs        => $configuration['mysql_dbs'].filter |$n, $v| { $v['ensure'] != 'absent' },
+        dbs        => pick($configuration['mysql_dbs'],{}).filter |$n, $v| { $v['ensure'] != 'absent' },
         run_user   => $real_run_uid_name,
         group      => $gid_name,
     }
