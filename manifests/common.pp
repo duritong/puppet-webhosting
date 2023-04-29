@@ -386,6 +386,28 @@ define webhosting::common (
     }
   }
 
+  $lvmounts = assert_type(Webhosting::Lvmounts,pick($configuration['lv_mounts'],{}))
+  $lv_defaults = {
+    fs_type => 'xfs',
+    mode    => '0640',
+    owner   => $real_uid_name,
+    group   => $gid_name,
+    require => File[$vhost_path],
+  }
+  $lvmounts.each |$lv_name,$lv_vals| {
+    if $ensure == 'absent' {
+      $_ensure = 'absent'
+    } else {
+      $_ensure = pick($lv_vals['ensure'],$ensure)
+    }
+    disks::lv_mount { "wh_${name}_${lv_name}":
+      * => $lv_defaults + $lv_vals + {
+        folder => "${vhost_path}/${lv_vals['folder']}",
+        ensure => $_ensure
+      };
+    }
+  }
+
   if $ensure != 'absent' {
     if $php_installation and $php_installation != 'system' {
       $php_inst = regsubst($php_installation,'^scl','php')
