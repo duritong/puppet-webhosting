@@ -29,7 +29,7 @@ define webhosting::user_scripts::manage (
     }
     $user_scripts_options = deep_merge($default_options,$options)
 
-    require webhosting::user_scripts
+    include webhosting::user_scripts
     file {
       "user_scripts_${name}":
         ensure  => directory,
@@ -40,7 +40,7 @@ define webhosting::user_scripts::manage (
         recurse => true,
         purge   => true,
         force   => true;
-    }
+    } -> Exec['/usr/local/sbin/tune_inotify_watches.sh tune']
 
     if $user_scripts_options['global']['contact'] == true {
       if $webhosting::user_scripts::default_contact_domain {

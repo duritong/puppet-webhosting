@@ -27,7 +27,6 @@ class webhosting::user_scripts (
     mode   => '0700',
   } -> exec { '/usr/local/sbin/tune_inotify_watches.sh tune':
     unless  => '/usr/local/sbin/tune_inotify_watches.sh',
-    require => Service['apache'],
   }
 
   # common stuff
