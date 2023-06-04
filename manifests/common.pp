@@ -192,7 +192,9 @@ define webhosting::common (
           }
         }
 
-        $con_values = $vals + {
+        $con_values = {
+          activate_service  => ($configuration['active_on_host'] != false),
+        } + $vals + {
           ensure            => $ensure,
           user              => $real_uid_name,
           uid               => $real_uid,
@@ -486,8 +488,8 @@ define webhosting::common (
       Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {
         timer_content   => epp('webhosting/cron/cron.timer.epp', $timer_params),
         service_content => epp('webhosting/cron/cron.service.epp', $service_params),
-        active          => true,
-        enable          => true,
+        active          => ($configuration['active_on_host'] != false),
+        enable          => ($configuration['active_on_host'] != false),
       }
       rsyslog::confd {
         "${name}-cron-${cron_name}":
