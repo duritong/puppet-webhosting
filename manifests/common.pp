@@ -564,7 +564,7 @@ define webhosting::common (
     include $configuration['puppet_classes']
   }
 
-  if 'additional_firewall_rules' in $configuration {
+  if ($ensure != 'absent') and 'additional_firewall_rules' in $configuration {
     $default_fw_rules = {
       source      => '$FW',
       destination => 'net',
