@@ -665,6 +665,7 @@ define webhosting::common (
       Logrotate::Rule["pma-${name}"]{
         ensure       => $ensure,
         path         => "${vhost_path}/logs/pma-php_error_log",
+        missingok    => true,
         compress     => true,
         copytruncate => true,
         dateext      => true,
