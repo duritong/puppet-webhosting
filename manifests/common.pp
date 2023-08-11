@@ -622,14 +622,6 @@ define webhosting::common (
         group => apache,
         mode  => '0640';
     }
-    phpmyadmin::instance {
-      $name:
-        config_dir => $pma_config_path,
-        base_dir   => $pma_path,
-        dbs        => pick($configuration['mysql_dbs'],{}).filter |$n, $v| { $v['ensure'] != 'absent' },
-        run_user   => $real_run_uid_name,
-        group      => $gid_name,
-    }
     php::fpm {
       "${name}-pma":
         php_inst_class  => undef,
@@ -656,8 +648,16 @@ define webhosting::common (
         ensure  => file,
         content => "${real_uid_name}:${bcrypt_password}\n",
       }
-      Phpmyadmin::Instance[$name] {
-        ensure => $ensure,
+      if $ensure == 'present' {
+        # this only setups files in the webdir which is anyway going to be removed
+        phpmyadmin::instance {
+          $name:
+            config_dir => $pma_config_path,
+            base_dir   => $pma_path,
+            dbs        => pick($configuration['mysql_dbs'],{}).filter |$n, $v| { $v['ensure'] != 'absent' },
+            run_user   => $real_run_uid_name,
+            group      => $gid_name,
+        }
       }
       Php::Fpm["${name}-pma"] {
         ensure => $ensure,
@@ -680,9 +680,6 @@ define webhosting::common (
     } else {
       File["/var/www/htpasswds/${name}-pma"]{
         ensure => absent,
-      }
-      Phpmyadmin::Instance[$name] {
-        ensure   => 'absent',
       }
       Php::Fpm["${name}-pma"] {
         ensure   => 'absent',
