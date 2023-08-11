@@ -477,14 +477,25 @@ define webhosting::common (
     if !empty($cron_jobs) {
       require systemd::mail_on_failure
     }
+    $container_env = { 'XDG_RUNTIME_DIR' => "/run/pods/${real_uid}/" }
+    $container_rw_dirs = [ "/run/pods/${real_uid}/", "/var/lib/containers/users/${uid_name}/run/", "/var/lib/containers/users/${uid_name}/storage/" ]
     $cron_jobs.each |$cron_name,$cron_vals| {
       $timer_params = $webhosting::cron_timer_defaults.merge($cron_vals.filter |$i| { $i[0] in ['on_calendar', 'randomize_delay_sec'] })
+      if $cron_vals['uses_podman'] {
+        $service_env = pick($cron_vals['environment'], {}) + $container_env
+        $read_write_directories = union(pick($cron_vals['read_write_directories'], []), $container_rw_dirs)
+      } else {
+        $service_env = pick($cron_vals['environment'], {})
+        $read_write_directories = pick($cron_vals['read_write_directories'], [])
+      }
       $service_params = {
-        cron_name => $cron_name,
-        name      => $name,
-        user      => $uid_name,
-        group     => $gid_name,
-      }.merge($cron_vals.filter |$i| { $i[0] in ['cmd','read_write_directories'] })
+        cron_name              => $cron_name,
+        name                   => $name,
+        user                   => $uid_name,
+        group                  => $gid_name,
+        environemnt            => $service_env,
+        read_write_directories => $read_write_directories,
+      }.merge($cron_vals.filter |$i| { $i[0] in ['cmd','uses_podman'] })
       Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {
         timer_content   => epp('webhosting/cron/cron.timer.epp', $timer_params),
         service_content => epp('webhosting/cron/cron.service.epp', $service_params),

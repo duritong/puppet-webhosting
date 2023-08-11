@@ -4,6 +4,8 @@
       String $user,
       String $group,
       Array[Stdlib::Unixpath] $read_write_directories = [],
+      Hash[String[1],String[1]] $environment = {},
+      Boolean $uses_podman = false,
 | -%>
 [Unit]
 Description=Cron <%= $cron_name %> for Webhosting <%= $name %>
@@ -16,13 +18,16 @@ User=<%= $user %>
 Group=<%= $group %>
 
 SyslogIdentifier=webhosting-<%= $name %>-<%= $cron_name %>
+<% if !empty($environment) { -%>
+Environment=$environment.map |$k,$v| { "\"${k}=${v}\"" }.join(' ')
+<% } -%>
 
 ExecStart=<%= $cmd %>
 
 # security settings
 PrivateTmp=true
 
-<% if versioncmp($facts['os']['release']['major'],'8') >= 0 { -%>
+<% if (versioncmp($facts['os']['release']['major'],'8') >= 0) and !$uses_podman { -%>
 ProtectSystem=strict
 PrivateUsers=true
 ProtectKernelTunables=true
