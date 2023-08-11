@@ -493,7 +493,7 @@ define webhosting::common (
         name                   => $name,
         user                   => $uid_name,
         group                  => $gid_name,
-        environemnt            => $service_env,
+        environment            => $service_env,
         read_write_directories => $read_write_directories,
       }.merge($cron_vals.filter |$i| { $i[0] in ['cmd','uses_podman'] })
       Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {
