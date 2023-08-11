@@ -19,7 +19,7 @@ Group=<%= $group %>
 
 SyslogIdentifier=webhosting-<%= $name %>-<%= $cron_name %>
 <% if !empty($environment) { -%>
-Environment=$environment.map |$k,$v| { "\"${k}=${v}\"" }.join(' ')
+Environment=<%= $environment.map |$k,$v| { "\"${k}=${v}\"" }.join(' ') %>
 <% } -%>
 
 ExecStart=<%= $cmd %>
