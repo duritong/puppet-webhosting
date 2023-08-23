@@ -496,11 +496,13 @@ define webhosting::common (
         environment            => $service_env,
         read_write_directories => $read_write_directories,
       }.merge($cron_vals.filter |$i| { $i[0] in ['cmd','uses_podman'] })
-      Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {
-        timer_content   => epp('webhosting/cron/cron.timer.epp', $timer_params),
-        service_content => epp('webhosting/cron/cron.service.epp', $service_params),
-        active          => ($configuration['active_on_host'] != false),
-        enable          => ($configuration['active_on_host'] != false),
+      if $cron_vals['ensure'] != 'absent' {
+        Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {
+          timer_content   => epp('webhosting/cron/cron.timer.epp', $timer_params),
+          service_content => epp('webhosting/cron/cron.service.epp', $service_params),
+          active          => ($configuration['active_on_host'] != false),
+          enable          => ($configuration['active_on_host'] != false),
+        }
       }
       rsyslog::confd {
         "${name}-cron-${cron_name}":
