@@ -25,7 +25,7 @@ def run_script
   log ''
   240.times do
     sleep 30
-    unless File.exists?(@run_file)
+    unless File.file?(@run_file)
       break
     end
   end

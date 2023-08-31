@@ -29,7 +29,7 @@ def _settings_files_map_and_check(files)
   files.each do |file, options|
     file_path = File.expand_path(File.join(@base_dir,file))
     stat = File.stat(file_path)
-    security_fail("#{file} does not exist.") unless File.exists?(file_path)
+    security_fail("#{file} does not exist.") unless File.file?(file_path)
     security_fail("#{file} has insecure permissions. Expected uid to be #{options[:uid]}") unless options[:uid].nil? || stat.uid == options[:uid]
     security_fail("#{file} has insecure permissions. Expected gid to be #{options[:gid]}") unless options[:gid].nil? || stat.gid == options[:gid]
     security_fail("#{file} has insecure permissions. Mode should not apply to mask #{options[:reject_mmask]}") unless options[:reject_mmask].nil? || (stat.mode & options[:reject_mmask] == 0)
@@ -192,8 +192,8 @@ begin
 
   @base_dir = File.dirname(@run_file)
   @run_file = File.expand_path(@run_file)
-  unless File.exists?(@run_file)
-    puts "Run file #{@run_file} does not exist"
+  unless File.file?(@run_file)
+    puts "Run file #{@run_file} does not exist or is not a file"
     usage
   end
 
@@ -205,7 +205,7 @@ begin
 
   Dir[File.join(@base_dir,'..','*/*.lock')].each do |el|
     existing_lockfile = File.expand_path(el)
-    if File.exists?(existing_lockfile)
+    if File.file?(existing_lockfile)
       pid = File.read(existing_lockfile).chomp.to_i
       script_name = File.basename(existing_lockfile, '.lock')
       if File.directory?("/proc/#{pid}")
@@ -224,8 +224,8 @@ rescue => e
   success = false
 ensure
   if @run_file
-    File.delete(@run_file) if File.exists?(@run_file)
-    File.delete(lockfile) if File.exists?(lockfile)
+    File.delete(@run_file) if File.file?(@run_file)
+    File.delete(lockfile) if File.file?(lockfile)
   end
 end
 

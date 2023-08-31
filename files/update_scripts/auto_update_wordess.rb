@@ -76,7 +76,7 @@ Dir['/var/www/vhosts/*/scripts/update_wordpress/update_wordpress.dirs'].each do 
   if vhost_options['auto_update']
     vhost_options = YAML.load_file(File.join(File.dirname(dir),'vhost.options'))
     log "Running wordpress auto_update for #{hosting}"
-    if File.exists?(File.join(dir,'update_wordpress.lock'))
+    if File.file?(File.join(dir,'update_wordpress.lock'))
       error_log "update_wordpress.lock already exists for #{hosting} skipping"
     else
       run_file = File.join(dir,'update_wordpress.auto_run')
