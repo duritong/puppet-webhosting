@@ -46,7 +46,7 @@ def load_directories
     k,v = items
     res[k] = v.collect do |item|
       path = File.expand_path(File.join(options['webdir'],item))
-      unless File.directory?(path)
+      if !File.directory?(path)
         log "#{path} is not a directory or doesn't exist. Skipping..."
         nil
       elsif path.start_with? "#{options['webdir']}"

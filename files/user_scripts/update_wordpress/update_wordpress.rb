@@ -47,7 +47,7 @@ def load_directories
   fd = load_file('update_wordpress.dirs',['wp_directories'])['wp_directories']
   Array(fd).collect do |d|
     path = File.expand_path(File.join(options['webdir'],d))
-    unless File.directory?(path)
+    if !File.directory?(path)
       log "#{path} is not a directory or doesn't exist. Skipping..."
       nil
     elsif path.start_with?("#{options['webdir']}")
