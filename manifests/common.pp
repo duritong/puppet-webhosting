@@ -555,13 +555,13 @@ define webhosting::common (
         if $v['content'] =~ /\AERB:/ {
           $tmp_content = template($v['content'].regsubst(/\AERB:/,''))
           if $tmp_content =~ /%%TROCLA_/ {
-            $_content = trocla::gsub($tmp_content, { prefix => "webhosting_${name}_", })
+            $_content = trocla::gsub($tmp_content, { prefix => "webhosting_${name}_", key_to_prefix => $configuration['trocla_key_to_prefix'], })
           } else {
             $_content = $tmp_content
           }
           $_v = $v.merge( { content => Sensitive($_content) })
         } elsif $v['content'] =~ /%%TROCLA_/ {
-          $_v = $v.merge( { content => Sensitive(trocla::gsub($v['content'], { prefix => "webhosting_${name}_", })) })
+          $_v = $v.merge( { content => Sensitive(trocla::gsub($v['content'], { prefix => "webhosting_${name}_", key_to_prefix => $configuration['trocla_key_to_prefix'], })) })
         } else {
           $_v = $v
         }
