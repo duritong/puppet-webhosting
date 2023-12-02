@@ -1,10 +1,10 @@
 <%- | String $on_calendar = 'daily',
-      Optional[String] $randomize_delay_sec = undef,
+      Optional[Variant[String,Enum[false]]] $randomized_delay_sec = undef,
 | -%>
 [Timer]
 OnCalendar=<%= $on_calendar %>
-<% if $randomize_delay_sec { -%>
-RandomizedDelaySec=<%= $randomize_delay_sec %>
+<% if $randomized_delay_sec { -%>
+RandomizedDelaySec=<%= $randomized_delay_sec %>
 <% } -%>
 
 [Install]

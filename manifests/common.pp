@@ -481,7 +481,7 @@ define webhosting::common (
     $container_rw_dirs = [ "/run/pods/${real_uid}/", "/var/lib/containers/users/${uid_name}/run/", "/var/lib/containers/users/${uid_name}/storage/" ]
     include webhosting
     $cron_jobs.each |$cron_name,$cron_vals| {
-      $timer_params = $webhosting::cron_timer_defaults.merge($cron_vals.filter |$i| { $i[0] in ['on_calendar', 'randomize_delay_sec'] })
+      $timer_params = $webhosting::cron_timer_defaults.merge($cron_vals.filter |$i| { $i[0] in ['on_calendar', 'randomized_delay_sec'] })
       if $cron_vals['uses_podman'] {
         $service_env = pick($cron_vals['environment'], {}) + $container_env
         $read_write_directories = union(pick($cron_vals['read_write_directories'], []), $container_rw_dirs)
