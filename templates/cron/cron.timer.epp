@@ -1,5 +1,5 @@
 <%- | String $on_calendar = 'daily',
-      Optional[Variant[String,Enum[false]]] $randomized_delay_sec = undef,
+      Optional[Variant[String,Boolean[false]]] $randomized_delay_sec = undef,
 | -%>
 [Timer]
 OnCalendar=<%= $on_calendar %>
