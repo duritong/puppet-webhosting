@@ -6,7 +6,7 @@ type Webhosting::Cronjobs = Hash[
       group                  => Optional[String[1]],
       supplementary_groups   => Optional[Array[String[1]]],
       on_calendar            => Optional[String],
-      randomize_delay_sec    => Optional[String],
+      randomize_delay_sec    => Optional[Variant[String,Enum[false]]],
       read_write_directories => Optional[Array[Stdlib::Unixpath]],
       uses_podman            => Optional[Boolean],
   }]
