@@ -489,6 +489,11 @@ define webhosting::common (
         $service_env = pick($cron_vals['environment'], {})
         $read_write_directories = pick($cron_vals['read_write_directories'], [])
       }
+      if $cron_vals['cmd'] =~ /^\// {
+        $real_cmd = $cron_vals['cmd']
+      } else {
+        $real_cmd = "${vhost_path}/${cron_vals['cmd']}"
+      }
       $service_params = {
         cron_name              => $cron_name,
         name                   => $name,
@@ -496,7 +501,9 @@ define webhosting::common (
         group                  => $real_gid_name,
         environment            => $service_env,
         read_write_directories => $read_write_directories,
-      }.merge($cron_vals.filter |$i| { $i[0] in ['cmd','uses_podman'] })
+        base_path              => $vhost_path,
+        cmd                    => $real_cmd,
+      }.merge($cron_vals.filter |$i| { $i[0] in ['uses_podman'] })
       if $cron_vals['ensure'] != 'absent' {
         Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {
           timer_content   => epp('webhosting/cron/cron.timer.epp', $timer_params),
