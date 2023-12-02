@@ -577,6 +577,12 @@ define webhosting::common (
   if ($ensure != 'absent') and ('puppet_classes' in $configuration) and !($configuration['puppet_classes'].empty) {
     include $configuration['puppet_classes']
   }
+  if ('puppet_resources' in $configuration) and !($configuration['puppet_resources'].empty) {
+    $configuration['puppet_resources'].each |$r,$v| {
+      assert_type(Hash[Pattern[/\A[a-z0-9_][a-zA-Z0-9_]*\Z/,Data]], $v)
+      ensure_resource($r,$name,{ ensure => $ensure }.merge($v))
+    }
+  }
 
   if ($ensure != 'absent') and 'additional_firewall_rules' in $configuration {
     $default_fw_rules = {
