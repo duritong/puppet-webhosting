@@ -3,6 +3,7 @@
       String $cmd,
       String $user,
       String $group,
+      Array[String[1]] $supplementary_groups = [],
       Array[Stdlib::Unixpath] $read_write_directories = [],
       Hash[String[1],String[1]] $environment = {},
       Boolean $uses_podman = false,
@@ -16,6 +17,9 @@ OnFailure=status_email_root@%n.service
 Type=oneshot
 User=<%= $user %>
 Group=<%= $group %>
+<% if !empty($supplementary_groups) { -%>
+SupplementaryGroups=<%= $supplementary_groups.join(' ') %>
+<% } -%>
 
 SyslogIdentifier=webhosting-<%= $name %>-<%= $cron_name %>
 <% if !empty($environment) { -%>

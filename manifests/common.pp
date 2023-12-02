@@ -501,9 +501,9 @@ define webhosting::common (
         environment            => $service_env,
         read_write_directories => $read_write_directories,
         cmd                    => $real_cmd,
-      }.merge($cron_vals.filter |$i| { $i[0] in ['uses_podman','group'] }).merge({
-        group => $real_gid_name,
-      })
+        group                  => $real_gid_name,
+        supplementary_groups   => [],
+      }.merge($cron_vals.filter |$i| { $i[0] in ['uses_podman','group','supplementary_groups'] })
       if $cron_vals['ensure'] != 'absent' {
         Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {
           timer_content   => epp('webhosting/cron/cron.timer.epp', $timer_params),
