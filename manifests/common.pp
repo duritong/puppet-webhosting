@@ -498,12 +498,13 @@ define webhosting::common (
         cron_name              => $cron_name,
         name                   => $name,
         user                   => $uid_name,
-        group                  => $real_gid_name,
         environment            => $service_env,
         read_write_directories => $read_write_directories,
         base_path              => $vhost_path,
         cmd                    => $real_cmd,
-      }.merge($cron_vals.filter |$i| { $i[0] in ['uses_podman'] })
+      }.merge($cron_vals.filter |$i| { $i[0] in ['uses_podman','group'] }).merge({
+        group => $real_gid_name,
+      })
       if $cron_vals['ensure'] != 'absent' {
         Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {
           timer_content   => epp('webhosting/cron/cron.timer.epp', $timer_params),
