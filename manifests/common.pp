@@ -587,7 +587,7 @@ define webhosting::common (
       active_on_host => $configuration['active_on_host'],
     }
     $configuration['puppet_resources'].each |$r,$v| {
-      assert_type(Hash[Pattern[/\A[a-z0-9_][a-zA-Z0-9_]*\Z/,Data]], $v)
+      assert_type(Hash[Pattern[/\A[a-z0-9_][a-zA-Z0-9_]*\Z/],Data], $v)
       ensure_resource($r,$name,$default_resource_vals.merge($v))
     }
   }
