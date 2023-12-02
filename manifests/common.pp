@@ -500,7 +500,6 @@ define webhosting::common (
         user                   => $uid_name,
         environment            => $service_env,
         read_write_directories => $read_write_directories,
-        base_path              => $vhost_path,
         cmd                    => $real_cmd,
       }.merge($cron_vals.filter |$i| { $i[0] in ['uses_podman','group'] }).merge({
         group => $real_gid_name,
