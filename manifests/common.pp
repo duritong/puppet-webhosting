@@ -365,10 +365,10 @@ define webhosting::common (
       create       => true,
       create_mode  => '0640',
       create_owner => 'root',
-      create_group => $gid_name,
+      create_group => $real_gid_name,
       su           => true,
       su_user      => 'root',
-      su_group     => $gid_name,
+      su_group     => $real_gid_name,
     }
   } else {
     Logrotate::Rule["cron-${name}"]{
@@ -393,7 +393,7 @@ define webhosting::common (
     fs_type => 'xfs',
     mode    => '0640',
     owner   => $real_uid_name,
-    group   => $gid_name,
+    group   => $real_gid_name,
     require => File[$vhost_path],
   }
   $lvmounts.each |$lv_name,$lv_vals| {
@@ -493,7 +493,7 @@ define webhosting::common (
         cron_name              => $cron_name,
         name                   => $name,
         user                   => $uid_name,
-        group                  => $gid_name,
+        group                  => $real_gid_name,
         environment            => $service_env,
         read_write_directories => $read_write_directories,
       }.merge($cron_vals.filter |$i| { $i[0] in ['cmd','uses_podman'] })
@@ -513,7 +513,7 @@ define webhosting::common (
             service_name => "webhosting-${name}-${cron_name}",
             logpath      => "${vhost_path}/logs",
             logfile_name => "${name}-cron-${cron_name}",
-            group        => $gid_name,
+            group        => $real_gid_name,
           }),
       } -> file {
         # manage file to workaround
@@ -523,7 +523,7 @@ define webhosting::common (
           ensure => file,
           mode   => '0640',
           owner  => 'root',
-          group  => $gid_name,
+          group  => $real_gid_name,
       }
     }
   }
@@ -534,7 +534,7 @@ define webhosting::common (
         documentroot => "${vhost_path}/www",
         uid_name     => $uid_name,
         run_uid_name => $real_run_uid_name,
-        gid_name     => $gid_name,
+        gid_name     => $real_gid_name,
         run_mode     => $run_mode,
     }
   }
@@ -542,7 +542,7 @@ define webhosting::common (
     $user_files = assert_type(Webhosting::Userfiles,$configuration['user_files'])
     $user_files_defaults = {
       owner                   => $uid_name,
-      group                   => $gid_name,
+      group                   => $real_gid_name,
       mode                    => '0640',
     }
     $user_files.each |$k,$v| {
@@ -578,12 +578,12 @@ define webhosting::common (
     include $configuration['puppet_classes']
   }
   if ('puppet_resources' in $configuration) and !($configuration['puppet_resources'].empty) {
-    $defaul_resource_vals  = {
+    $default_resource_vals  = {
       ensure => $ensure,
       user   => $uid_name,
-      group  => $gid_name,
+      group  => $real_gid_name,
       uid    => $real_uid,
-      gid    => $real_gid,
+      gid    => $real_run_gid,
     }
     $configuration['puppet_resources'].each |$r,$v| {
       assert_type(Hash[Pattern[/\A[a-z0-9_][a-zA-Z0-9_]*\Z/,Data]], $v)
@@ -657,7 +657,7 @@ define webhosting::common (
         logfile_name    => 'pma-fpm-error.log',
         tmpdir          => "${pma_path}/tmp",
         run_user        => $real_run_uid_name,
-        run_group       => $gid_name,
+        run_group       => $real_gid_name,
         additional_envs => { 'PHPMYADMIN_CONFIG' => "${pma_config_path}/config.php" },
         php_settings    => {
           engine                => 'On',
@@ -683,7 +683,7 @@ define webhosting::common (
             base_dir   => $pma_path,
             dbs        => pick($configuration['mysql_dbs'],{}).filter |$n, $v| { $v['ensure'] != 'absent' },
             run_user   => $real_run_uid_name,
-            group      => $gid_name,
+            group      => $real_gid_name,
         }
       }
       Php::Fpm["${name}-pma"] {
@@ -699,10 +699,10 @@ define webhosting::common (
         create       => true,
         create_mode  => '0640',
         create_owner => $real_run_uid_name,
-        create_group => $gid_name,
+        create_group => $real_gid_name,
         su           => true,
         su_user      => $real_run_uid_name,
-        su_group     => $gid_name,
+        su_group     => $real_gid_name,
       }
     } else {
       File["/var/www/htpasswds/${name}-pma"]{
