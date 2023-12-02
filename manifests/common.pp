@@ -579,11 +579,12 @@ define webhosting::common (
   }
   if ('puppet_resources' in $configuration) and !($configuration['puppet_resources'].empty) {
     $default_resource_vals  = {
-      ensure => $ensure,
-      user   => $uid_name,
-      group  => $real_gid_name,
-      uid    => $real_uid,
-      gid    => $real_run_gid,
+      ensure         => $ensure,
+      user           => $uid_name,
+      group          => $real_gid_name,
+      uid            => $real_uid,
+      gid            => $real_run_gid,
+      active_on_host => $configuration['active_on_host'],
     }
     $configuration['puppet_resources'].each |$r,$v| {
       assert_type(Hash[Pattern[/\A[a-z0-9_][a-zA-Z0-9_]*\Z/,Data]], $v)
