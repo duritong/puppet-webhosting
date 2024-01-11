@@ -509,6 +509,7 @@ define webhosting::common (
         cmd                    => $real_cmd,
         group                  => $real_gid_name,
         supplementary_groups   => [],
+        config                 => pick($cron_vals['systemd'],{}),
       }.merge($cron_vals.filter |$i| { $i[0] in ['uses_podman','group','supplementary_groups'] })
       if $cron_vals['ensure'] != 'absent' {
         Systemd::Timer["webhosting-${name}-${cron_name}.timer"] {

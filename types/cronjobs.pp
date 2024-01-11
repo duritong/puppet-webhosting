@@ -9,5 +9,6 @@ type Webhosting::Cronjobs = Hash[
       randomized_delay_sec   => Optional[Variant[String,Boolean[false]]],
       read_write_directories => Optional[Array[Stdlib::Unixpath]],
       uses_podman            => Optional[Boolean],
+      systemd                => Optional[Hash[Pattern[/^[A-Z][a-zA-Z0-9_\-]+$/],Data]],
   }]
 ]
