@@ -478,7 +478,13 @@ define webhosting::common (
       require systemd::mail_on_failure
     }
     $container_env = { 'XDG_RUNTIME_DIR' => "/run/pods/${real_uid}/" }
-    $container_rw_dirs = [ "/run/pods/${real_uid}/", "/var/lib/containers/users/${uid_name}/run/", "/var/lib/containers/users/${uid_name}/storage/" ]
+    $container_rw_dirs = [
+      "/run/pods/${real_uid}/",
+      "/var/lib/containers/users/${uid_name}/run/",
+      "/var/lib/containers/users/${uid_name}/data/",
+      "/var/lib/containers/users/${uid_name}/storage/",
+      "/var/lib/containers/users/${uid_name}/tmpdir/",
+    ]
     include webhosting
     $cron_jobs.each |$cron_name,$cron_vals| {
       $timer_params = $webhosting::cron_timer_defaults.merge($cron_vals.filter |$i| { $i[0] in ['on_calendar', 'randomized_delay_sec'] })
