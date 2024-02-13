@@ -398,7 +398,10 @@ define webhosting::common (
   $lvmounts.each |$lv_name,$lv_vals| {
     if $ensure == 'absent' {
       $_ensure = 'absent'
-      $lv_deps = {}
+      $lv_deps = {
+        manage_folder => false,
+        before        => Exec["cleanup_webdir_${vhost_path}"],
+      }
     } else {
       $_ensure = pick($lv_vals['ensure'],$ensure)
       $lv_deps = {
