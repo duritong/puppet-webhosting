@@ -394,16 +394,19 @@ define webhosting::common (
     mode    => '0640',
     owner   => $real_uid_name,
     group   => $real_gid_name,
-    require => File[$vhost_path],
   }
   $lvmounts.each |$lv_name,$lv_vals| {
     if $ensure == 'absent' {
       $_ensure = 'absent'
+      $lv_deps = {}
     } else {
       $_ensure = pick($lv_vals['ensure'],$ensure)
+      $lv_deps = {
+        require => File[$vhost_path],
+      }
     }
     disks::lv_mount { "wh_${name}_${lv_name}":
-      * => $lv_defaults + $lv_vals + {
+      * => $lv_defaults + $lv_vals + $lv_deps + {
         folder => "${vhost_path}/${lv_vals['folder']}",
         ensure => $_ensure
       };
