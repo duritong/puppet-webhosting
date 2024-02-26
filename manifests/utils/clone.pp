@@ -20,7 +20,7 @@ define webhosting::utils::clone(
     cloneddir_group => $gid_name,
     require         => $req,
   }
-  if is_hash($git_repo) {
+  if $git_repo =~ Hash {
     $git_options = $git_repo
   } else {
     $git_options = {
