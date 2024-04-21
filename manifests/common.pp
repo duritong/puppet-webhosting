@@ -619,7 +619,7 @@ define webhosting::common (
 
     $configuration['additional_firewall_rules'].each |$n,$rule| {
       firewall::rule {
-        "${name}-${n}":
+        "${name.regsubst(/[^a-zA-Z0-9_]/,'_','G')}_${n}":
           * => $default_fw_rules + $rule;
       }
     }
