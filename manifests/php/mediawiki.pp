@@ -160,6 +160,11 @@ define webhosting::php::mediawiki (
     htpasswd_file      => $htpasswd_file,
     mod_security       => $mod_security,
   }
+  if $configuration['active_on_host'] != false {
+    $_autoinstall = $autoinstall
+  } else {
+    $_autoinstall = false
+  }
   mediawiki::instance { $name:
     ensure                  => $ensure,
     image                   => $image,
@@ -177,7 +182,7 @@ define webhosting::php::mediawiki (
     spam_protection         => $spam_protection,
     wiki_options            => $wiki_options,
     php_installation        => $php_installation,
-    autoinstall             => $autoinstall,
+    autoinstall             => $_autoinstall,
     squid_servers           => $squid_servers,
     language                => $language,
     hashed_upload_dir       => $hashed_upload_dir,

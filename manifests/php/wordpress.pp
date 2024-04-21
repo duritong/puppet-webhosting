@@ -172,7 +172,7 @@ define webhosting::php::wordpress (
       User::Managed[$real_run_uid_name] -> Apache::Vhost::Php::Wordpress[$name]
     }
   }
-  if $ensure != 'absent' {
+  if ($ensure != 'absent') and ($configuration['active_on_host'] != false) {
     wordpress::instance { $name:
       path             => $documentroot,
       autoinstall      => $autoinstall,
