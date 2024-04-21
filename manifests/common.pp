@@ -614,16 +614,11 @@ define webhosting::common (
 
   if ($ensure != 'absent') and 'additional_firewall_rules' in $configuration {
     $default_fw_rules = {
-      source      => '$FW',
-      destination => 'net',
-      proto       => 'tcp',
-      order       => 240,
-      action      => 'ACCEPT',
-      shorewall6  => false,
+      direction   => 'out',
     }
 
     $configuration['additional_firewall_rules'].each |$n,$rule| {
-      shorewall::rule{
+      firewall::rule {
         "${name}-${n}":
           * => $default_fw_rules + $rule;
       }
