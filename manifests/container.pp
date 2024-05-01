@@ -123,7 +123,7 @@ define webhosting::container (
     if $domain == 'absent' {
       $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${name}"
     } else {
-      $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${domain}"
+      $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${domain} disablereuse=On"
     }
   }
 
