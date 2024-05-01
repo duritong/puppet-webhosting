@@ -119,23 +119,17 @@ define webhosting::container (
 
   if ('no_socket_forward' in $configuration) and $configuration['no_socket_forward'] {
     $options = "http://127.0.0.1:${port}"
-    $_configuration2 = $_configuration
   } else {
     if $domain == 'absent' {
       $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${name}"
     } else {
       $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${domain}"
     }
-    if !('proxy_pass_options' in $configuration) {
-      $_configuration2 = { 'proxy_pass_options' => 'disablereuse=On' } + $_configuration
-    } else {
-      $_configuration2 = $_configuration
-    }
   }
 
   apache::vhost::container { $name:
     ensure             => $ensure,
-    configuration      => $_configuration2,
+    configuration      => $_configuration,
     domain             => $domain,
     domainalias        => $domainalias,
     server_admin       => $server_admin,
