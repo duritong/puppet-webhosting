@@ -126,8 +126,10 @@ define webhosting::container (
     } else {
       $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${domain}"
     }
-    if !('proxy_pass_options' in $configuration) {
+    if !('proxy_pass_options' in $_configuration) {
       $_configuration2 = { 'proxy_pass_options' => 'disablereuse=On' } + $_configuration
+    } elsif ($_configuration['proxy_pass_options'] !~ /reuse=/) {
+      $_configuration2 = $_configuration + { 'proxy_pass_options' => "${_configuration['proxy_pass_options']} disablereuse=On" }
     } else {
       $_configuration2 = $_configuration
     }
