@@ -121,7 +121,7 @@ define webhosting::container (
     $options = "http://127.0.0.1:${port}"
   } else {
     if $domain == 'absent' {
-      $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${name}"
+      $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${name} disablereuse=On"
     } else {
       $options = "unix:/var/www/vhosts/${name}/tmp/run/${port}|http://${domain} disablereuse=On"
     }
