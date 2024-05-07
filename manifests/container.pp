@@ -75,6 +75,17 @@ define webhosting::container (
     $_user_scripts = $user_scripts
   }
   $user_container_config = pick($configuration['container_config'],{})
+  if $user_container_config['publish_socket_directly'] {
+    $publish_socket = {}
+  } else {
+    $publish_socket = {
+      $port => {
+        'dir'                     => "/var/www/vhosts/${name}/tmp/run",
+        'security-opt-label-type' => 'socat_httpd_sidecar',
+      },
+    }
+  }
+
   $_configuration = ($configuration - ['container_config']) + {
     containers          => {
       $name => $user_container_config + {
@@ -85,12 +96,7 @@ define webhosting::container (
         homedir        => "/var/www/vhosts/${name}",
         manage_user    => false,
         image          => $image,
-        publish_socket => {
-          $port => {
-            'dir'                     => "/var/www/vhosts/${name}/tmp/run",
-            'security-opt-label-type' => 'socat_httpd_sidecar',
-          },
-        },
+        publish_socket => $publish_socket,
       },
     },
   }
