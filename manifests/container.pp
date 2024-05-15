@@ -77,7 +77,9 @@ define webhosting::container (
   $user_container_config = pick($configuration['container_config'],{})
   if $user_container_config['publish_socket_directly'] {
     $publish_socket = {}
+    $_run_flags = { 'security-opt-label-type' => 'httpd_container_rw_content_direct_socket', } + pick($user_container_config['run_flags'],{})
   } else {
+    $_run_flags = pick($user_container_config['run_flags'],{})
     $publish_socket = {
       $port => {
         'dir'                     => "/var/www/vhosts/${name}/tmp/run",
@@ -87,7 +89,7 @@ define webhosting::container (
   }
 
   $_configuration = ($configuration - ['container_config']) + {
-    containers          => {
+    containers => {
       $name => $user_container_config - ['publish_socket_directly'] + {
         ensure         => $ensure,
         user           => $uid_name,
@@ -97,6 +99,7 @@ define webhosting::container (
         manage_user    => false,
         image          => $image,
         publish_socket => $publish_socket,
+        run_flags      => $_run_flags,
       },
     },
   }
