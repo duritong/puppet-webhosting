@@ -88,7 +88,7 @@ define webhosting::container (
 
   $_configuration = ($configuration - ['container_config']) + {
     containers          => {
-      $name => $user_container_config + {
+      $name => $user_container_config - ['publish_socket_directly'] + {
         ensure         => $ensure,
         user           => $uid_name,
         uid            => $real_uid,
